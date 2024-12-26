@@ -1,0 +1,410 @@
+---
+source: src/converters/poetry/mod.rs
+expression: "perform_migration(Path::new(\"tests/fixtures/poetry/full/pyproject.toml\"),\ntrue, DependencyGroupsStrategy::SetDefaultGroups,)"
+snapshot_kind: text
+---
+'''
+[build-system]
+requires = ["uv>=0.5,<0.6"]
+build-backend = "uv"
+
+[project]
+name = "foobar"
+version = "0.1.0"
+description = "A fabulous project."
+authors = [{ name = "John Doe", email = "john.doe@example.com" }]
+requires-python = "~=3.11"
+readme = "README.md"
+license = "MIT"
+maintainers = [
+    { name = "Dohn Joe", email = "dohn.joe@example.com" },
+    { name = "Johd Noe" },
+]
+keywords = [
+    "foo",
+    "bar",
+    "foobar",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "caret>=1.2.3,<2",
+    "caret-2~=1.2",
+    "caret-3>=1,<2",
+    "caret-4>=0.2.3,<0.3",
+    "caret-5>=0.0.3,<0.0.4",
+    "caret-6>=0.0,<0.1",
+    "caret-7>=0,<1",
+    "caret-8>=1.2.3.4,<2",
+    "caret-9>=0.1.2.3,<0.2",
+    "caret-pre-release>=1.2.3b1,<2",
+    "tilde~=1.2.3",
+    "tilde-2>=1.2,<1.3",
+    "tilde-3>=1,<2",
+    "tilde-4~=1.2.3.4",
+    "tilde-pre-release~=1.2.3b1",
+    "exact==1.2.3",
+    "star",
+    "star-2==1.*",
+    "star-3==1.2.*",
+    "pep440>=1.2.3",
+    "with-version-only==1.2.3",
+    "with-extras[asyncio, postgresql_asyncpg]==1.2.3",
+    "with-markers==1.2.3 ; python_version <= '3.11' or sys_platform == 'win32'",
+    "with-platform==1.2.3 ; sys_platform == 'darwin'",
+    "with-markers-python-platform==1.2.3 ; python_version >= '3.11' and python_version < '3.12' and platform_python_implementation == 'CPython' or platform_python_implementation == 'Jython' and sys_platform == 'darwin'",
+    "with-source==1.2.3",
+    "python-restricted==1.2.3 ; python_version ~= '3.11'",
+    "python-restricted-2==1.2.3 ; python_version >= '3.11' and python_version < '3.12'",
+    "python-restricted-3==1.2.3 ; python_version > '3.11'",
+    "python-restricted-4==1.2.3 ; python_version >= '3.11'",
+    "python-restricted-5==1.2.3 ; python_version < '3.11'",
+    "python-restricted-6==1.2.3 ; python_version <= '3.11'",
+    "python-restricted-7==1.2.3 ; python_version > '3.11' and python_version < '3.13'",
+    "python-restricted-with-source==1.2.3 ; python_version > '3.11' and python_version < '3.13'",
+    "whitespaces~=3.2",
+    "whitespaces-2>   3.11,     <=     3.13",
+    "optional-not-in-extra==1.2.3",
+    "local-package",
+    "local-package-2",
+    "local-package-editable",
+    "url-dep",
+    "git",
+    "git-branch",
+    "git-rev",
+    "git-tag",
+    "git-subdirectory",
+    "multiple-constraints-python-version>=2 ; python_version >= '3.11'",
+    "multiple-constraints-python-version<2 ; python_version < '3.11'",
+    "multiple-constraints-platform-version>=2 ; sys_platform == 'darwin'",
+    "multiple-constraints-platform-version<2 ; sys_platform == 'linux'",
+    "multiple-constraints-markers-version>=2 ; platform_python_implementation == 'CPython'",
+    "multiple-constraints-markers-version<2 ; platform_python_implementation != 'CPython'",
+    "multiple-constraints-python-platform-markers-version>=2 ; python_version >= '3.11' and platform_python_implementation == 'CPython' and sys_platform == 'darwin'",
+    "multiple-constraints-python-platform-markers-version<2 ; python_version < '3.11' and platform_python_implementation != 'CPython' and sys_platform == 'linux'",
+    "multiple-constraints-python-source",
+    "multiple-constraints-platform-source",
+    "multiple-constraints-markers-source",
+    "multiple-constraints-python-platform-markers-source",
+]
+
+[project.optional-dependencies]
+extra = ["dep-in-extra==1.2.3"]
+extra-2 = [
+    "dep-in-extra==1.2.3",
+    "optional-in-extra==1.2.3",
+]
+
+[project.urls]
+Homepage = "https://homepage.example.com"
+Repository = "https://repository.example.com"
+Documentation = "https://docs.example.com"
+"First link" = "https://first.example.com"
+"Another link" = "https://another.example.com"
+
+[project.scripts]
+console-script = "foo:run"
+console-script-2 = "override_bar:run"
+console-script-3 = "foobar:run"
+
+[project.gui-scripts]
+gui-script = "gui:run"
+
+[project.entry-points.some-scripts]
+a-script = "a_script:run"
+another-script = "another_script:run"
+
+[project.entry-points.other-scripts]
+a-script = "another_script:run"
+yet-another-script = "yet_another_scripts:run"
+
+[dependency-groups]
+dev = [
+    "dev-legacy==1.2.3",
+    "dev-legacy-2==1.2.3",
+    "dev-dep==1.2.3",
+]
+typing = ["typing-dep==1.2.3"]
+
+[tool.poetry]
+package-mode = false
+name = "foobar"
+version = "0.1.0"
+description = "A fabulous project."
+license = "MIT"
+authors = ["John Doe <john.doe@example.com>"]
+maintainers = ["Dohn Joe <dohn.joe@example.com>", "Johd Noe"]
+readme = "README.md"
+keywords = [
+    "foo",
+    "bar",
+    "foobar",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Operating System :: OS Independent",
+]
+homepage = "https://homepage.example.com"
+repository = "https://repository.example.com"
+documentation = "https://docs.example.com"
+
+# Package metadata
+packages = [
+    { include = "foo" },
+    { include = "bar", from = "lib", to = "target", format = "sdist" },
+    { include = "foobar/**/*.py", from = "lib", to = "target", format = ["sdist", "wheel"] },
+]
+include = [
+    { path = "tests" },
+    { path = "docs", format = "sdist" },
+    { path = "README.md", format = ["sdist", "wheel"] }
+]
+exclude = ["foo/bar.py"]
+
+[tool.uv]
+package = false
+default-groups = [
+    "dev",
+    "typing",
+]
+
+[[tool.uv.index]]
+name = "PyPI"
+url = "https://pypi.org/simple/"
+default = true
+
+[[tool.uv.index]]
+name = "secondary"
+url = "https://secondary.example.com/simple/"
+
+[[tool.uv.index]]
+name = "supplemental"
+url = "https://supplemental.example.com/simple/"
+
+[[tool.uv.index]]
+name = "explicit"
+url = "https://explicit.example.com/simple/"
+explicit = true
+
+[[tool.uv.index]]
+name = "default"
+url = "https://default.example.com/simple/"
+default = true
+
+[tool.uv.sources]
+with-source = { index = "supplemental" }
+python-restricted-with-source = { index = "supplemental" }
+local-package = { path = "package/" }
+local-package-2 = { path = "another-package/", editable = false }
+local-package-editable = { path = "package/dist/package-0.1.0.tar.gz", editable = true }
+url-dep = { url = "https://example.com/package-0.0.1.tar.gz" }
+git = { git = "https://example.com/foo/bar" }
+git-branch = { git = "https://example.com/foo/bar", branch = "foo" }
+git-rev = { git = "https://example.com/foo/bar", rev = "1234567" }
+git-tag = { git = "https://example.com/foo/bar", tag = "v1.2.3" }
+git-subdirectory = { git = "https://example.com/foo/bar", subdirectory = "directory" }
+multiple-constraints-python-source = [
+    { url = "https://example.com/foo-1.2.3-py3-none-any.whl", marker = "python_version >= '3.11'" },
+    { git = "https://example.com/foo/bar", tag = "v1.2.3", marker = "python_version < '3.11'" },
+]
+multiple-constraints-platform-source = [
+    { url = "https://example.com/foo-1.2.3-py3-none-any.whl", marker = "sys_platform == 'darwin'" },
+    { git = "https://example.com/foo/bar", tag = "v1.2.3", marker = "sys_platform == 'linux'" },
+]
+multiple-constraints-markers-source = [
+    { url = "https://example.com/foo-1.2.3-py3-none-any.whl", marker = "platform_python_implementation == 'CPython'" },
+    { git = "https://example.com/foo/bar", tag = "v1.2.3", marker = "platform_python_implementation != 'CPython'" },
+]
+multiple-constraints-python-platform-markers-source = [
+    { url = "https://example.com/foo-1.2.3-py3-none-any.whl", marker = "python_version >= '3.11' and platform_python_implementation == 'CPython' and sys_platform == 'darwin'" },
+    { index = "supplemental", marker = "python_version < '3.11' and platform_python_implementation != 'CPython' and sys_platform == 'linux'" },
+]
+
+[tool.poetry.dependencies]
+# Python version
+python = "^3.11"  # ~=3.11
+
+# Caret
+caret = "^1.2.3"  # >=1.2.3,<2
+caret-2 = "^1.2"  # >=1.2.0,<2 or ~=1.2
+caret-3 = "^1"  # >=1.0.0,<2
+caret-4 = "^0.2.3"  # >=0.2.3,<0.3
+caret-5 = "^0.0.3"  # >=0.0.3,<0.0.4
+caret-6 = "^0.0"  # >=0.0.0,<0.1
+caret-7 = "^0"  # >=0.0.0,<1
+caret-8 = "^1.2.3.4"  # >=1.2.3.4,<2
+caret-9 = "^0.1.2.3"  # >=0.1.2.3,<0.2
+caret-pre-release = "^1.2.3b1"  # >=1.2.3b1,<2
+
+# Tilde
+tilde = "~1.2.3"  # >=1.2.3,<1.3.0 or ~=1.2.3
+tilde-2 = "~1.2"  # >=1.2.0,<1.3
+tilde-3 = "~1"  # >=1.0.0,<2
+tilde-4 = "~1.2.3.4"  # >=1.2.3.4,<1.3.0.0 or ~=1.2.3.4
+tilde-pre-release = "~1.2.3b1"  # >=1.2.3b1,<1.3 or ~=1.2.3
+
+# Almost PEP 440
+exact = "1.2.3"  # ==1.2.3
+star = "*"  # (no version specifier)
+star-2 = "1.*"  # ==1.*
+star-3 = "1.2.*"  # ==1.2.*
+
+# PEP 440
+pep440 = ">=1.2.3"  # >=1.2.3 (already compliant)
+
+# Tables
+with-version-only = { version = "1.2.3" }
+with-extras = { version = "1.2.3", extras = ["asyncio", "postgresql_asyncpg"] }
+with-markers = { version = "1.2.3", markers = "python_version <= '3.11' or sys_platform == 'win32'" }
+with-platform = { version = "1.2.3", platform = "darwin" }
+with-markers-python-platform = { version = "1.2.3", python = "~3.11", platform = "darwin", markers = "platform_python_implementation == 'CPython' or platform_python_implementation == 'Jython'", additional_key = "foobar" }
+with-source = { version = "1.2.3", source = "supplemental" }
+
+python-restricted = { version = "1.2.3", python = "^3.11" }
+python-restricted-2 = { version = "1.2.3", python = "~3.11" }
+python-restricted-3 = { version = "1.2.3", python = ">3.11" }
+python-restricted-4 = { version = "1.2.3", python = ">=3.11" }
+python-restricted-5 = { version = "1.2.3", python = "<3.11" }
+python-restricted-6 = { version = "1.2.3", python = "<=3.11" }
+python-restricted-7 = { version = "1.2.3", python = ">3.11,<3.13" }
+python-restricted-with-source = { version = "1.2.3", python = ">3.11,<3.13", source = "supplemental" }
+
+# Going wild
+whitespaces = "    ^   3.2   "
+whitespaces-2 = { version = "     >   3.11,     <=     3.13    " }
+
+# Extras and optional
+dep-in-extra = { version = "1.2.3" }
+optional-in-extra = { version = "1.2.3", optional = true }
+optional-not-in-extra = { version = "1.2.3", optional = true }
+
+# Path
+local-package = { path = "package/" }
+local-package-2 = { path = "another-package/", develop = false }
+local-package-editable = { path = "package/dist/package-0.1.0.tar.gz", develop = true }
+
+# URL
+url-dep = { url = "https://example.com/package-0.0.1.tar.gz" }
+
+# Git
+git = { git = "https://example.com/foo/bar" }
+git-branch = { git = "https://example.com/foo/bar", branch = "foo" }
+git-rev = { git = "https://example.com/foo/bar", rev = "1234567" }
+git-tag = { git = "https://example.com/foo/bar", tag = "v1.2.3" }
+git-subdirectory = { git = "https://example.com/foo/bar", subdirectory = "directory" }
+
+# Multiple constraints
+multiple-constraints-python-version = [
+    { python = ">=3.11", version = ">=2" },
+    { python = "<3.11", version = "<2" },
+]
+multiple-constraints-platform-version = [
+    { platform = "darwin", version = ">=2" },
+    { platform = "linux", version = "<2" },
+]
+multiple-constraints-markers-version = [
+    { markers = "platform_python_implementation == 'CPython'", version = ">=2" },
+    { markers = "platform_python_implementation != 'CPython'", version = "<2" },
+]
+multiple-constraints-python-platform-markers-version = [
+    { python = ">=3.11", platform = "darwin", markers = "platform_python_implementation == 'CPython'", version = ">=2" },
+    { python = "<3.11", platform = "linux", markers = "platform_python_implementation != 'CPython'", version = "<2" },
+]
+multiple-constraints-python-source  = [
+    { python = ">=3.11", url = "https://example.com/foo-1.2.3-py3-none-any.whl" },
+    { python = "<3.11", git = "https://example.com/foo/bar", tag = "v1.2.3" },
+]
+multiple-constraints-platform-source  = [
+    { platform = "darwin", url = "https://example.com/foo-1.2.3-py3-none-any.whl" },
+    { platform = "linux", git = "https://example.com/foo/bar", tag = "v1.2.3" },
+]
+multiple-constraints-markers-source = [
+    { markers = "platform_python_implementation == 'CPython'", url = "https://example.com/foo-1.2.3-py3-none-any.whl" },
+    { markers = "platform_python_implementation != 'CPython'", git = "https://example.com/foo/bar", tag = "v1.2.3" },
+]
+multiple-constraints-python-platform-markers-source  = [
+    { python = ">=3.11", platform = "darwin", markers = "platform_python_implementation == 'CPython'", url = "https://example.com/foo-1.2.3-py3-none-any.whl" },
+    { python = "<3.11", platform = "linux", markers = "platform_python_implementation != 'CPython'", source = "supplemental" },
+]
+
+[tool.poetry.extras]
+extra = ["dep-in-extra"]
+extra-2 = ["dep-in-extra", "optional-in-extra"]
+
+[tool.poetry.dev-dependencies]
+dev-legacy = "1.2.3"
+dev-legacy-2 = "1.2.3"
+
+[tool.poetry.group.dev.dependencies]
+dev-dep = "1.2.3"
+
+[tool.poetry.group.typing.dependencies]
+typing-dep = "1.2.3"
+
+[tool.poetry.urls]
+"First link" = "https://first.example.com"
+"Another link" = "https://another.example.com"
+
+[tool.poetry.scripts]
+console-script = "foo:run"
+console-script-2 = "bar:run"
+
+[tool.poetry.plugins.console_scripts]
+console-script-2 = "override_bar:run"
+console-script-3 = "foobar:run"
+
+[tool.poetry.plugins.gui_scripts]
+gui-script = "gui:run"
+
+[tool.poetry.plugins.some-scripts]
+a-script = "a_script:run"
+another-script = "another_script:run"
+
+[tool.poetry.plugins.other-scripts]
+a-script = "another_script:run"
+yet-another-script = "yet_another_scripts:run"
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+[[tool.poetry.source]]
+name = "secondary"
+url = "https://secondary.example.com/simple/"
+priority = "secondary"
+
+[[tool.poetry.source]]
+name = "supplemental"
+url = "https://supplemental.example.com/simple/"
+priority = "supplemental"
+
+[[tool.poetry.source]]
+name = "explicit"
+url = "https://explicit.example.com/simple/"
+priority = "explicit"
+
+[[tool.poetry.source]]
+name = "default"
+url = "https://default.example.com/simple/"
+priority = "default"
+
+[tool.ruff]
+fix = true
+
+[tool.ruff.lint]
+# This comment should be preserved.
+fixable = ["I", "UP"]
+
+[tool.ruff.format]
+preview = true
+'''

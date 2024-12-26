@@ -1,0 +1,38 @@
+[package]
+name = "migrate-to-uv"
+version = "0.0.1"
+edition = "2021"
+rust-version = "1.83"
+license = "MIT"
+authors = ["Mathieu Kniewallner <mathieu.kniewallner@gmail.com>"]
+default-run = "migrate-to-uv"
+
+[dependencies]
+clap = { version = "=4.5.23", features = ["derive"] }
+clap-verbosity-flag = "=3.0.2"
+env_logger = "=0.11.6"
+indexmap = { version = "=2.7.0", features = ["serde"] }
+log = "=0.4.22"
+owo-colors = "=4.1.0"
+pep440_rs = "=0.7.3"
+regex = "=1.11.1"
+serde = { version = "=1.0.216", features = ["derive"] }
+toml = "=0.8.19"
+toml_edit = { version = "=0.22.22", features = ["display", "serde"] }
+
+[dev-dependencies]
+insta = { version = "=1.41.1", features = ["toml"] }
+rstest = "=0.23.0"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+too_many_lines = "allow"
+
+[profile.dev.package]
+insta.opt-level = 3
+similar.opt-level = 3
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"

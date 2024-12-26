@@ -1,0 +1,51 @@
+[build-system]
+requires = ["maturin>=1.5,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "migrate-to-uv"
+version = "0.0.1"
+description = ""
+authors = [{ name = "Mathieu Kniewallner", email = "mathieu.kniewallner@gmail.com>" }]
+requires-python = ">=3.8"
+license = "MIT"
+readme = "README.md"
+keywords = [
+    "uv",
+    "migrate",
+    "poetry",
+    "pipenv",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Rust",
+    "Topic :: Software Development :: Libraries",
+]
+
+[project.urls]
+Documentation = "https://mkniewallner.github.io/migrate-to-uv/"
+Repository = "https://github.com/mkniewallner/migrate-to-uv"
+Changelog = "https://github.com/mkniewallner/migrate-to-uv/blob/main/CHANGELOG.md"
+Funding = "https://github.com/sponsors/mkniewallner"
+
+[dependency-groups]
+docs = [
+    "mkdocs==1.6.1",
+    "mkdocs-material==9.5.49",
+]
+
+[tool.maturin]
+bindings = "bin"
+module-name = "migrate_to_uv"

@@ -1,0 +1,30 @@
+repos:
+  - repo: local
+    hooks:
+      - id: cargo-check-lock
+        name: check cargo lock file consistency
+        entry: cargo check
+        args: ["--locked", "--all-targets", "--all-features"]
+        language: system
+        pass_filenames: false
+        files: Cargo\.toml$
+
+  - repo: local
+    hooks:
+      - id: cargo-fmt
+        name: cargo fmt
+        entry: cargo fmt
+        args: ["--all", "--"]
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: cargo-clippy
+        name: cargo clippy
+        entry: cargo clippy
+        args: ["--all-targets", "--all-features", "--", "-D", "warnings"]
+        language: system
+        types: [rust]
+        pass_filenames: false

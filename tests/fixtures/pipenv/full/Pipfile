@@ -1,0 +1,58 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[[source]]
+url = "https://example.com/simple"
+verify_ssl = true
+name = "other-index"
+
+[packages]
+dep = "==1.2.3"
+dep-2 = ">=1.2.3"
+dep-3 = "~=1.2.3"
+dep-4 = "~=1.2"
+
+# Tables
+with-version-only = { version = "==1.2.3" }
+with-extras = { version = "==1.2.3", extras = ["foo", "bar"] }
+with-source = { version = "==1.2.3", index = "other-index" }
+
+# Path
+local-package = { path = "package/" }
+local-package-2 = { path = "another-package/", editable = false }
+local-package-editable = { path = "package/dist/package-0.1.0.tar.gz", editable = true }
+
+# Git
+git = { git = "https://example.com/foo/bar.git" }
+git-ref = { git = "https://example.com/foo/bar.git", ref = "v1.2.3" }
+
+# Markers
+markers = { version = "==1.2.3", markers = "sys_platform == 'win32'" }
+markers-2 = { version = "==1.2.3", markers = "sys_platform == 'win32'", os_name= "== 'nt'", sys_platform = "!= 'darwin'", platform_machine = "== 'x86_64'", platform_python_implementation = "== 'CPython'", platform_release = "== '1.2.3'", platform_system = "== 'Windows'", platform_version = "== '1.2.3'", python_version = "> '3.8'", python_full_version = "> '3.8.0'", implementation_name = "!= 'pypy'", implementation_version = "> '3.8'", additional_key = "foobar" }
+
+[dev-packages]
+dev-package = "==1.2.3"
+dev-package-local = { path = "package" }
+dev-package-source = { path = "package", index = "other-index" }
+
+[packages-category]
+category-package = "==1.2.3"
+category-package-2 = { version = "==1.2.3", index = "other-index" }
+
+[packages-category-2]
+category-2-package = { version = "==1.2.3", index = "other-index" }
+category-2-package-2 = { git = "https://example.com/foo/bar.git", ref = "v1.2.3", markers = "sys_platform == 'win32'" }
+
+[requires]
+python_version = "3.13"
+python_full_version = "3.13.1"
+
+[pipenv]
+allow_prereleases = true
+install_search_all_sources = true
+extra-key = "bar"
+
+[scripts]
+"foo" = "bar:run"

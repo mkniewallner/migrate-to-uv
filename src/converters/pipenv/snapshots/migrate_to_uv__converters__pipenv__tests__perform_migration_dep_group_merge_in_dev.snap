@@ -1,0 +1,69 @@
+---
+source: src/migrators/pipenv/mod.rs
+expression: "perform_migration(Path::new(\"tests/fixtures/pipenv/full/Pipfile\"),\nPath::new(\"tests/fixtures/pipenv/full/pyproject.toml\"),\nDependencyGroupsStrategy::MergeIntoDev,)"
+snapshot_kind: text
+---
+'''
+[project]
+name = ""
+version = "0.0.1"
+requires-python = "~=3.13"
+dependencies = [
+    "dep==1.2.3",
+    "dep-2>=1.2.3",
+    "dep-3~=1.2.3",
+    "dep-4~=1.2",
+    "with-version-only==1.2.3",
+    "with-extras[foo, bar]==1.2.3",
+    "with-source==1.2.3",
+    "local-package",
+    "local-package-2",
+    "local-package-editable",
+    "git",
+    "git-ref",
+    "markers==1.2.3 ; sys_platform == 'win32'",
+    "markers-2==1.2.3 ; os_name == 'nt' and sys_platform != 'darwin' and platform_machine == 'x86_64' and platform_python_implementation == 'CPython' and platform_release == '1.2.3' and platform_system == 'Windows' and platform_version == '1.2.3' and python_version > '3.8' and python_full_version > '3.8.0' and implementation_name != 'pypy' and implementation_version > '3.8' and sys_platform == 'win32'",
+]
+
+[tool.ruff]
+fix = true
+
+[dependency-groups]
+dev = [
+    "dev-package==1.2.3",
+    "dev-package-local",
+    "dev-package-source",
+    "category-package==1.2.3",
+    "category-package-2==1.2.3",
+    "category-2-package==1.2.3",
+    "category-2-package-2 ; sys_platform == 'win32'",
+]
+
+[tool.ruff.format]
+preview = true
+
+[tool.uv]
+package = false
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+
+[[tool.uv.index]]
+name = "other-index"
+url = "https://example.com/simple"
+explicit = true
+
+[tool.uv.sources]
+dev-package-local = { path = "package" }
+dev-package-source = { index = "other-index" }
+category-package-2 = { index = "other-index" }
+category-2-package = { index = "other-index" }
+category-2-package-2 = { git = "https://example.com/foo/bar.git", rev = "v1.2.3" }
+with-source = { index = "other-index" }
+local-package = { path = "package/" }
+local-package-2 = { path = "another-package/", editable = false }
+local-package-editable = { path = "package/dist/package-0.1.0.tar.gz", editable = true }
+git = { git = "https://example.com/foo/bar.git" }
+git-ref = { git = "https://example.com/foo/bar.git", rev = "v1.2.3" }
+'''

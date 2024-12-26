@@ -1,0 +1,5 @@
+[tool.ruff]
+fix = true
+
+[tool.ruff.format]
+preview = true

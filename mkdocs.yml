@@ -1,0 +1,68 @@
+site_name: migrate-to-uv
+edit_uri: edit/main/docs/
+repo_name: mkniewallner/migrate-to-uv
+repo_url: https://github.com/mkniewallner/migrate-to-uv
+site_url: https://mkniewallner.github.io/migrate-to-uv
+site_description: Migrate to uv from another package manager.
+site_author: Mathieu Kniewallner
+
+nav:
+  - Introduction: index.md
+  - Usage and configuration: usage-and-configuration.md
+  - Supported package managers: supported-package-managers.md
+  - Changelog: CHANGELOG.md
+
+plugins:
+  - search
+
+theme:
+  name: material
+  features:
+    - content.action.edit
+    - content.code.copy
+    - navigation.footer
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: deep orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preferences
+  icon:
+    repo: fontawesome/brands/github
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/mkniewallner/migrate-to-uv
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/migrate-to-uv/
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.superfences
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
