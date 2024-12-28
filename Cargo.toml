@@ -16,7 +16,7 @@ log = "=0.4.22"
 owo-colors = "=4.1.0"
 pep440_rs = "=0.7.3"
 regex = "=1.11.1"
-serde = { version = "=1.0.216", features = ["derive"] }
+serde = { version = "=1.0.217", features = ["derive"] }
 toml = "=0.8.19"
 toml_edit = { version = "=0.22.22", features = ["display", "serde"] }
 
