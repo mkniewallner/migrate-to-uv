@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+* [poetry] Migrate data from `packages`, `include` and `exclude` to hatch build backend ([#16](https://github.com/mkniewallner/migrate-to-uv/pull/16))
+
 ### Bug fixes
 
 * Do not insert `[tool.uv]` if empty ([#17](https://github.com/mkniewallner/migrate-to-uv/pull/17))
