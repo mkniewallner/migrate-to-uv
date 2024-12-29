@@ -43,30 +43,39 @@ impl VisitMut for PyprojectPrettyFormatter {
         if let Item::Value(Value::InlineTable(inline_table)) = node {
             let parent_keys: Vec<&str> = self.parent_keys.iter().map(AsRef::as_ref).collect();
 
-            match parent_keys.as_slice() {
+            if matches!(
+                parent_keys.as_slice(),
                 ["build-system" | "project" | "dependency-groups"]
-                | ["project", "urls" | "optional-dependencies" | "scripts" | "gui-scripts" | "entry-points"]
-                | ["project", "entry-points", _]
-                | ["tool", "uv"]
-                | ["tool", "uv", "sources"] => {
-                    let position: Option<usize> = match parent_keys.as_slice() {
-                        ["project"] => Some(0),
-                        ["dependency-groups"] => Some(1),
-                        ["tool", "uv"] => Some(2),
-                        _ => None,
-                    };
+                    | [
+                        "project",
+                        "urls"
+                            | "optional-dependencies"
+                            | "scripts"
+                            | "gui-scripts"
+                            | "entry-points"
+                    ]
+                    | ["project", "entry-points", _]
+                    | ["tool", "uv"]
+                    | ["tool", "uv", "sources"]
+                    | ["tool", "hatch", ..]
+            ) {
+                let position = match parent_keys.as_slice() {
+                    ["project"] => Some(0),
+                    ["dependency-groups"] => Some(1),
+                    ["tool", "uv"] => Some(2),
+                    ["tool", "hatch"] => Some(3),
+                    _ => None,
+                };
 
-                    let inline_table = std::mem::replace(inline_table, InlineTable::new());
-                    let mut table = inline_table.into_table();
+                let inline_table = std::mem::replace(inline_table, InlineTable::new());
+                let mut table = inline_table.into_table();
 
-                    if let Some(position) = position {
-                        table.set_position(position);
-                    }
-
-                    key.fmt();
-                    *node = Item::Table(table);
+                if let Some(position) = position {
+                    table.set_position(position);
                 }
-                _ => (),
+
+                key.fmt();
+                *node = Item::Table(table);
             }
         }
 
@@ -85,7 +94,7 @@ impl VisitMut for PyprojectPrettyFormatter {
         // sections ensures that unrelated sections are left intact.
         if matches!(
             parent_keys.as_slice(),
-            ["project" | "dependency-groups", ..] | ["tool", "uv", ..]
+            ["project" | "dependency-groups", ..] | ["tool", "uv" | "hatch", ..]
         ) && node.len() >= 2
         {
             for item in node.iter_mut() {

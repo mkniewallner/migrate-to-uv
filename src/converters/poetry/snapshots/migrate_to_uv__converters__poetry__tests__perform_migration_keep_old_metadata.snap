@@ -1,12 +1,11 @@
 ---
 source: src/converters/poetry/mod.rs
 expression: "perform_migration(Path::new(\"tests/fixtures/poetry/full/pyproject.toml\"),\ntrue, DependencyGroupsStrategy::SetDefaultGroups,)"
-snapshot_kind: text
 ---
 '''
 [build-system]
-requires = ["uv>=0.5,<0.6"]
-build-backend = "uv"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "foobar"
@@ -160,16 +159,33 @@ documentation = "https://docs.example.com"
 
 # Package metadata
 packages = [
-    { include = "foo" },
-    { include = "bar", from = "lib", to = "target", format = "sdist" },
-    { include = "foobar/**/*.py", from = "lib", to = "target", format = ["sdist", "wheel"] },
+    { include = "packages-sdist-wheel" },
+    { include = "packages-sdist-wheel-2", format = [] },
+    { include = "packages-sdist-wheel-3/**/*.py", format = ["sdist", "wheel"] },
+    { include = "packages-sdist", format = "sdist" },
+    { include = "packages-sdist-2", format = ["sdist"] },
+    { include = "packages-wheel", format = "wheel" },
+    { include = "packages-wheel-2", format = ["wheel"] },
+    { include = "packages-from", from = "from" },
+    { include = "packages-to", to = "to" },
+    { include = "packages-from-to", from = "from", to = "to" },
+    { include = "packages-glob-to/**/*.py", to = "to" },
+    { include = "packages-glob-from-to/**/*.py", from = "from", to = "to" },
 ]
 include = [
-    { path = "tests" },
-    { path = "docs", format = "sdist" },
-    { path = "README.md", format = ["sdist", "wheel"] }
+    "include-sdist-wheel",
+    { path = "include-sdist-wheel-2" },
+    { path = "include-sdist-wheel-3", format = [] },
+    { path = "include-sdist-wheel-4", format = ["sdist", "wheel"] },
+    { path = "include-sdist", format = "sdist" },
+    { path = "include-sdist-2", format = ["sdist"] },
+    { path = "include-wheel", format = "wheel" },
+    { path = "include-wheel-2", format = ["wheel"] },
 ]
-exclude = ["foo/bar.py"]
+exclude = [
+    "exclude-sdist-wheel",
+    "exclude-sdist-wheel-2",
+]
 
 [tool.uv]
 package = false
@@ -336,6 +352,61 @@ multiple-constraints-python-platform-markers-source  = [
     { python = ">=3.11", platform = "darwin", markers = "platform_python_implementation == 'CPython'", url = "https://example.com/foo-1.2.3-py3-none-any.whl" },
     { python = "<3.11", platform = "linux", markers = "platform_python_implementation != 'CPython'", source = "supplemental" },
 ]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "packages-sdist-wheel",
+    "packages-sdist-wheel-2",
+    "packages-sdist-wheel-3/**/*.py",
+    "packages-sdist",
+    "packages-sdist-2",
+    "from/packages-from",
+    "packages-to",
+    "from/packages-from-to",
+    "packages-glob-to/**/*.py",
+    "from/packages-glob-from-to/**/*.py",
+    "include-sdist-wheel",
+    "include-sdist-wheel-2",
+    "include-sdist-wheel-3",
+    "include-sdist-wheel-4",
+    "include-sdist",
+    "include-sdist-2",
+]
+exclude = [
+    "exclude-sdist-wheel",
+    "exclude-sdist-wheel-2",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "packages-sdist-wheel",
+    "packages-sdist-wheel-2",
+    "packages-sdist-wheel-3/**/*.py",
+    "packages-wheel",
+    "packages-wheel-2",
+    "from/packages-from",
+    "packages-to",
+    "from/packages-from-to",
+    "packages-glob-to/**/*.py",
+    "from/packages-glob-from-to/**/*.py",
+    "include-sdist-wheel",
+    "include-sdist-wheel-2",
+    "include-sdist-wheel-3",
+    "include-sdist-wheel-4",
+    "include-wheel",
+    "include-wheel-2",
+]
+exclude = [
+    "exclude-sdist-wheel",
+    "exclude-sdist-wheel-2",
+]
+
+[tool.hatch.build.targets.wheel.sources]
+"from/packages-from" = "packages-from"
+packages-to = "to/packages-to"
+"from/packages-from-to" = "to/packages-from-to"
+packages-glob-to = "to/packages-glob-to"
+"from/packages-glob-from-to" = "to/packages-glob-from-to"
 
 [tool.poetry.extras]
 extra = ["dep-in-extra"]

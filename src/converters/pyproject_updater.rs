@@ -1,3 +1,4 @@
+use crate::schema::hatch::Hatch;
 use crate::schema::pep_621::Project;
 use crate::schema::pyproject::{BuildSystem, DependencyGroupSpecification};
 use crate::schema::uv::Uv;
@@ -55,6 +56,21 @@ impl PyprojectUpdater<'_> {
 
         self.pyproject["tool"]["uv"] = value(
             serde::Serialize::serialize(&uv, toml_edit::ser::ValueSerializer::new()).unwrap(),
+        );
+    }
+
+    /// Adds or replaces hatch-specific data in TOML document.
+    pub fn insert_hatch(&mut self, hatch: Option<&Hatch>) {
+        if hatch.is_none() {
+            return;
+        }
+
+        if !self.pyproject.contains_key("tool") {
+            self.pyproject["tool"] = table();
+        }
+
+        self.pyproject["tool"]["hatch"] = value(
+            serde::Serialize::serialize(&hatch, toml_edit::ser::ValueSerializer::new()).unwrap(),
         );
     }
 }

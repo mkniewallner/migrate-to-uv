@@ -4,7 +4,7 @@ mod project;
 mod sources;
 pub mod version;
 
-use crate::converters::poetry::build_backend::warn_unsupported_package_keys;
+use crate::converters::poetry::build_backend::get_hatch;
 use crate::converters::pyproject_updater::PyprojectUpdater;
 use crate::converters::Converter;
 use crate::converters::DependencyGroupsStrategy;
@@ -145,7 +145,7 @@ fn perform_migration(
         default_groups: uv_default_groups,
     };
 
-    warn_unsupported_package_keys(
+    let hatch = get_hatch(
         poetry.packages.as_ref(),
         poetry.include.as_ref(),
         poetry.exclude.as_ref(),
@@ -161,6 +161,7 @@ fn perform_migration(
     pyproject_updater.insert_pep_621(&project);
     pyproject_updater.insert_dependency_groups(dependency_groups.as_ref());
     pyproject_updater.insert_uv(&uv);
+    pyproject_updater.insert_hatch(hatch.as_ref());
 
     if !keep_old_metadata {
         remove_pyproject_poetry_section(&mut updated_pyproject);

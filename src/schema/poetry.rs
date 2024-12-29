@@ -29,12 +29,9 @@ pub struct Poetry {
     pub urls: Option<IndexMap<String, String>>,
     pub scripts: Option<IndexMap<String, String>>,
     pub plugins: Option<IndexMap<String, IndexMap<String, String>>>,
-    // TODO: Migrate packages once uv build backend is stable.
     pub packages: Option<Vec<Package>>,
-    // TODO: Migrate include once uv build backend is stable.
-    pub include: Option<Vec<IncludeExclude>>,
-    // TODO: Migrate exclude once uv build backend is stable.
-    pub exclude: Option<Vec<IncludeExclude>>,
+    pub include: Option<Vec<Include>>,
+    pub exclude: Option<Vec<String>>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -160,16 +157,16 @@ impl DependencySpecification {
 /// Package distribution definition <https://python-poetry.org/docs/pyproject/#packages>.
 #[derive(Deserialize, Serialize)]
 pub struct Package {
-    include: String,
-    from: Option<String>,
-    to: Option<String>,
-    format: Option<SingleOrVec<Format>>,
+    pub include: String,
+    pub from: Option<String>,
+    pub to: Option<String>,
+    pub format: Option<SingleOrVec<Format>>,
 }
 
-/// Package distribution file inclusion/exclusion: <https://python-poetry.org/docs/pyproject/#include-and-exclude>.
+/// Package distribution file inclusion: <https://python-poetry.org/docs/pyproject/#include-and-exclude>.
 #[derive(Deserialize, Serialize)]
 #[serde(untagged)]
-pub enum IncludeExclude {
+pub enum Include {
     String(String),
     Map {
         path: String,
@@ -177,7 +174,7 @@ pub enum IncludeExclude {
     },
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Eq, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Format {
     Sdist,
