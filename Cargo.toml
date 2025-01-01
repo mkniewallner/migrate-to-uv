@@ -22,7 +22,7 @@ toml_edit = { version = "=0.22.22", features = ["display", "serde"] }
 
 [dev-dependencies]
 insta = { version = "=1.41.1", features = ["toml"] }
-rstest = "=0.23.0"
+rstest = "=0.24.0"
 
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
