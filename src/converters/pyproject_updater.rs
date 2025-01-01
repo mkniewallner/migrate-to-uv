@@ -45,6 +45,10 @@ impl PyprojectUpdater<'_> {
 
     /// Adds or replaces uv-specific data in TOML document.
     pub fn insert_uv(&mut self, uv: &Uv) {
+        if uv == &Uv::default() {
+            return;
+        }
+
         if !self.pyproject.contains_key("tool") {
             self.pyproject["tool"] = table();
         }

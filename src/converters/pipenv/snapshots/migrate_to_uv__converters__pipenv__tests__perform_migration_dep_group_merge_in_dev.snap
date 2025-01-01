@@ -1,5 +1,5 @@
 ---
-source: src/migrators/pipenv/mod.rs
+source: src/converters/pipenv/mod.rs
 expression: "perform_migration(Path::new(\"tests/fixtures/pipenv/full/Pipfile\"),\nPath::new(\"tests/fixtures/pipenv/full/pyproject.toml\"),\nDependencyGroupsStrategy::MergeIntoDev,)"
 snapshot_kind: text
 ---
