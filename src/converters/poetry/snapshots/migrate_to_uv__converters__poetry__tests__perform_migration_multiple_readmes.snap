@@ -1,5 +1,5 @@
 ---
-source: src/migrators/poetry/mod.rs
+source: src/converters/poetry/mod.rs
 expression: "perform_migration(Path::new(\"tests/fixtures/poetry/multiple_readmes/pyproject.toml\"),\nfalse, DependencyGroupsStrategy::SetDefaultGroups,)"
 snapshot_kind: text
 ---
@@ -8,6 +8,4 @@ snapshot_kind: text
 name = ""
 version = "0.0.1"
 readme = "README1.md"
-
-[tool.uv]
 '''

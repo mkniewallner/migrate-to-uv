@@ -1,6 +1,6 @@
 ---
-source: src/migrators/poetry/mod.rs
-expression: "perform_migration(Path::new(\"tests/fixtures/poetry/minimal/pyproject.toml\"),\nfalse, DependencyGroupsStrategy::IncludeInDev,)"
+source: src/converters/poetry/mod.rs
+expression: "perform_migration(Path::new(\"tests/fixtures/poetry/minimal/pyproject.toml\"),\nfalse, DependencyGroupsStrategy::SetDefaultGroups,)"
 snapshot_kind: text
 ---
 '''
@@ -10,8 +10,6 @@ version = "0.0.1"
 
 [tool.ruff]
 fix = true
-
-[tool.uv]
 
 [tool.ruff.format]
 preview = true

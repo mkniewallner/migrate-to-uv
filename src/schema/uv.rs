@@ -1,7 +1,7 @@
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Deserialize, Serialize)]
+#[derive(Default, Deserialize, Serialize, Eq, PartialEq)]
 pub struct Uv {
     pub package: Option<bool>,
     /// <https://docs.astral.sh/uv/configuration/indexes/#defining-an-index>
@@ -13,7 +13,7 @@ pub struct Uv {
     pub default_groups: Option<Vec<String>>,
 }
 
-#[derive(Default, Deserialize, Serialize)]
+#[derive(Default, Deserialize, Serialize, Eq, PartialEq)]
 pub struct Index {
     pub name: String,
     pub url: Option<String>,
@@ -21,7 +21,7 @@ pub struct Index {
     pub explicit: Option<bool>,
 }
 
-#[derive(Default, Deserialize, Serialize)]
+#[derive(Default, Deserialize, Serialize, Eq, PartialEq)]
 pub struct SourceIndex {
     pub index: Option<String>,
     pub path: Option<String>,
@@ -35,7 +35,7 @@ pub struct SourceIndex {
     pub marker: Option<String>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Eq, PartialEq)]
 #[serde(untagged)]
 pub enum SourceContainer {
     SourceIndex(SourceIndex),
