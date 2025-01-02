@@ -43,7 +43,7 @@ impl Converter for Pipenv {
                 updated_pyproject_string
             );
         } else {
-            let mut pyproject_file = File::create(&pipfile_path).unwrap();
+            let mut pyproject_file = File::create(&pyproject_path).unwrap();
 
             pyproject_file
                 .write_all(updated_pyproject_string.as_bytes())
