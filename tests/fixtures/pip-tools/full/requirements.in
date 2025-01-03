@@ -1,0 +1,2 @@
+arrow
+httpx[cli,zstd]==0.28.1

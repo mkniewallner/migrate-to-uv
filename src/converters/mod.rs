@@ -1,8 +1,7 @@
-use crate::detector::PackageManager;
 use crate::schema::pyproject::DependencyGroupSpecification;
 use indexmap::IndexMap;
-use std::path::PathBuf;
 
+pub mod pip_tools;
 pub mod pipenv;
 pub mod poetry;
 mod pyproject_updater;
@@ -20,16 +19,6 @@ pub trait Converter {
         keep_old_metadata: bool,
         dependency_groups_strategy: DependencyGroupsStrategy,
     );
-}
-
-pub fn get_converter(
-    detected_package_manager: &PackageManager,
-    project_path: PathBuf,
-) -> Box<dyn Converter> {
-    match detected_package_manager {
-        PackageManager::Pipenv => Box::new(pipenv::Pipenv { project_path }),
-        PackageManager::Poetry => Box::new(poetry::Poetry { project_path }),
-    }
 }
 
 #[derive(clap::ValueEnum, Clone, Copy, Debug)]

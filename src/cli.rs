@@ -1,4 +1,4 @@
-use crate::converters::{get_converter, DependencyGroupsStrategy};
+use crate::converters::DependencyGroupsStrategy;
 use crate::detector::{Detector, PackageManager};
 use crate::logger;
 use clap::builder::styling::{AnsiColor, Effects};
@@ -44,6 +44,10 @@ struct Cli {
     dependency_groups_strategy: DependencyGroupsStrategy,
     #[arg(long, help = "Keep data from current package manager")]
     keep_current_data: bool,
+    #[arg(long, default_values = vec!["requirements.in", "foo"], help = "Requirement files to migrate")]
+    requirement_files: Vec<String>,
+    #[arg(long, default_values = vec!["requirements-dev.in"], help = "Development requirement files to migrate")]
+    dev_requirement_files: Vec<String>,
     #[command(flatten)]
     verbose: Verbosity<InfoLevel>,
 }
@@ -55,14 +59,14 @@ pub fn cli() {
 
     let detector = Detector {
         project_path: &cli.path,
+        requirement_files: cli.requirement_files,
+        dev_requirement_files: cli.dev_requirement_files,
         enforced_package_manager: cli.package_manager,
     };
 
     match detector.detect() {
-        Ok(manager) => {
-            let migrator = get_converter(&manager, cli.path);
-
-            migrator.convert_to_uv(
+        Ok(converter) => {
+            converter.convert_to_uv(
                 cli.dry_run,
                 cli.keep_current_data,
                 cli.dependency_groups_strategy,
