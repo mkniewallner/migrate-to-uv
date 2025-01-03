@@ -2,6 +2,10 @@
 
 ## 0.1.2 - 2025-01-02
 
+### Features
+
+* [poetry] Migrate data from `packages`, `include` and `exclude` to hatch build backend ([#16](https://github.com/mkniewallner/migrate-to-uv/pull/16))
+
 ### Bug fixes
 
 * [pipenv] Correctly update `pyproject.toml` ([#19](https://github.com/mkniewallner/migrate-to-uv/pull/19))

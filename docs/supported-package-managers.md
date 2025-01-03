@@ -16,6 +16,7 @@ Most [Poetry](https://python-poetry.org/) metadata is converted to uv when perfo
 - [Dependency markers](https://python-poetry.org/docs/dependency-specification#using-environment-markers) (including
   [`python`](https://python-poetry.org/docs/dependency-specification/#python-restricted-dependencies) and `platform`)
 - [Multiple constraints dependencies](https://python-poetry.org/docs/dependency-specification#multiple-constraints-dependencies)
+- Package distribution metadata ([`packages`](https://python-poetry.org/docs/pyproject/#packages), [`include` and `exclude`](https://python-poetry.org/docs/pyproject/#include-and-exclude))
 - [Supported Python versions](https://python-poetry.org/docs/basic-usage/#setting-a-python-version)
 - [Scripts](https://python-poetry.org/docs/pyproject/#scripts) and
   [plugins](https://python-poetry.org/docs/pyproject/#plugins) (also known as entry points)
@@ -24,12 +25,6 @@ Version definitions set for dependencies are also preserved, and converted to th
 equivalent [PEP 440](https://peps.python.org/pep-0440/) format used by uv, even for Poetry-specific version
 specification (e.g., [caret](https://python-poetry.org/docs/dependency-specification/#caret-requirements) (`^`)
 and [tilde](https://python-poetry.org/docs/dependency-specification/#tilde-requirements) (`~`)).
-
-### Missing features
-
-The following features are not yet supported when migrating:
-
-- Package distribution metadata ([`packages`](https://python-poetry.org/docs/pyproject/#packages), [`include` and `exclude`](https://python-poetry.org/docs/pyproject/#include-and-exclude))
 
 ## Pipenv
 
