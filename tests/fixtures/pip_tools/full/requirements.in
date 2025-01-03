@@ -1,0 +1,3 @@
+arrow
+httpx[cli,zstd]==0.28.1
+uvicorn @ git+https://github.com/encode/uvicorn

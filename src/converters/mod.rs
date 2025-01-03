@@ -4,6 +4,7 @@ use indexmap::IndexMap;
 use std::any::Any;
 use std::fmt::Debug;
 
+pub mod pip;
 pub mod pipenv;
 pub mod poetry;
 mod pyproject_updater;
