@@ -34,7 +34,18 @@ jobs:
         run: cargo clippy --all-targets --all-features -- -D warnings
 
   tests:
-    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        os:
+          - name: linux
+            image: ubuntu-24.04
+          - name: macos
+            image: macos-15
+          - name: windows
+            image: windows-2025
+      fail-fast: false
+    runs-on: ${{ matrix.os.image }}
+    name: tests (${{ matrix.os.name }})
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
