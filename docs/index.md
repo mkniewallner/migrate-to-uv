@@ -14,10 +14,11 @@ The following package managers are supported:
 
 - [Poetry](supported-package-managers.md#poetry)
 - [Pipenv](supported-package-managers.md#pipenv)
+- [pip-tools](supported-package-managers.md#pip-tools)
+- [pip](supported-package-managers.md#pip)
 
-More package managers (e.g., [pip-tools](https://pip-tools.readthedocs.io/en/stable/),
-[pip](https://pip.pypa.io/en/stable/), [setuptools](https://setuptools.pypa.io/en/stable/), ...) could be
-implemented in the future.
+More package managers (e.g., [setuptools](https://setuptools.pypa.io/en/stable/)) could be implemented in the
+future.
 
 ## Features
 

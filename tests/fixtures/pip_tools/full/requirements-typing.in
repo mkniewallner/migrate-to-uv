@@ -1,0 +1,2 @@
+mypy==1.14.1
+types-jsonschema==4.23.0.20241208

@@ -44,6 +44,10 @@ struct Cli {
     dependency_groups_strategy: DependencyGroupsStrategy,
     #[arg(long, help = "Keep data from current package manager")]
     keep_current_data: bool,
+    #[arg(long, default_values = vec!["requirements.txt"], help = "Requirements file to migrate")]
+    requirements_file: Vec<String>,
+    #[arg(long, default_values = vec!["requirements-dev.txt"], help = "Development requirements file to migrate")]
+    dev_requirements_file: Vec<String>,
     #[command(flatten)]
     verbose: Verbosity<InfoLevel>,
 }
@@ -53,7 +57,12 @@ pub fn cli() {
 
     logger::configure(cli.verbose);
 
-    match get_converter(&cli.path, cli.package_manager) {
+    match get_converter(
+        &cli.path,
+        cli.requirements_file,
+        cli.dev_requirements_file,
+        cli.package_manager,
+    ) {
         Ok(converter) => {
             converter.convert_to_uv(
                 cli.dry_run,

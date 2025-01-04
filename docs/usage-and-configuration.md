@@ -80,6 +80,28 @@ If this is not desirable, it is possible to change the strategy by using `--depe
 migrate-to-uv --dependency-groups-strategy include-in-dev
 ```
 
+#### `--requirements-file`
+
+Names of the production requirements files to look for, for projects using `pip` or `pip-tools`. The argument can be set
+multiple times, if there are multiple files.
+
+**Example**:
+
+```bash
+migrate-to-uv --requirements-file requirements.txt --requirements-file more-requirements.txt
+```
+
+#### `--dev-requirements-file`
+
+Names of the development requirements files to look for, for projects using `pip` or `pip-tools`. The argument can be
+set multiple times, if there are multiple files.
+
+**Example**:
+
+```bash
+migrate-to-uv --dev-requirements-file requirements-dev.txt --dev-requirements-file requirements-docs.txt
+```
+
 #### `--keep-current-data`
 
 Keep the current package manager data (lock file, sections in `pyproject.toml`, ...) after the migration, if you want to

@@ -42,3 +42,61 @@ migration:
 - [Package indexes](https://pipenv.pypa.io/en/stable/indexes.html)
 - [Dependency markers](https://pipenv.pypa.io/en/stable/specifiers.html#specifying-basically-anything)
 - [Supported Python versions](https://pipenv.pypa.io/en/stable/advanced.html#automatic-python-installation)
+
+## pip-tools
+
+Most [pip-tools](https://pip-tools.readthedocs.io/en/stable/) metadata is converted to uv when performing the migration.
+
+By default, `migrate-to-uv` will search for:
+
+- production dependencies in `requirements.in`
+- development dependencies in `requirements-dev.in`
+
+If your project uses different file names, or defines production and/or development dependencies across multiple files,
+you can specify the names of the files using [`--requirements-file`](usage-and-configuration.md#-requirements-file) and
+[`--dev-requirements-file`](usage-and-configuration.md#-dev-requirements-file) (both can be specified multiple times),
+for instance:
+
+```bash
+migrate-to-uv \
+  --requirements-file requirements-prod.in \
+  --dev-requirements-file requirements-dev.in \
+  --dev-requirements-file requirements-docs.in
+```
+
+### Missing features
+
+- Dependencies that do not follow [PEP 508](https://peps.python.org/pep-0508/) specification are not yet handled
+- References to other requirement files (e.g., `-r other-requirements.in`) are not supported, but the requirements file
+  can manually be set with [`--requirements-file`](usage-and-configuration.md#-requirements-file) or
+  [`--dev-requirements-file`](usage-and-configuration.md#-dev-requirements-file)
+- Index URLs are not yet migrated
+
+## pip
+
+Most [pip](https://pip.pypa.io/en/stable/) metadata is converted to uv when performing the migration.
+
+By default, `migrate-to-uv` will search for:
+
+- production dependencies in `requirements.txt`
+- development dependencies in `requirements-dev.txt`
+
+If your project uses different file names, or defines production and/or development dependencies across multiple files,
+you can specify the names of the files [`--requirements-file`](usage-and-configuration.md#-requirements-file) and
+[`--dev-requirements-file`](usage-and-configuration.md#-dev-requirements-file) (both can be specified multiple times),
+for instance:
+
+```bash
+migrate-to-uv \
+  --requirements-file requirements-prod.txt \
+  --dev-requirements-file requirements-dev.txt \
+  --dev-requirements-file requirements-docs.txt
+```
+
+### Missing features
+
+- Dependencies that do not follow [PEP 508](https://peps.python.org/pep-0508/) specification are not yet handled
+- References to other requirement files (e.g., `-r other-requirements.txt`) are not supported, but the requirements file
+  can manually be set with [`--requirements-file`](usage-and-configuration.md#-requirements-file) or
+  [`--dev-requirements-file`](usage-and-configuration.md#-dev-requirements-file)
+- Index URLs are not yet migrated

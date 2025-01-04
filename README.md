@@ -22,10 +22,10 @@ The following package managers are supported:
 
 - [Poetry](https://python-poetry.org/)
 - [Pipenv](https://pipenv.pypa.io/en/stable/)
+- [pip-tools](https://pip-tools.readthedocs.io/en/stable/)
+- [pip](https://pip.pypa.io/en/stable/)
 
-More package managers (e.g., [pip-tools](https://pip-tools.readthedocs.io/en/stable/),
-[pip](https://pip.pypa.io/en/stable/), [setuptools](https://setuptools.pypa.io/en/stable/), ...) could be
-implemented in the future.
+More package managers (e.g., [setuptools](https://setuptools.pypa.io/en/stable/)) could be implemented in the future.
 
 ## Features
 
