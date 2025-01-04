@@ -12,6 +12,8 @@ use crate::toml::PyprojectPrettyFormatter;
 use indexmap::IndexMap;
 use log::info;
 use owo_colors::OwoColorize;
+#[cfg(test)]
+use std::any::Any;
 use std::default::Default;
 use std::fs;
 use std::fs::{remove_file, File};
@@ -20,6 +22,7 @@ use std::path::{Path, PathBuf};
 use toml_edit::visit_mut::VisitMut;
 use toml_edit::DocumentMut;
 
+#[derive(Debug, PartialEq, Eq)]
 pub struct Pipenv {
     pub project_path: PathBuf,
 }
@@ -60,6 +63,11 @@ impl Converter for Pipenv {
                     .green()
             );
         }
+    }
+
+    #[cfg(test)]
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 

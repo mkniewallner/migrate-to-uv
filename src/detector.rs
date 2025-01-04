@@ -1,3 +1,5 @@
+use crate::converters;
+use crate::converters::Converter;
 use crate::schema::pyproject::PyProject;
 use log::debug;
 use owo_colors::OwoColorize;
@@ -13,7 +15,7 @@ pub enum PackageManager {
 }
 
 impl PackageManager {
-    fn detected(&self, project_path: &Path) -> Result<(), String> {
+    fn detected(&self, project_path: &Path) -> Result<Box<dyn Converter>, String> {
         match self {
             Self::Poetry => {
                 let project_file = "pyproject.toml";
@@ -39,6 +41,11 @@ impl PackageManager {
                         "[tool.poetry]".bold()
                     ));
                 }
+
+                debug!("{} detected as a package manager.", self);
+                Ok(Box::new(converters::poetry::Poetry {
+                    project_path: project_path.to_path_buf(),
+                }))
             }
             Self::Pipenv => {
                 let project_file = "Pipfile";
@@ -50,11 +57,13 @@ impl PackageManager {
                         project_file.bold()
                     ));
                 }
+
+                debug!("{} detected as a package manager.", self);
+                Ok(Box::new(converters::pipenv::Pipenv {
+                    project_path: project_path.to_path_buf(),
+                }))
             }
         }
-
-        debug!("{} detected as a package manager.", self);
-        Ok(())
     }
 }
 
@@ -64,66 +73,79 @@ impl Display for PackageManager {
     }
 }
 
-pub struct Detector<'a> {
-    pub project_path: &'a Path,
-    pub enforced_package_manager: Option<PackageManager>,
-}
-
-/// Auto-detects package manager used based on files (and their content) present in the project, or
-/// explicitly search for a specific package manager if enforced in the CLI.
-impl Detector<'_> {
-    pub fn detect(self) -> Result<PackageManager, String> {
-        if !self.project_path.exists() {
-            return Err(format!("{} does not exist.", self.project_path.display()));
-        }
-
-        if !self.project_path.is_dir() {
-            return Err(format!(
-                "{} is not a directory.",
-                self.project_path.display()
-            ));
-        }
-
-        if let Some(enforced_package_manager) = self.enforced_package_manager {
-            return match enforced_package_manager.detected(self.project_path) {
-                Ok(()) => Ok(enforced_package_manager),
-                Err(e) => Err(e),
-            };
-        }
-
-        match PackageManager::Poetry.detected(self.project_path) {
-            Ok(()) => return Ok(PackageManager::Poetry),
-            Err(err) => debug!("{err}"),
-        }
-
-        match PackageManager::Pipenv.detected(self.project_path) {
-            Ok(()) => return Ok(PackageManager::Pipenv),
-            Err(err) => debug!("{err}"),
-        }
-
-        Err(
-            "Could not determine which package manager is used from the ones that are supported."
-                .to_string(),
-        )
+/// Auto-detects converter to use based on files (and their content) present in the project, or
+/// explicitly select the one associated to the package manager that could be enforced in the CLI.
+pub fn get_converter(
+    project_path: &Path,
+    enforced_package_manager: Option<PackageManager>,
+) -> Result<Box<dyn Converter>, String> {
+    if !project_path.exists() {
+        return Err(format!("{} does not exist.", project_path.display()));
     }
+
+    if !project_path.is_dir() {
+        return Err(format!("{} is not a directory.", project_path.display()));
+    }
+
+    if let Some(enforced_package_manager) = enforced_package_manager {
+        return match enforced_package_manager.detected(project_path) {
+            Ok(converter) => return Ok(converter),
+            Err(e) => Err(e),
+        };
+    }
+
+    match PackageManager::Poetry.detected(project_path) {
+        Ok(converter) => return Ok(converter),
+        Err(err) => debug!("{err}"),
+    }
+
+    match PackageManager::Pipenv.detected(project_path) {
+        Ok(converter) => return Ok(converter),
+        Err(err) => debug!("{err}"),
+    }
+
+    Err(
+        "Could not determine which package manager is used from the ones that are supported."
+            .to_string(),
+    )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use rstest::rstest;
+    use std::path::PathBuf;
 
     #[rstest]
-    #[case("tests/fixtures/poetry/full", PackageManager::Poetry)]
-    #[case("tests/fixtures/poetry/minimal", PackageManager::Poetry)]
-    #[case("tests/fixtures/pipenv/full", PackageManager::Pipenv)]
-    #[case("tests/fixtures/pipenv/minimal", PackageManager::Pipenv)]
-    fn test_auto_detect_ok(#[case] project_path: &str, #[case] expected: PackageManager) {
-        let detector = Detector {
-            project_path: Path::new(project_path),
-            enforced_package_manager: None,
-        };
-        assert_eq!(detector.detect(), Ok(expected));
+    #[case("tests/fixtures/poetry/full")]
+    #[case("tests/fixtures/poetry/minimal")]
+    fn test_auto_detect_poetry_ok(#[case] project_path: &str) {
+        let converter = get_converter(Path::new(project_path), None).unwrap();
+        assert_eq!(
+            converter
+                .as_any()
+                .downcast_ref::<converters::poetry::Poetry>()
+                .unwrap(),
+            &converters::poetry::Poetry {
+                project_path: PathBuf::from(project_path)
+            }
+        );
+    }
+
+    #[rstest]
+    #[case("tests/fixtures/pipenv/full")]
+    #[case("tests/fixtures/pipenv/minimal")]
+    fn test_auto_detect_pipenv_ok(#[case] project_path: &str) {
+        let converter = get_converter(Path::new(project_path), None).unwrap();
+        assert_eq!(
+            converter
+                .as_any()
+                .downcast_ref::<converters::pipenv::Pipenv>()
+                .unwrap(),
+            &converters::pipenv::Pipenv {
+                project_path: PathBuf::from(project_path)
+            }
+        );
     }
 
     #[rstest]
@@ -140,58 +162,61 @@ mod tests {
         "Could not determine which package manager is used from the ones that are supported."
     )]
     fn test_auto_detect_err(#[case] project_path: &str, #[case] error: String) {
-        let detector = Detector {
-            project_path: Path::new(project_path),
-            enforced_package_manager: None,
-        };
-        assert_eq!(detector.detect(), Err(error));
+        let converter = get_converter(Path::new(project_path), None);
+        assert_eq!(converter.unwrap_err(), error);
     }
 
     #[rstest]
     #[case("tests/fixtures/poetry/full")]
     #[case("tests/fixtures/poetry/minimal")]
     fn test_poetry_ok(#[case] project_path: &str) {
-        let detector = Detector {
-            project_path: Path::new(project_path),
-            enforced_package_manager: Some(PackageManager::Poetry),
-        };
-        assert_eq!(detector.detect(), Ok(PackageManager::Poetry));
+        let converter =
+            get_converter(Path::new(project_path), Some(PackageManager::Poetry)).unwrap();
+        assert_eq!(
+            converter
+                .as_any()
+                .downcast_ref::<converters::poetry::Poetry>()
+                .unwrap(),
+            &converters::poetry::Poetry {
+                project_path: PathBuf::from(project_path)
+            }
+        );
     }
 
     #[rstest]
     #[case("tests/fixtures/poetry", format!("Directory does not contain a {} file.", "pyproject.toml".bold()))]
     #[case("tests/fixtures/pipenv/full", format!("{} does not contain a {} section.", "pyproject.toml".bold(), "[tool.poetry]".bold()))]
     fn test_poetry_err(#[case] project_path: &str, #[case] error: String) {
-        let detector = Detector {
-            project_path: Path::new(project_path),
-            enforced_package_manager: Some(PackageManager::Poetry),
-        };
-        assert_eq!(detector.detect(), Err(error));
+        let converter = get_converter(Path::new(project_path), Some(PackageManager::Poetry));
+        assert_eq!(converter.unwrap_err(), error);
     }
 
     #[rstest]
     #[case("tests/fixtures/pipenv/full")]
     #[case("tests/fixtures/pipenv/minimal")]
     fn test_pipenv_ok(#[case] project_path: &str) {
-        let detector = Detector {
-            project_path: Path::new(project_path),
-            enforced_package_manager: Some(PackageManager::Pipenv),
-        };
-        assert_eq!(detector.detect(), Ok(PackageManager::Pipenv));
+        let converter =
+            get_converter(Path::new(project_path), Some(PackageManager::Pipenv)).unwrap();
+        assert_eq!(
+            converter
+                .as_any()
+                .downcast_ref::<converters::pipenv::Pipenv>()
+                .unwrap(),
+            &converters::pipenv::Pipenv {
+                project_path: PathBuf::from(project_path)
+            }
+        );
     }
 
     #[test]
     fn test_pipenv_err() {
-        let detector = Detector {
-            project_path: Path::new("tests/fixtures/pipenv"),
-            enforced_package_manager: Some(PackageManager::Pipenv),
-        };
+        let converter = get_converter(
+            Path::new("tests/fixtures/pipenv"),
+            Some(PackageManager::Pipenv),
+        );
         assert_eq!(
-            detector.detect(),
-            Err(format!(
-                "Directory does not contain a {} file.",
-                "Pipfile".bold()
-            ))
+            converter.unwrap_err(),
+            format!("Directory does not contain a {} file.", "Pipfile".bold())
         );
     }
 }
