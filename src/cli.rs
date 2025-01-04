@@ -1,5 +1,5 @@
-use crate::converters::{get_converter, DependencyGroupsStrategy};
-use crate::detector::{detect_package_manager, PackageManager};
+use crate::converters::DependencyGroupsStrategy;
+use crate::detector::{get_converter, PackageManager};
 use crate::logger;
 use clap::builder::styling::{AnsiColor, Effects};
 use clap::builder::Styles;
@@ -53,11 +53,9 @@ pub fn cli() {
 
     logger::configure(cli.verbose);
 
-    match detect_package_manager(&cli.path, cli.package_manager) {
-        Ok(manager) => {
-            let migrator = get_converter(&manager, cli.path);
-
-            migrator.convert_to_uv(
+    match get_converter(&cli.path, cli.package_manager) {
+        Ok(converter) => {
+            converter.convert_to_uv(
                 cli.dry_run,
                 cli.keep_current_data,
                 cli.dependency_groups_strategy,
