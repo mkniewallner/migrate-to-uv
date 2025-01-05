@@ -5,6 +5,7 @@
 ### Features
 
 * Support migrating projects using `pip` and `pip-tools` ([#24](https://github.com/mkniewallner/migrate-to-uv/pull/24))
+* [poetry] Migrate data from `packages`, `include` and `exclude` to Hatch build backend ([#16](https://github.com/mkniewallner/migrate-to-uv/pull/16))
 
 ## 0.1.2 - 2025-01-02
 

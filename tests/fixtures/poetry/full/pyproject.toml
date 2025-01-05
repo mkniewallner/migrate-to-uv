@@ -30,16 +30,33 @@ documentation = "https://docs.example.com"
 
 # Package metadata
 packages = [
-    { include = "foo" },
-    { include = "bar", from = "lib", to = "target", format = "sdist" },
-    { include = "foobar/**/*.py", from = "lib", to = "target", format = ["sdist", "wheel"] },
+    { include = "packages-sdist-wheel" },
+    { include = "packages-sdist-wheel-2", format = [] },
+    { include = "packages-sdist-wheel-3/**/*.py", format = ["sdist", "wheel"] },
+    { include = "packages-sdist", format = "sdist" },
+    { include = "packages-sdist-2", format = ["sdist"] },
+    { include = "packages-wheel", format = "wheel" },
+    { include = "packages-wheel-2", format = ["wheel"] },
+    { include = "packages-from", from = "from" },
+    { include = "packages-to", to = "to" },
+    { include = "packages-from-to", from = "from", to = "to" },
+    { include = "packages-glob-to/**/*.py", to = "to" },
+    { include = "packages-glob-from-to/**/*.py", from = "from", to = "to" },
 ]
 include = [
-    { path = "tests" },
-    { path = "docs", format = "sdist" },
-    { path = "README.md", format = ["sdist", "wheel"] }
+    "include-sdist-wheel",
+    { path = "include-sdist-wheel-2" },
+    { path = "include-sdist-wheel-3", format = [] },
+    { path = "include-sdist-wheel-4", format = ["sdist", "wheel"] },
+    { path = "include-sdist", format = "sdist" },
+    { path = "include-sdist-2", format = ["sdist"] },
+    { path = "include-wheel", format = "wheel" },
+    { path = "include-wheel-2", format = ["wheel"] },
 ]
-exclude = ["foo/bar.py"]
+exclude = [
+    "exclude-sdist-wheel",
+    "exclude-sdist-wheel-2",
+]
 
 [tool.poetry.dependencies]
 # Python version

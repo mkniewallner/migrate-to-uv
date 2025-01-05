@@ -1,12 +1,11 @@
 ---
 source: src/converters/poetry/mod.rs
 expression: "perform_migration(Path::new(\"tests/fixtures/poetry/full/pyproject.toml\"),\nfalse, DependencyGroupsStrategy::KeepExisting,)"
-snapshot_kind: text
 ---
 '''
 [build-system]
-requires = ["uv>=0.5,<0.6"]
-build-backend = "uv"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "foobar"
@@ -186,6 +185,61 @@ multiple-constraints-python-platform-markers-source = [
     { url = "https://example.com/foo-1.2.3-py3-none-any.whl", marker = "python_version >= '3.11' and platform_python_implementation == 'CPython' and sys_platform == 'darwin'" },
     { index = "supplemental", marker = "python_version < '3.11' and platform_python_implementation != 'CPython' and sys_platform == 'linux'" },
 ]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "packages-sdist-wheel",
+    "packages-sdist-wheel-2",
+    "packages-sdist-wheel-3/**/*.py",
+    "packages-sdist",
+    "packages-sdist-2",
+    "from/packages-from",
+    "packages-to",
+    "from/packages-from-to",
+    "packages-glob-to/**/*.py",
+    "from/packages-glob-from-to/**/*.py",
+    "include-sdist-wheel",
+    "include-sdist-wheel-2",
+    "include-sdist-wheel-3",
+    "include-sdist-wheel-4",
+    "include-sdist",
+    "include-sdist-2",
+]
+exclude = [
+    "exclude-sdist-wheel",
+    "exclude-sdist-wheel-2",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "packages-sdist-wheel",
+    "packages-sdist-wheel-2",
+    "packages-sdist-wheel-3/**/*.py",
+    "packages-wheel",
+    "packages-wheel-2",
+    "from/packages-from",
+    "packages-to",
+    "from/packages-from-to",
+    "packages-glob-to/**/*.py",
+    "from/packages-glob-from-to/**/*.py",
+    "include-sdist-wheel",
+    "include-sdist-wheel-2",
+    "include-sdist-wheel-3",
+    "include-sdist-wheel-4",
+    "include-wheel",
+    "include-wheel-2",
+]
+exclude = [
+    "exclude-sdist-wheel",
+    "exclude-sdist-wheel-2",
+]
+
+[tool.hatch.build.targets.wheel.sources]
+"from/packages-from" = "packages-from"
+packages-to = "to/packages-to"
+"from/packages-from-to" = "to/packages-from-to"
+packages-glob-to = "to/packages-glob-to"
+"from/packages-glob-from-to" = "to/packages-glob-from-to"
 
 [tool.ruff]
 fix = true

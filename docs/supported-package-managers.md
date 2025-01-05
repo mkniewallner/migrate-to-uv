@@ -6,7 +6,7 @@ be used, use [`--package-manager`](usage-and-configuration.md#-package-manager).
 
 ## Poetry
 
-Most [Poetry](https://python-poetry.org/) metadata is converted to uv when performing the migration:
+All existing [Poetry](https://python-poetry.org/) metadata should be converted to uv when performing the migration:
 
 - [Project metadata](https://python-poetry.org/docs/pyproject/) (`name`, `version`, `authors`, ...)
 - [Dependencies and dependency groups](https://python-poetry.org/docs/pyproject/#dependencies-and-dependency-groups)
@@ -16,6 +16,7 @@ Most [Poetry](https://python-poetry.org/) metadata is converted to uv when perfo
 - [Dependency markers](https://python-poetry.org/docs/dependency-specification#using-environment-markers) (including
   [`python`](https://python-poetry.org/docs/dependency-specification/#python-restricted-dependencies) and `platform`)
 - [Multiple constraints dependencies](https://python-poetry.org/docs/dependency-specification#multiple-constraints-dependencies)
+- Package distribution metadata ([`packages`](https://python-poetry.org/docs/pyproject/#packages), [`include` and `exclude`](https://python-poetry.org/docs/pyproject/#include-and-exclude))
 - [Supported Python versions](https://python-poetry.org/docs/basic-usage/#setting-a-python-version)
 - [Scripts](https://python-poetry.org/docs/pyproject/#scripts) and
   [plugins](https://python-poetry.org/docs/pyproject/#plugins) (also known as entry points)
@@ -25,11 +26,22 @@ equivalent [PEP 440](https://peps.python.org/pep-0440/) format used by uv, even 
 specification (e.g., [caret](https://python-poetry.org/docs/dependency-specification/#caret-requirements) (`^`)
 and [tilde](https://python-poetry.org/docs/dependency-specification/#tilde-requirements) (`~`)).
 
-### Missing features
+### Build backend
 
-The following features are not yet supported when migrating:
+As uv does not yet have a stable build backend (see [astral-sh/uv#8779](https://github.com/astral-sh/uv/issues/8779) for more details), when
+performing the migration for libraries, `migrate-to-uv` sets [Hatch](https://hatch.pypa.io/latest/) as a build
+backend, migrating:
 
-- Package distribution metadata ([`packages`](https://python-poetry.org/docs/pyproject/#packages), [`include` and `exclude`](https://python-poetry.org/docs/pyproject/#include-and-exclude))
+- Poetry [`packages`](https://python-poetry.org/docs/pyproject/#packages) and [`include`](https://python-poetry.org/docs/pyproject/#include-and-exclude) to Hatch [`include`](https://hatch.pypa.io/latest/config/build/#patterns)
+- Poetry [`exclude`](https://python-poetry.org/docs/pyproject/#include-and-exclude) to Hatch [`exclude`](https://hatch.pypa.io/latest/config/build/#patterns)
+
+!!! note
+
+    Path rewriting, defined with `to` in `packages` for Poetry, is also migrated to Hatch by defining
+    [sources](https://hatch.pypa.io/latest/config/build/#rewriting-paths) in wheel target.
+
+
+Once uv build backend is out of preview and considered stable, it will be used for the migration.
 
 ## Pipenv
 
