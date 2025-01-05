@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Bug fixes
+
+* [poetry] Avoid crashing when an extra lists a non-existing dependency ([#30](https://github.com/mkniewallner/migrate-to-uv/pull/30))
+
 ## 0.2.0 - 2025-01-05
 
 ### Features

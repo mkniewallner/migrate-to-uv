@@ -168,6 +168,7 @@ multiple-constraints-python-platform-markers-source  = [
 [tool.poetry.extras]
 extra = ["dep-in-extra"]
 extra-2 = ["dep-in-extra", "optional-in-extra"]
+extra-with-non-existing-dependencies = ["non-existing-dependency"]
 
 [tool.poetry.dev-dependencies]
 dev-legacy = "1.2.3"

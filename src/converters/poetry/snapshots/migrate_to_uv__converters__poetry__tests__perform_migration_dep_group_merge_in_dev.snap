@@ -99,6 +99,7 @@ extra-2 = [
     "dep-in-extra==1.2.3",
     "optional-in-extra==1.2.3",
 ]
+extra-with-non-existing-dependencies = []
 
 [project.urls]
 Homepage = "https://homepage.example.com"
