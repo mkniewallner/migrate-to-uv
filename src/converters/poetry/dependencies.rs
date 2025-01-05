@@ -5,6 +5,8 @@ use crate::schema::poetry::DependencySpecification;
 use crate::schema::pyproject::DependencyGroupSpecification;
 use crate::schema::uv::{SourceContainer, SourceIndex};
 use indexmap::IndexMap;
+use log::warn;
+use owo_colors::OwoColorize;
 use std::collections::HashSet;
 
 pub fn get(
@@ -98,13 +100,25 @@ pub fn get_optional(
                 extra.to_string(),
                 extra_dependencies
                     .iter()
-                    .map(|dependency| {
-                        dependencies_to_remove.insert(dependency);
-
-                        format!(
-                            "{}{}",
-                            dependency,
-                            poetry_dependencies.get(dependency).unwrap().to_pep_508()
+                    .filter_map(|dependency| {
+                        // If dependency listed in extra does not exist, warn the user.
+                        poetry_dependencies.get(dependency).map_or_else(
+                            || {
+                                warn!(
+                                    "Could not find dependency \"{}\" listed in \"{}\" extra.",
+                                    dependency.bold(),
+                                    extra.bold()
+                                );
+                                None
+                            },
+                            |dependency_specification| {
+                                dependencies_to_remove.insert(dependency);
+                                Some(format!(
+                                    "{}{}",
+                                    dependency,
+                                    dependency_specification.to_pep_508()
+                                ))
+                            },
                         )
                     })
                     .collect(),
