@@ -6,25 +6,31 @@ be used, use [`--package-manager`](usage-and-configuration.md#-package-manager).
 
 ## Poetry
 
+!!! warning
+
+    Projects that use [PEP 621](https://packaging.python.org/en/latest/specifications/pyproject-toml/) syntax, added in
+    Poetry 2.0, are not yet handled. Support for it can be tracked
+    in [migrate-to-uv#45](https://github.com/mkniewallner/migrate-to-uv/issues/45).
+
 All existing [Poetry](https://python-poetry.org/) metadata should be converted to uv when performing the migration:
 
-- [Project metadata](https://python-poetry.org/docs/pyproject/) (`name`, `version`, `authors`, ...)
-- [Dependencies and dependency groups](https://python-poetry.org/docs/pyproject/#dependencies-and-dependency-groups)
+- [Project metadata](https://python-poetry.org/docs/1.8/pyproject/) (`name`, `version`, `authors`, ...)
+- [Dependencies and dependency groups](https://python-poetry.org/docs/1.8/pyproject/#dependencies-and-dependency-groups)
   (PyPI, path, git, URL)
-- [Dependency extras](https://python-poetry.org/docs/pyproject/#extras) (also known as optional dependencies)
-- [Dependency sources](https://python-poetry.org/docs/repositories/)
-- [Dependency markers](https://python-poetry.org/docs/dependency-specification#using-environment-markers) (including
+- [Dependency extras](https://python-poetry.org/docs/1.8/pyproject/#extras) (also known as optional dependencies)
+- [Dependency sources](https://python-poetry.org/docs/1.8/repositories/)
+- [Dependency markers](https://python-poetry.org/docs/1.8/dependency-specification/#using-environment-markers) (including
   [`python`](https://python-poetry.org/docs/dependency-specification/#python-restricted-dependencies) and `platform`)
-- [Multiple constraints dependencies](https://python-poetry.org/docs/dependency-specification#multiple-constraints-dependencies)
-- Package distribution metadata ([`packages`](https://python-poetry.org/docs/pyproject/#packages), [`include` and `exclude`](https://python-poetry.org/docs/pyproject/#include-and-exclude))
-- [Supported Python versions](https://python-poetry.org/docs/basic-usage/#setting-a-python-version)
-- [Scripts](https://python-poetry.org/docs/pyproject/#scripts) and
-  [plugins](https://python-poetry.org/docs/pyproject/#plugins) (also known as entry points)
+- [Multiple constraints dependencies](https://python-poetry.org/docs/1.8/dependency-specification/#multiple-constraints-dependencies)
+- Package distribution metadata ([`packages`](https://python-poetry.org/docs/1.8/pyproject/#packages), [`include` and `exclude`](https://python-poetry.org/docs/1.8/pyproject/#include-and-exclude))
+- [Supported Python versions](https://python-poetry.org/docs/1.8/basic-usage/#setting-a-python-version)
+- [Scripts](https://python-poetry.org/docs/1.8/pyproject/#scripts) and
+  [plugins](https://python-poetry.org/docs/1.8/pyproject/#plugins) (also known as entry points)
 
 Version definitions set for dependencies are also preserved, and converted to their
 equivalent [PEP 440](https://peps.python.org/pep-0440/) format used by uv, even for Poetry-specific version
-specification (e.g., [caret](https://python-poetry.org/docs/dependency-specification/#caret-requirements) (`^`)
-and [tilde](https://python-poetry.org/docs/dependency-specification/#tilde-requirements) (`~`)).
+specification (e.g., [caret](https://python-poetry.org/docs/1.8/dependency-specification/#caret-requirements) (`^`)
+and [tilde](https://python-poetry.org/docs/1.8/dependency-specification/#tilde-requirements) (`~`)).
 
 ### Build backend
 
@@ -32,8 +38,8 @@ As uv does not yet have a stable build backend (see [astral-sh/uv#8779](https://
 performing the migration for libraries, `migrate-to-uv` sets [Hatch](https://hatch.pypa.io/latest/) as a build
 backend, migrating:
 
-- Poetry [`packages`](https://python-poetry.org/docs/pyproject/#packages) and [`include`](https://python-poetry.org/docs/pyproject/#include-and-exclude) to Hatch [`include`](https://hatch.pypa.io/latest/config/build/#patterns)
-- Poetry [`exclude`](https://python-poetry.org/docs/pyproject/#include-and-exclude) to Hatch [`exclude`](https://hatch.pypa.io/latest/config/build/#patterns)
+- Poetry [`packages`](https://python-poetry.org/docs/1.8/pyproject/#packages) and [`include`](https://python-poetry.org/docs/1.8/pyproject/#include-and-exclude) to Hatch [`include`](https://hatch.pypa.io/latest/config/build/#patterns)
+- Poetry [`exclude`](https://python-poetry.org/docs/1.8/pyproject/#include-and-exclude) to Hatch [`exclude`](https://hatch.pypa.io/latest/config/build/#patterns)
 
 !!! note
 
