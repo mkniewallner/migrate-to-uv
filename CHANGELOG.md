@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+Dependencies are now locked with `uv lock` at the end of the migration, if `uv` is detected as an executable. This new
+behavior can be opted out by setting `--skip-lock` flag, like so:
+
+```bash
+migrate-to-uv --skip-lock
+```
+
+### Features
+
+* Lock dependencies at the end of migration ([#46](https://github.com/mkniewallner/migrate-to-uv/pull/46))
+
 ## 0.2.1 - 2025-01-05
 
 ### Bug fixes

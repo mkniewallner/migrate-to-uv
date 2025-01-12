@@ -42,6 +42,17 @@ the terminal.
 migrate-to-uv --dry-run
 ```
 
+#### `--skip-lock`
+
+By default, `migrate-to-uv` locks dependencies with `uv lock` at the end of the migration. This flag disables this
+behavior.
+
+**Example**:
+
+```bash
+migrate-to-uv --skip-lock
+```
+
 #### `--package-manager`
 
 By default, `migrate-to-uv` tries to auto-detect the package manager based on the files (and their content) used by the

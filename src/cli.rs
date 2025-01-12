@@ -33,6 +33,11 @@ struct Cli {
     dry_run: bool,
     #[arg(
         long,
+        help = "Do not lock dependencies with uv at the end of the migration"
+    )]
+    skip_lock: bool,
+    #[arg(
+        long,
         help = "Enforce a specific package manager instead of auto-detecting it"
     )]
     package_manager: Option<PackageManager>,
@@ -66,6 +71,7 @@ pub fn cli() {
         Ok(converter) => {
             converter.convert_to_uv(
                 cli.dry_run,
+                cli.skip_lock,
                 cli.keep_current_data,
                 cli.dependency_groups_strategy,
             );
