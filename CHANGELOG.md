@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 - 2025-01-12
 
 Dependencies are now locked with `uv lock` at the end of the migration, if `uv` is detected as an executable. This new
 behavior can be opted out by setting `--skip-lock` flag, like so:
