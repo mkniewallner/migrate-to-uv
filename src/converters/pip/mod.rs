@@ -1,14 +1,14 @@
 mod dependencies;
 
 use crate::converters::pyproject_updater::PyprojectUpdater;
-use crate::converters::Converter;
 use crate::converters::DependencyGroupsStrategy;
+use crate::converters::{lock_dependencies, Converter};
 use crate::schema::pep_621::Project;
 use crate::schema::pyproject::DependencyGroupSpecification;
 use crate::schema::uv::Uv;
 use crate::toml::PyprojectPrettyFormatter;
 use indexmap::IndexMap;
-use log::info;
+use log::{info, warn};
 use owo_colors::OwoColorize;
 #[cfg(test)]
 use std::any::Any;
@@ -32,6 +32,7 @@ impl Converter for Pip {
     fn convert_to_uv(
         &self,
         dry_run: bool,
+        skip_lock: bool,
         keep_old_metadata: bool,
         _dependency_groups_strategy: DependencyGroupsStrategy,
     ) {
@@ -81,6 +82,18 @@ impl Converter for Pip {
                     )
                     .unwrap();
                 }
+            }
+
+            if !dry_run && !skip_lock && lock_dependencies(self.project_path.as_ref()).is_err() {
+                warn!(
+                    "Project migrated from {} to uv, but an error occurred when locking dependencies.",
+                    if self.is_pip_tools {
+                        "pip-tools"
+                    } else {
+                        "pip"
+                    }
+                );
+                return;
             }
 
             info!(

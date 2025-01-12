@@ -162,8 +162,8 @@ default = true
 with-source = { index = "supplemental" }
 python-restricted-with-source = { index = "supplemental" }
 local-package = { path = "package/" }
-local-package-2 = { path = "another-package/", editable = false }
-local-package-editable = { path = "package/dist/package-0.1.0.tar.gz", editable = true }
+local-package-2 = { path = "package/dist/package-0.1.0.tar.gz", editable = false }
+local-package-editable = { path = "editable-package/", editable = true }
 url-dep = { url = "https://example.com/package-0.0.1.tar.gz" }
 git = { git = "https://example.com/foo/bar" }
 git-branch = { git = "https://example.com/foo/bar", branch = "foo" }
