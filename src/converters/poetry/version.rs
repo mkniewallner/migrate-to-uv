@@ -19,7 +19,7 @@ impl PoetryPep440 {
             .join(" and ")
     }
 
-    /// <https://python-poetry.org/docs/dependency-specification/#caret-requirements>
+    /// <https://python-poetry.org/docs/1.8/dependency-specification/#caret-requirements>
     fn from_caret(s: &str) -> Self {
         if let Ok(version) = Version::from_str(s) {
             return match version.clone().release() {
@@ -33,7 +33,7 @@ impl PoetryPep440 {
         Self::Matching(Version::from_str(s).unwrap())
     }
 
-    /// <https://python-poetry.org/docs/dependency-specification/#tilde-requirements>
+    /// <https://python-poetry.org/docs/1.8/dependency-specification/#tilde-requirements>
     fn from_tilde(s: &str) -> Self {
         if let Ok(version) = Version::from_str(s) {
             return match version.clone().release() {

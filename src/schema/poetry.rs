@@ -39,7 +39,7 @@ pub struct DependencyGroup {
     pub dependencies: IndexMap<String, DependencySpecification>,
 }
 
-/// Represents a package source: <https://python-poetry.org/docs/repositories/#package-sources>.
+/// Represents a package source: <https://python-poetry.org/docs/1.8/repositories/#package-sources>.
 #[derive(Deserialize, Serialize)]
 pub struct Source {
     pub name: String,
@@ -50,28 +50,28 @@ pub struct Source {
 #[derive(Deserialize, Serialize, Eq, PartialEq, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum SourcePriority {
-    /// <https://python-poetry.org/docs/repositories/#primary-package-sources>.
+    /// <https://python-poetry.org/docs/1.8/repositories/#primary-package-sources>.
     Primary,
-    /// <https://python-poetry.org/docs/repositories/#supplemental-package-sources>.
+    /// <https://python-poetry.org/docs/1.8/repositories/#supplemental-package-sources>.
     Supplemental,
-    /// <https://python-poetry.org/docs/repositories/#explicit-package-sources>.
+    /// <https://python-poetry.org/docs/1.8/repositories/#explicit-package-sources>.
     Explicit,
-    /// <https://python-poetry.org/docs/repositories/#default-package-source-deprecated>.
+    /// <https://python-poetry.org/docs/1.8/repositories/#default-package-source-deprecated>.
     Default,
-    /// <https://python-poetry.org/docs/repositories/#secondary-package-sources-deprecated>.
+    /// <https://python-poetry.org/docs/1.8/repositories/#secondary-package-sources-deprecated>.
     Secondary,
 }
 
 /// Represents the different ways dependencies can be defined in Poetry.
 ///
-/// See <https://python-poetry.org/docs/dependency-specification/> for details.
+/// See <https://python-poetry.org/docs/1.8/dependency-specification/> for details.
 #[derive(Deserialize, Serialize)]
 #[serde(untagged)]
 #[allow(clippy::large_enum_variant)]
 pub enum DependencySpecification {
-    /// Simple version constraint: <https://python-poetry.org/docs/basic-usage/#specifying-dependencies>.
+    /// Simple version constraint: <https://python-poetry.org/docs/1.8/basic-usage/#specifying-dependencies>.
     String(String),
-    /// Complex version constraint: <https://python-poetry.org/docs/dependency-specification/>.
+    /// Complex version constraint: <https://python-poetry.org/docs/1.8/dependency-specification/>.
     Map {
         version: Option<String>,
         extras: Option<Vec<String>>,
@@ -88,7 +88,7 @@ pub enum DependencySpecification {
         develop: Option<bool>,
         url: Option<String>,
     },
-    /// Multiple constraints dependencies: <https://python-poetry.org/docs/dependency-specification/#multiple-constraints-dependencies>.
+    /// Multiple constraints dependencies: <https://python-poetry.org/docs/1.8/dependency-specification/#multiple-constraints-dependencies>.
     Vec(Vec<Self>),
 }
 
@@ -154,7 +154,7 @@ impl DependencySpecification {
     }
 }
 
-/// Package distribution definition <https://python-poetry.org/docs/pyproject/#packages>.
+/// Package distribution definition <https://python-poetry.org/docs/1.8/pyproject/#packages>.
 #[derive(Deserialize, Serialize)]
 pub struct Package {
     pub include: String,
@@ -163,7 +163,7 @@ pub struct Package {
     pub format: Option<SingleOrVec<Format>>,
 }
 
-/// Package distribution file inclusion: <https://python-poetry.org/docs/pyproject/#include-and-exclude>.
+/// Package distribution file inclusion: <https://python-poetry.org/docs/1.8/pyproject/#include-and-exclude>.
 #[derive(Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum Include {
