@@ -1,0 +1,13 @@
+[tool.poetry]
+package-mode = false
+name = "foo"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+arrow = "^1.2.3"
+
+[tool.poetry.group.dev.dependencies]
+factory-boy = "^3.2.1"
+
+[tool.poetry.group.typing.dependencies]
+mypy = "^1.13.0"

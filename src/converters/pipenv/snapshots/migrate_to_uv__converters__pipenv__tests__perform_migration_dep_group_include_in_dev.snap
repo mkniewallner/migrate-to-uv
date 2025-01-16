@@ -1,7 +1,6 @@
 ---
 source: src/converters/pipenv/mod.rs
-expression: "perform_migration(Path::new(\"tests/fixtures/pipenv/full/Pipfile\"),\nPath::new(\"tests/fixtures/pipenv/full/pyproject.toml\"),\nDependencyGroupsStrategy::IncludeInDev,)"
-snapshot_kind: text
+expression: "pipenv.perform_migration(true, DependencyGroupsStrategy::IncludeInDev)"
 ---
 '''
 [project]

@@ -1,0 +1,40 @@
+---
+source: src/converters/pipenv/mod.rs
+expression: "pipenv.perform_migration(false, DependencyGroupsStrategy::SetDefaultGroups)"
+---
+'''
+[project]
+name = ""
+version = "0.0.1"
+dependencies = ["arrow>=1.2.3"]
+
+[dependency-groups]
+dev = ["mypy>=1.13.0"]
+test = ["factory-boy>=3.2.1"]
+
+[tool.uv]
+package = false
+default-groups = [
+    "dev",
+    "test",
+]
+constraint-dependencies = [
+    "arrow==1.2.3",
+    "faker==33.1.0",
+    "python-dateutil==2.7.0",
+    "six==1.15.0",
+    "typing-extensions==4.6.0",
+    "mypy==1.13.0",
+    "mypy-extensions==1.0.0",
+    "typing-extensions==4.6.0",
+    "factory-boy==3.2.1",
+    "faker==33.1.0",
+    "python-dateutil==2.7.0",
+    "six==1.15.0",
+    "typing-extensions==4.6.0",
+]
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+'''

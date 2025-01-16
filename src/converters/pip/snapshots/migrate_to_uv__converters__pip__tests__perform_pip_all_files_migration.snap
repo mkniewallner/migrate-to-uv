@@ -1,6 +1,6 @@
 ---
 source: src/converters/pip/mod.rs
-expression: "perform_migration(Path::new(\"tests/fixtures/pip/full\"),\nvec![\"requirements.txt\".to_string()],\nvec![\"requirements-dev.txt\".to_string(),\n\"requirements-typing.txt\".to_string()],\nPath::new(\"tests/fixtures/pip/full/pyproject.toml\"),)"
+expression: pip.perform_migration(true)
 ---
 '''
 [project]

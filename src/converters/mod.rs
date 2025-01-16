@@ -8,6 +8,7 @@ use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::path::Path;
 use std::process::{Command, Stdio};
+use toml_edit::DocumentMut;
 
 pub mod pip;
 pub mod pipenv;
@@ -21,10 +22,12 @@ type DependencyGroupsAndDefaultGroups = (
 
 /// Converts a project from a package manager to uv.
 pub trait Converter: Debug {
+    #[allow(clippy::fn_params_excessive_bools)]
     fn convert_to_uv(
         &self,
         dry_run: bool,
         skip_lock: bool,
+        ignore_locked_versions: bool,
         keep_old_metadata: bool,
         dependency_groups_strategy: DependencyGroupsStrategy,
     );
@@ -33,7 +36,7 @@ pub trait Converter: Debug {
     fn as_any(&self) -> &dyn Any;
 }
 
-pub fn lock_dependencies(project_path: &Path) -> Result<(), ()> {
+pub fn lock_dependencies(project_path: &Path, is_removing_constraints: bool) -> Result<(), ()> {
     const UV_EXECUTABLE: &str = "uv";
 
     match Command::new(UV_EXECUTABLE)
@@ -43,8 +46,13 @@ pub fn lock_dependencies(project_path: &Path) -> Result<(), ()> {
     {
         Ok(_) => {
             info!(
-                "Locking dependencies with \"{}\"...",
-                format!("{UV_EXECUTABLE} lock").bold()
+                "Locking dependencies with \"{}\"{}...",
+                format!("{UV_EXECUTABLE} lock").bold(),
+                if is_removing_constraints {
+                    " again to remove constraints"
+                } else {
+                    ""
+                }
             );
 
             Command::new(UV_EXECUTABLE)
@@ -86,6 +94,21 @@ pub fn lock_dependencies(project_path: &Path) -> Result<(), ()> {
             Err(())
         }
     }
+}
+
+/// Remove `constraint-dependencies` under `[tool.uv]`, which is only needed to lock dependencies to
+/// specific versions in the generated lock file.
+pub fn remove_constraint_dependencies(pyproject_toml: &str) -> Option<DocumentMut> {
+    let mut updated_pyproject = pyproject_toml.parse::<DocumentMut>().unwrap();
+
+    updated_pyproject
+        .get_mut("tool")?
+        .as_table_mut()?
+        .get_mut("uv")?
+        .as_table_mut()?
+        .remove("constraint-dependencies")?;
+
+    Some(updated_pyproject)
 }
 
 #[derive(clap::ValueEnum, Clone, Copy, Debug)]

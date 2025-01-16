@@ -1,9 +1,13 @@
 use crate::converters::{DependencyGroupsAndDefaultGroups, DependencyGroupsStrategy};
 use crate::schema;
-use crate::schema::pipenv::{DependencySpecification, KeywordMarkers};
+use crate::schema::pipenv::{DependencySpecification, KeywordMarkers, PipenvLock};
 use crate::schema::pyproject::DependencyGroupSpecification;
 use crate::schema::uv::{SourceContainer, SourceIndex};
 use indexmap::IndexMap;
+use log::warn;
+use owo_colors::OwoColorize;
+use std::fs;
+use std::path::Path;
 
 pub fn get(
     pipenv_dependencies: Option<&IndexMap<String, DependencySpecification>>,
@@ -207,4 +211,36 @@ pub fn get_dependency_groups_and_default_groups(
             Some(default_groups)
         },
     )
+}
+
+pub fn get_constraint_dependencies(
+    ignore_locked_versions: bool,
+    pipenv_lock_path: &Path,
+) -> Option<Vec<String>> {
+    if ignore_locked_versions {
+        return None;
+    }
+
+    let pipenv_lock_content = fs::read_to_string(pipenv_lock_path).unwrap_or_default();
+    let Ok(pipenv_lock) = serde_json::from_str::<PipenvLock>(pipenv_lock_content.as_str()) else {
+        warn!(
+            "Could not parse \"{}\", dependencies will not be kept to their current locked versions.",
+            "Pipfile.lock".bold()
+        );
+        return None;
+    };
+
+    let constraint_dependencies: Vec<String> = pipenv_lock
+        .category_groups
+        .unwrap_or_default()
+        .values()
+        .flatten()
+        .map(|(name, spec)| format!("{}{}", name, spec.version))
+        .collect();
+
+    if constraint_dependencies.is_empty() {
+        None
+    } else {
+        Some(constraint_dependencies)
+    }
 }

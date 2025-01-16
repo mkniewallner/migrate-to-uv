@@ -1,0 +1,13 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+arrow = ">=1.2.3"
+
+[dev-packages]
+mypy = ">=1.13.0"
+
+[test]
+factory-boy = ">=3.2.1"

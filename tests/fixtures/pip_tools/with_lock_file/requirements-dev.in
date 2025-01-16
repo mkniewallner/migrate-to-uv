@@ -1,0 +1,2 @@
+-c requirements.txt
+factory-boy==3.2.1

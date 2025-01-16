@@ -1,5 +1,6 @@
 use indexmap::IndexMap;
 use serde::Deserialize;
+use std::collections::BTreeMap;
 
 #[derive(Deserialize)]
 pub struct Pipfile {
@@ -10,10 +11,10 @@ pub struct Pipfile {
     pub requires: Option<Requires>,
     /// Not used, this avoids having the section in `category_groups` below.
     #[allow(dead_code)]
-    pub pipenv: Option<Placeholder>,
+    pipenv: Option<Placeholder>,
     /// Not used, this avoids having the section in `category_groups` below
     #[allow(dead_code)]
-    pub scripts: Option<Placeholder>,
+    scripts: Option<Placeholder>,
     /// Assume that remaining keys are category groups (<https://pipenv.pypa.io/en/stable/pipfile.html#package-category-groups>).
     #[serde(flatten)]
     pub category_groups: Option<IndexMap<String, IndexMap<String, DependencySpecification>>>,
@@ -65,6 +66,21 @@ pub struct KeywordMarkers {
     pub python_full_version: Option<String>,
     pub implementation_name: Option<String>,
     pub implementation_version: Option<String>,
+}
+
+#[derive(Deserialize)]
+pub struct PipenvLock {
+    /// Not used, this avoids having the section in `category_groups` below.
+    #[allow(dead_code)]
+    #[serde(rename(deserialize = "_meta"))]
+    meta: Option<Placeholder>,
+    #[serde(flatten)]
+    pub category_groups: Option<BTreeMap<String, BTreeMap<String, LockedPackage>>>,
+}
+
+#[derive(Deserialize)]
+pub struct LockedPackage {
+    pub version: String,
 }
 
 #[derive(Deserialize)]

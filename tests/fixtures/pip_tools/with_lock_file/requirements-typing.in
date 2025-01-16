@@ -1,0 +1,2 @@
+-c requirements-dev.txt
+mypy==1.13.0

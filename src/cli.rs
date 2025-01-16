@@ -38,6 +38,11 @@ struct Cli {
     skip_lock: bool,
     #[arg(
         long,
+        help = "Ignore current locked versions of dependencies when generating `uv.lock`"
+    )]
+    ignore_locked_versions: bool,
+    #[arg(
+        long,
         help = "Enforce a specific package manager instead of auto-detecting it"
     )]
     package_manager: Option<PackageManager>,
@@ -72,6 +77,7 @@ pub fn cli() {
             converter.convert_to_uv(
                 cli.dry_run,
                 cli.skip_lock,
+                cli.ignore_locked_versions,
                 cli.keep_current_data,
                 cli.dependency_groups_strategy,
             );

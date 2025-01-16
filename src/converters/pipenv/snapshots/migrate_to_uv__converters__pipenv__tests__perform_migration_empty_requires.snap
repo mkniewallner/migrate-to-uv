@@ -1,7 +1,6 @@
 ---
 source: src/converters/pipenv/mod.rs
-expression: "perform_migration(Path::new(\"tests/fixtures/pipenv/empty_requires/Pipfile\"),\nPath::new(\"tests/fixtures/pipenv/empty_requires/pyproject.toml\"),\nDependencyGroupsStrategy::SetDefaultGroups,)"
-snapshot_kind: text
+expression: "pipenv.perform_migration(true, DependencyGroupsStrategy::SetDefaultGroups)"
 ---
 '''
 [project]
