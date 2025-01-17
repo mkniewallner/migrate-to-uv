@@ -1,8 +1,7 @@
 ---
-source: src/converters/pipenv/mod.rs
-expression: "pipenv.perform_migration(true, DependencyGroupsStrategy::MergeIntoDev)"
+source: tests/pipenv.rs
+expression: "fs::read_to_string(project_path.join(\"pyproject.toml\")).unwrap()"
 ---
-'''
 [project]
 name = ""
 version = "0.0.1"
@@ -32,8 +31,12 @@ dev = [
     "dev-package==1.2.3",
     "dev-package-local",
     "dev-package-source",
+]
+packages-category = [
     "category-package==1.2.3",
     "category-package-2==1.2.3",
+]
+packages-category-2 = [
     "category-2-package==1.2.3",
     "category-2-package-2 ; sys_platform == 'win32'",
 ]
@@ -43,6 +46,11 @@ preview = true
 
 [tool.uv]
 package = false
+default-groups = [
+    "dev",
+    "packages-category",
+    "packages-category-2",
+]
 
 [[tool.uv.index]]
 name = "pypi"
@@ -65,4 +73,3 @@ local-package-2 = { path = "another-package/", editable = false }
 local-package-editable = { path = "package/dist/package-0.1.0.tar.gz", editable = true }
 git = { git = "https://example.com/foo/bar.git" }
 git-ref = { git = "https://example.com/foo/bar.git", rev = "v1.2.3" }
-'''
