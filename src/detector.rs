@@ -14,6 +14,7 @@ pub enum PackageManager {
     PipTools,
     Pipenv,
     Poetry,
+    Uv,
 }
 
 impl PackageManager {
@@ -26,6 +27,31 @@ impl PackageManager {
         debug!("Checking if project uses {self}...");
 
         match self {
+            Self::Uv => {
+                if project_path.join("uv.lock").exists() {
+                    return Err("Project is already using uv!".to_string());
+                }
+
+                let project_file = "pyproject.toml";
+                let pyproject_toml_path = project_path.join(project_file);
+
+                if !pyproject_toml_path.exists() {
+                    return Err(format!(
+                        "Directory does not contain a {} file.",
+                        project_file.bold()
+                    ));
+                }
+
+                let pyproject_toml_content = fs::read_to_string(pyproject_toml_path).unwrap();
+                let pyproject_toml: PyProject =
+                    toml::from_str(pyproject_toml_content.as_str()).unwrap();
+
+                if pyproject_toml.tool.is_some_and(|tool| tool.uv.is_some()) {
+                    return Err("Project is already using uv!".to_string());
+                }
+
+                Err("Project is not using uv.".to_string())
+            }
             Self::Poetry => {
                 let project_file = "pyproject.toml";
 
@@ -139,6 +165,7 @@ impl Display for PackageManager {
             Self::PipTools => write!(f, "pip-tools"),
             Self::Pipenv => write!(f, "Pipenv"),
             Self::Poetry => write!(f, "Poetry"),
+            Self::Uv => write!(f, "uv"),
         }
     }
 }
@@ -159,6 +186,17 @@ pub fn get_converter(
         return Err(format!("{} is not a directory.", project_path.display()));
     }
 
+    // Always check for uv first
+    match PackageManager::Uv.detected(
+        project_path,
+        requirements_files.clone(),
+        dev_requirements_files.clone(),
+    ) {
+        Ok(_) => unreachable!(),
+        Err(err) if err == "Project is already using uv!" => return Err(err),
+        Err(_) => (), // Continue checking other package managers
+    }
+
     if let Some(enforced_package_manager) = enforced_package_manager {
         return match enforced_package_manager.detected(
             project_path,
@@ -170,36 +208,20 @@ pub fn get_converter(
         };
     }
 
-    match PackageManager::Poetry.detected(
-        project_path,
-        requirements_files.clone(),
-        dev_requirements_files.clone(),
-    ) {
-        Ok(converter) => return Ok(converter),
-        Err(err) => debug!("{err}"),
-    }
-
-    match PackageManager::Pipenv.detected(
-        project_path,
-        requirements_files.clone(),
-        dev_requirements_files.clone(),
-    ) {
-        Ok(converter) => return Ok(converter),
-        Err(err) => debug!("{err}"),
-    }
-
-    match PackageManager::PipTools.detected(
-        project_path,
-        requirements_files.clone(),
-        dev_requirements_files.clone(),
-    ) {
-        Ok(converter) => return Ok(converter),
-        Err(err) => debug!("{err}"),
-    }
-
-    match PackageManager::Pip.detected(project_path, requirements_files, dev_requirements_files) {
-        Ok(converter) => return Ok(converter),
-        Err(err) => debug!("{err}"),
+    for package_manager in [
+        PackageManager::Poetry,
+        PackageManager::Pipenv,
+        PackageManager::PipTools,
+        PackageManager::Pip,
+    ] {
+        match package_manager.detected(
+            project_path,
+            requirements_files.clone(),
+            dev_requirements_files.clone(),
+        ) {
+            Ok(converter) => return Ok(converter),
+            Err(err) => debug!("{err}"),
+        }
     }
 
     Err(
@@ -488,5 +510,38 @@ mod tests {
             converter.unwrap_err(),
             "Directory does not contain any pip requirements file.",
         );
+    }
+
+    #[test]
+    fn test_auto_detect_already_using_uv() {
+        let converter = get_converter(
+            Path::new("tests/fixtures/uv/minimal"),
+            vec!["requirements.txt".to_string()],
+            vec!["requirements-dev.txt".to_string()],
+            None,
+        );
+        assert_eq!(converter.unwrap_err(), "Project is already using uv!");
+    }
+
+    #[test]
+    fn test_auto_detect_already_using_uv_by_config() {
+        let converter = get_converter(
+            Path::new("tests/fixtures/uv/minimal"),
+            vec!["requirements.txt".to_string()],
+            vec!["requirements-dev.txt".to_string()],
+            None,
+        );
+        assert_eq!(converter.unwrap_err(), "Project is already using uv!");
+    }
+
+    #[test]
+    fn test_auto_detect_already_using_uv_by_lock() {
+        let converter = get_converter(
+            Path::new("tests/fixtures/uv/with_lock"),
+            vec!["requirements.txt".to_string()],
+            vec!["requirements-dev.txt".to_string()],
+            None,
+        );
+        assert_eq!(converter.unwrap_err(), "Project is already using uv!");
     }
 }
