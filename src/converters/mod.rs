@@ -8,7 +8,6 @@ use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::path::Path;
 use std::process::{Command, Stdio};
-use toml_edit::DocumentMut;
 
 pub mod pip;
 pub mod pipenv;
@@ -94,35 +93,6 @@ pub fn lock_dependencies(project_path: &Path, is_removing_constraints: bool) -> 
             Err(())
         }
     }
-}
-
-/// Remove `constraint-dependencies` under `[tool.uv]`, which is only needed to lock dependencies to
-/// specific versions in the generated lock file.
-pub fn remove_constraint_dependencies(pyproject_toml: &str) -> Option<DocumentMut> {
-    let mut updated_pyproject = pyproject_toml.parse::<DocumentMut>().unwrap();
-
-    updated_pyproject
-        .get_mut("tool")?
-        .as_table_mut()?
-        .get_mut("uv")?
-        .as_table_mut()?
-        .remove("constraint-dependencies")?;
-
-    // If `constraint-dependencies` was the only item in `[tool.uv]`, remove `[tool.uv]`.
-    if updated_pyproject
-        .get("tool")?
-        .as_table()?
-        .get("uv")?
-        .as_table()?
-        .is_empty()
-    {
-        updated_pyproject
-            .get_mut("tool")?
-            .as_table_mut()?
-            .remove("uv")?;
-    }
-
-    Some(updated_pyproject)
 }
 
 #[derive(clap::ValueEnum, Clone, Copy, Debug)]

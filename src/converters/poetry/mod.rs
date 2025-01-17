@@ -7,8 +7,8 @@ pub mod version;
 use crate::converters::poetry::build_backend::get_hatch;
 use crate::converters::poetry::dependencies::get_constraint_dependencies;
 use crate::converters::pyproject_updater::PyprojectUpdater;
+use crate::converters::DependencyGroupsStrategy;
 use crate::converters::{lock_dependencies, Converter};
-use crate::converters::{remove_constraint_dependencies, DependencyGroupsStrategy};
 use crate::schema::pep_621::Project;
 use crate::schema::pyproject::PyProject;
 use crate::schema::uv::{SourceContainer, Uv};
@@ -47,11 +47,15 @@ impl Converter for Poetry {
         );
 
         if dry_run {
+            let mut pyproject_updater = PyprojectUpdater {
+                pyproject: &mut updated_pyproject_string.parse::<DocumentMut>().unwrap(),
+            };
             info!(
                 "{}\n{}",
                 "Migrated pyproject.toml:".bold(),
-                remove_constraint_dependencies(&updated_pyproject_string)
-                    .map_or(updated_pyproject_string, |pyproject| pyproject.to_string())
+                pyproject_updater
+                    .remove_constraint_dependencies()
+                    .map_or(updated_pyproject_string, ToString::to_string)
             );
             return;
         }
@@ -74,9 +78,10 @@ impl Converter for Poetry {
         }
 
         if !ignore_locked_versions {
-            if let Some(updated_pyproject) =
-                remove_constraint_dependencies(&updated_pyproject_string)
-            {
+            let mut pyproject_updater = PyprojectUpdater {
+                pyproject: &mut updated_pyproject_string.parse::<DocumentMut>().unwrap(),
+            };
+            if let Some(updated_pyproject) = pyproject_updater.remove_constraint_dependencies() {
                 let mut pyproject_file = File::create(pyproject_path).unwrap();
                 pyproject_file
                     .write_all(updated_pyproject.to_string().as_bytes())

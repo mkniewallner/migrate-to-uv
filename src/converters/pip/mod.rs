@@ -2,8 +2,8 @@ mod dependencies;
 
 use crate::converters::pip::dependencies::get_constraint_dependencies;
 use crate::converters::pyproject_updater::PyprojectUpdater;
+use crate::converters::DependencyGroupsStrategy;
 use crate::converters::{lock_dependencies, Converter};
-use crate::converters::{remove_constraint_dependencies, DependencyGroupsStrategy};
 use crate::schema::pep_621::Project;
 use crate::schema::pyproject::DependencyGroupSpecification;
 use crate::schema::uv::Uv;
@@ -42,11 +42,15 @@ impl Converter for Pip {
         let updated_pyproject_string = self.perform_migration(ignore_locked_versions);
 
         if dry_run {
+            let mut pyproject_updater = PyprojectUpdater {
+                pyproject: &mut updated_pyproject_string.parse::<DocumentMut>().unwrap(),
+            };
             info!(
                 "{}\n{}",
                 "Migrated pyproject.toml:".bold(),
-                remove_constraint_dependencies(&updated_pyproject_string)
-                    .map_or(updated_pyproject_string, |pyproject| pyproject.to_string())
+                pyproject_updater
+                    .remove_constraint_dependencies()
+                    .map_or(updated_pyproject_string, ToString::to_string)
             );
         } else {
             let mut pyproject_file = File::create(&pyproject_path).unwrap();
@@ -70,8 +74,10 @@ impl Converter for Pip {
             }
 
             if !ignore_locked_versions {
-                if let Some(updated_pyproject) =
-                    remove_constraint_dependencies(&updated_pyproject_string)
+                let mut pyproject_updater = PyprojectUpdater {
+                    pyproject: &mut updated_pyproject_string.parse::<DocumentMut>().unwrap(),
+                };
+                if let Some(updated_pyproject) = pyproject_updater.remove_constraint_dependencies()
                 {
                     let mut pyproject_file = File::create(pyproject_path).unwrap();
                     pyproject_file
