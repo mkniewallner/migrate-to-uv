@@ -130,3 +130,46 @@ migrate-to-uv --dev-requirements-file requirements-dev.txt --dev-requirements-fi
 
 Keep the current package manager data (lock file, sections in `pyproject.toml`, ...) after the migration, if you want to
 handle the cleaning yourself, or want to compare the differences first.
+
+### Authentication for private indexes
+
+By default, `migrate-to-uv` generates `uv.lock` with `uv lock` to lock dependencies. If you currently use a package
+manager with private indexes, credentials will need to be set for locking to work properly. This can be done by setting
+the [same environment variables as uv expects for private indexes](https://docs.astral.sh/uv/configuration/indexes/#providing-credentials).
+
+Since the names of the indexes in uv should be the same as the ones in the current package manager before the migration,
+you should be able to adapt the environment variables based on what you previously used.
+
+For instance, if you currently use Poetry and have:
+
+```toml
+[[tool.poetry.source]]
+name = "foo-bar"
+url = "https://private-index.example.com"
+priority = "supplementary"
+```
+
+Credentials would be set with the following environment variables:
+
+- `POETRY_HTTP_BASIC_FOO_BAR_USERNAME`
+- `POETRY_HTTP_BASIC_FOO_BAR_PASSWORD`
+
+For uv, this would translate to:
+
+- `UV_INDEX_FOO_BAR_USERNAME`
+- `UV_INDEX_FOO_BAR_PASSWORD`
+
+To forward those credentials to `migrate-to-uv`, you can either export them beforehand, or set the environment variables
+when invoking the command:
+
+```bash
+# Either
+export UV_INDEX_FOO_BAR_USERNAME=<username>
+export UV_INDEX_FOO_BAR_PASSWORD=<password>
+migrate-to-uv
+
+# Or
+UV_INDEX_FOO_BAR_USERNAME=<username> \
+  UV_INDEX_FOO_BAR_PASSWORD=<password> \
+  migrate-to-uv
+```
