@@ -25,6 +25,8 @@ use std::path::PathBuf;
 use toml_edit::visit_mut::VisitMut;
 use toml_edit::DocumentMut;
 
+const FILES_TO_DELETE: &[&str] = &["poetry.lock", "poetry.toml"];
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct Poetry {
     pub project_path: PathBuf,
@@ -223,10 +225,12 @@ impl Poetry {
     }
 
     fn delete_poetry_references(&self) -> std::io::Result<()> {
-        let poetry_lock_path = self.project_path.join("poetry.lock");
+        for file in FILES_TO_DELETE {
+            let path = self.project_path.join(file);
 
-        if poetry_lock_path.exists() {
-            remove_file(poetry_lock_path)?;
+            if path.exists() {
+                remove_file(path)?;
+            }
         }
 
         Ok(())
