@@ -73,7 +73,9 @@ impl Converter for Pip {
                 );
             }
 
-            if !ignore_locked_versions {
+            // There are no locked dependencies for pip, so we only have to remove constraints for
+            // pip-tools.
+            if self.is_pip_tools && !ignore_locked_versions {
                 let mut pyproject_updater = PyprojectUpdater {
                     pyproject: &mut updated_pyproject_string.parse::<DocumentMut>().unwrap(),
                 };
@@ -151,6 +153,7 @@ impl Pip {
             package: Some(false),
             constraint_dependencies: get_constraint_dependencies(
                 ignore_locked_versions,
+                self.is_pip_tools,
                 &self.project_path,
                 self.requirements_files.clone(),
                 self.dev_requirements_files.clone(),

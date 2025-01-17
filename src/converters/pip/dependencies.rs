@@ -28,11 +28,12 @@ pub fn get(project_path: &Path, requirements_files: Vec<String>) -> Option<Vec<S
 
 pub fn get_constraint_dependencies(
     ignore_locked_versions: bool,
+    is_pip_tools: bool,
     project_path: &Path,
     requirements_files: Vec<String>,
     dev_requirements_files: Vec<String>,
 ) -> Option<Vec<String>> {
-    if ignore_locked_versions {
+    if !is_pip_tools || ignore_locked_versions {
         return None;
     }
 
