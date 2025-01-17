@@ -108,6 +108,20 @@ pub fn remove_constraint_dependencies(pyproject_toml: &str) -> Option<DocumentMu
         .as_table_mut()?
         .remove("constraint-dependencies")?;
 
+    // If `constraint-dependencies` was the only item in `[tool.uv]`, remove `[tool.uv]`.
+    if updated_pyproject
+        .get("tool")?
+        .as_table()?
+        .get("uv")?
+        .as_table()?
+        .is_empty()
+    {
+        updated_pyproject
+            .get_mut("tool")?
+            .as_table_mut()?
+            .remove("uv")?;
+    }
+
     Some(updated_pyproject)
 }
 
