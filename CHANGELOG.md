@@ -1,9 +1,22 @@
 # Changelog
 
+## Unreleased
+
+When generating `uv.lock` with `uv lock` command, `migrate-to-uv` now keeps the same versions dependencies were locked to with the previous package manager (if a lock file was found), both for direct and transitive dependencies. This is supported for Poetry, Pipenv, and pip-tools.
+
+This new behavior can be opted out by setting `--ignore-locked-versions` flag, like so:
+
+```bash
+migrate-to-uv --ignore-locked-versions
+```
+
+### Features
+
+* Keep locked dependencies versions when generating `uv.lock` ([#56](https://github.com/mkniewallner/migrate-to-uv/pull/56))
+
 ## 0.3.0 - 2025-01-12
 
-Dependencies are now locked with `uv lock` at the end of the migration, if `uv` is detected as an executable. This new
-behavior can be opted out by setting `--skip-lock` flag, like so:
+Dependencies are now locked with `uv lock` at the end of the migration, if `uv` is detected as an executable. This new behavior can be opted out by setting `--skip-lock` flag, like so:
 
 ```bash
 migrate-to-uv --skip-lock

@@ -1,6 +1,6 @@
 ---
 source: src/converters/poetry/mod.rs
-expression: "perform_migration(Path::new(\"tests/fixtures/poetry/full/pyproject.toml\"),\ntrue, DependencyGroupsStrategy::SetDefaultGroups,)"
+expression: "poetry.perform_migration(true, true,\nDependencyGroupsStrategy::SetDefaultGroups,)"
 ---
 '''
 [build-system]

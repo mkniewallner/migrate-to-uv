@@ -180,3 +180,14 @@ pub enum Format {
     Sdist,
     Wheel,
 }
+
+#[derive(Deserialize)]
+pub struct PoetryLock {
+    pub package: Option<Vec<LockedPackage>>,
+}
+
+#[derive(Deserialize)]
+pub struct LockedPackage {
+    pub name: String,
+    pub version: String,
+}

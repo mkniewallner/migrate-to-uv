@@ -35,6 +35,10 @@ Version definitions set for dependencies are also preserved, and converted to th
 equivalent [PEP 440](https://peps.python.org/pep-0440/) for package managers that use their own syntax (for instance
 [caret](https://python-poetry.org/docs/dependency-specification/#caret-requirements) for Poetry).
 
+At the end of the migration, `migrate-to-uv` also generates `uv.lock` file with `uv lock` command to lock dependencies,
+and keeps dependencies (both direct and transitive) to the exact same versions they were locked to with the previous
+package manager, if a lock file was found.
+
 !!! warning
 
     Although `migrate-to-uv` matches current package manager definition as closely as possible when performing the migration, it is still heavily recommended to double check the end result, especially if you are migrating a package that is meant to be publicly distributed.

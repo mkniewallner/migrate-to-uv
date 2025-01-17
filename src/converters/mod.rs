@@ -21,10 +21,12 @@ type DependencyGroupsAndDefaultGroups = (
 
 /// Converts a project from a package manager to uv.
 pub trait Converter: Debug {
+    #[allow(clippy::fn_params_excessive_bools)]
     fn convert_to_uv(
         &self,
         dry_run: bool,
         skip_lock: bool,
+        ignore_locked_versions: bool,
         keep_old_metadata: bool,
         dependency_groups_strategy: DependencyGroupsStrategy,
     );
@@ -33,7 +35,7 @@ pub trait Converter: Debug {
     fn as_any(&self) -> &dyn Any;
 }
 
-pub fn lock_dependencies(project_path: &Path) -> Result<(), ()> {
+pub fn lock_dependencies(project_path: &Path, is_removing_constraints: bool) -> Result<(), ()> {
     const UV_EXECUTABLE: &str = "uv";
 
     match Command::new(UV_EXECUTABLE)
@@ -43,8 +45,13 @@ pub fn lock_dependencies(project_path: &Path) -> Result<(), ()> {
     {
         Ok(_) => {
             info!(
-                "Locking dependencies with \"{}\"...",
-                format!("{UV_EXECUTABLE} lock").bold()
+                "Locking dependencies with \"{}\"{}...",
+                format!("{UV_EXECUTABLE} lock").bold(),
+                if is_removing_constraints {
+                    " again to remove constraints"
+                } else {
+                    ""
+                }
             );
 
             Command::new(UV_EXECUTABLE)

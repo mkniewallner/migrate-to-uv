@@ -11,6 +11,8 @@ pub struct Uv {
     /// <https://docs.astral.sh/uv/concepts/projects/dependencies/#default-groups>
     #[serde(rename(serialize = "default-groups"))]
     pub default_groups: Option<Vec<String>>,
+    #[serde(rename(serialize = "constraint-dependencies"))]
+    pub constraint_dependencies: Option<Vec<String>>,
 }
 
 #[derive(Default, Deserialize, Serialize, Eq, PartialEq)]

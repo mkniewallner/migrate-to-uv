@@ -25,3 +25,29 @@ pub fn get(project_path: &Path, requirements_files: Vec<String>) -> Option<Vec<S
     }
     Some(dependencies)
 }
+
+pub fn get_constraint_dependencies(
+    ignore_locked_versions: bool,
+    project_path: &Path,
+    requirements_files: Vec<String>,
+    dev_requirements_files: Vec<String>,
+) -> Option<Vec<String>> {
+    if ignore_locked_versions {
+        return None;
+    }
+
+    if let Some(dependencies) = get(
+        project_path,
+        requirements_files
+            .into_iter()
+            .chain(dev_requirements_files)
+            .map(|f| f.replace(".in", ".txt"))
+            .collect(),
+    ) {
+        if dependencies.is_empty() {
+            return None;
+        }
+        return Some(dependencies);
+    }
+    None
+}

@@ -73,4 +73,32 @@ impl PyprojectUpdater<'_> {
             serde::Serialize::serialize(&hatch, toml_edit::ser::ValueSerializer::new()).unwrap(),
         );
     }
+
+    /// Remove `constraint-dependencies` under `[tool.uv]`, which is only needed to lock
+    /// dependencies to specific versions in the generated lock file.
+    pub fn remove_constraint_dependencies(&mut self) -> Option<&DocumentMut> {
+        self.pyproject
+            .get_mut("tool")?
+            .as_table_mut()?
+            .get_mut("uv")?
+            .as_table_mut()?
+            .remove("constraint-dependencies")?;
+
+        // If `constraint-dependencies` was the only item in `[tool.uv]`, remove `[tool.uv]`.
+        if self
+            .pyproject
+            .get("tool")?
+            .as_table()?
+            .get("uv")?
+            .as_table()?
+            .is_empty()
+        {
+            self.pyproject
+                .get_mut("tool")?
+                .as_table_mut()?
+                .remove("uv")?;
+        }
+
+        Some(self.pyproject)
+    }
 }

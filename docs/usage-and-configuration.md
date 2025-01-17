@@ -53,6 +53,19 @@ behavior.
 migrate-to-uv --skip-lock
 ```
 
+#### `--ignore-locked-versions`
+
+By default, when locking dependencies with `uv lock`, `migrate-to-uv` keeps dependencies to the versions they were
+locked to with the previous package manager, if it supports lock files, and if a lock file is found. This behavior can
+be disabled, in which case dependencies will be locked to the highest possible versions allowed by the dependencies
+constraints.
+
+**Example**:
+
+```bash
+migrate-to-uv --ignore-locked-versions
+```
+
 #### `--package-manager`
 
 By default, `migrate-to-uv` tries to auto-detect the package manager based on the files (and their content) used by the
