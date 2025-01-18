@@ -14,7 +14,40 @@ pub enum PackageManager {
     PipTools,
     Pipenv,
     Poetry,
-    Uv,
+}
+
+fn project_already_uses_uv(project_path: &Path) -> (bool, String) {
+    if project_path.join("uv.lock").exists() {
+        return (true, format!(
+            "file \"{}\" found",
+            "uv.lock".bold()
+        ));
+    }
+
+    let pyproject_toml_path = project_path.join("pyproject.toml");
+    if !pyproject_toml_path.exists() {
+        return (false, String::new());
+    }
+
+    let pyproject_toml_content = match fs::read_to_string(&pyproject_toml_path) {
+        Ok(content) => content,
+        Err(_) => return (false, String::new()),
+    };
+
+    let pyproject_toml: PyProject = match toml::from_str(&pyproject_toml_content) {
+        Ok(parsed) => parsed,
+        Err(_) => return (false, String::new()),
+    };
+
+    if pyproject_toml.tool.is_some_and(|tool| tool.uv.is_some()) {
+        return (true, format!(
+            "section \"{}\" found in file \"{}\"",
+            "[tool.uv]".bold(),
+            "pyproject.toml".bold()
+        ));
+    }
+
+    (false, String::new())
 }
 
 impl PackageManager {
@@ -27,31 +60,6 @@ impl PackageManager {
         debug!("Checking if project uses {self}...");
 
         match self {
-            Self::Uv => {
-                if project_path.join("uv.lock").exists() {
-                    return Err("Project is already using uv!".to_string());
-                }
-
-                let project_file = "pyproject.toml";
-                let pyproject_toml_path = project_path.join(project_file);
-
-                if !pyproject_toml_path.exists() {
-                    return Err(format!(
-                        "Directory does not contain a {} file.",
-                        project_file.bold()
-                    ));
-                }
-
-                let pyproject_toml_content = fs::read_to_string(pyproject_toml_path).unwrap();
-                let pyproject_toml: PyProject =
-                    toml::from_str(pyproject_toml_content.as_str()).unwrap();
-
-                if pyproject_toml.tool.is_some_and(|tool| tool.uv.is_some()) {
-                    return Err("Project is already using uv!".to_string());
-                }
-
-                Err("Project is not using uv.".to_string())
-            }
             Self::Poetry => {
                 let project_file = "pyproject.toml";
 
@@ -165,7 +173,6 @@ impl Display for PackageManager {
             Self::PipTools => write!(f, "pip-tools"),
             Self::Pipenv => write!(f, "Pipenv"),
             Self::Poetry => write!(f, "Poetry"),
-            Self::Uv => write!(f, "uv"),
         }
     }
 }
@@ -187,14 +194,9 @@ pub fn get_converter(
     }
 
     // Always check for uv first
-    match PackageManager::Uv.detected(
-        project_path,
-        requirements_files.clone(),
-        dev_requirements_files.clone(),
-    ) {
-        Ok(_) => unreachable!(),
-        Err(err) if err == "Project is already using uv!" => return Err(err),
-        Err(_) => (), // Continue checking other package managers
+    match project_already_uses_uv(project_path) {
+        (true, reason) => return Err(format!("Project is already using uv ({reason})")),
+        (false, _) => (),
     }
 
     if let Some(enforced_package_manager) = enforced_package_manager {
@@ -520,7 +522,14 @@ mod tests {
             vec!["requirements-dev.txt".to_string()],
             None,
         );
-        assert_eq!(converter.unwrap_err(), "Project is already using uv!");
+        assert_eq!(
+            converter.unwrap_err(),
+            format!(
+                "Project is already using uv (\"{}\" section detected in \"{}\")",
+                "[tool.uv]".bold(),
+                "pyproject.toml".bold()
+            )
+        );
     }
 
     #[test]
@@ -531,7 +540,14 @@ mod tests {
             vec!["requirements-dev.txt".to_string()],
             None,
         );
-        assert_eq!(converter.unwrap_err(), "Project is already using uv!");
+        assert_eq!(
+            converter.unwrap_err(),
+            format!(
+                "Project is already using uv (\"{}\" section detected in \"{}\")",
+                "[tool.uv]".bold(),
+                "pyproject.toml".bold()
+            )
+        );
     }
 
     #[test]
@@ -542,6 +558,12 @@ mod tests {
             vec!["requirements-dev.txt".to_string()],
             None,
         );
-        assert_eq!(converter.unwrap_err(), "Project is already using uv!");
+        assert_eq!(
+            converter.unwrap_err(),
+            format!(
+                "Project is already using uv (\"{}\" detected)",
+                "uv.lock".bold()
+            )
+        );
     }
 }
