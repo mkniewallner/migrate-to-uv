@@ -18,10 +18,7 @@ pub enum PackageManager {
 
 fn project_already_uses_uv(project_path: &Path) -> (bool, String) {
     if project_path.join("uv.lock").exists() {
-        return (true, format!(
-            "file \"{}\" found",
-            "uv.lock".bold()
-        ));
+        return (true, format!("file \"{}\" found", "uv.lock".bold()));
     }
 
     let pyproject_toml_path = project_path.join("pyproject.toml");
@@ -40,11 +37,14 @@ fn project_already_uses_uv(project_path: &Path) -> (bool, String) {
     };
 
     if pyproject_toml.tool.is_some_and(|tool| tool.uv.is_some()) {
-        return (true, format!(
-            "section \"{}\" found in file \"{}\"",
-            "[tool.uv]".bold(),
-            "pyproject.toml".bold()
-        ));
+        return (
+            true,
+            format!(
+                "section \"{}\" found in file \"{}\"",
+                "[tool.uv]".bold(),
+                "pyproject.toml".bold()
+            ),
+        );
     }
 
     (false, String::new())
@@ -525,7 +525,7 @@ mod tests {
         assert_eq!(
             converter.unwrap_err(),
             format!(
-                "Project is already using uv (\"{}\" section detected in \"{}\")",
+                "Project is already using uv (section \"{}\" found in file \"{}\")",
                 "[tool.uv]".bold(),
                 "pyproject.toml".bold()
             )
@@ -543,7 +543,7 @@ mod tests {
         assert_eq!(
             converter.unwrap_err(),
             format!(
-                "Project is already using uv (\"{}\" section detected in \"{}\")",
+                "Project is already using uv (section \"{}\" found in file \"{}\")",
                 "[tool.uv]".bold(),
                 "pyproject.toml".bold()
             )
@@ -561,7 +561,7 @@ mod tests {
         assert_eq!(
             converter.unwrap_err(),
             format!(
-                "Project is already using uv (\"{}\" detected)",
+                "Project is already using uv (file \"{}\" found)",
                 "uv.lock".bold()
             )
         );
