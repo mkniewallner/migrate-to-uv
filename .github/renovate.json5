@@ -4,4 +4,10 @@
     "github>mkniewallner/renovate-config:default.json5",
     ":automergePatch",
   ],
+  packageRules: [
+    {
+      matchPackageNames: ["uv", "astral-sh/uv-pre-commit"],
+      groupName: "uv-version",
+    },
+  ],
 }
