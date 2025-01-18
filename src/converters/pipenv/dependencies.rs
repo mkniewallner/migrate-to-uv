@@ -217,11 +217,11 @@ pub fn get_constraint_dependencies(
     ignore_locked_versions: bool,
     pipenv_lock_path: &Path,
 ) -> Option<Vec<String>> {
-    if ignore_locked_versions {
+    if ignore_locked_versions || !pipenv_lock_path.exists() {
         return None;
     }
 
-    let pipenv_lock_content = fs::read_to_string(pipenv_lock_path).unwrap_or_default();
+    let pipenv_lock_content = fs::read_to_string(pipenv_lock_path).unwrap();
     let Ok(pipenv_lock) = serde_json::from_str::<PipenvLock>(pipenv_lock_content.as_str()) else {
         warn!(
             "Could not parse \"{}\", dependencies will not be kept to their current locked versions.",
