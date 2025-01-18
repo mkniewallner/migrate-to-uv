@@ -2,126 +2,34 @@ mod dependencies;
 
 use crate::converters::pip::dependencies::get_constraint_dependencies;
 use crate::converters::pyproject_updater::PyprojectUpdater;
-use crate::converters::DependencyGroupsStrategy;
-use crate::converters::{lock_dependencies, Converter};
+use crate::converters::Converter;
+use crate::converters::ConverterOptions;
 use crate::schema::pep_621::Project;
 use crate::schema::pyproject::DependencyGroupSpecification;
 use crate::schema::uv::Uv;
 use crate::toml::PyprojectPrettyFormatter;
 use indexmap::IndexMap;
-use log::{info, warn};
-use owo_colors::OwoColorize;
 #[cfg(test)]
 use std::any::Any;
 use std::default::Default;
 use std::fs;
-use std::fs::{remove_file, File};
-use std::io::Write;
-use std::path::PathBuf;
 use toml_edit::visit_mut::VisitMut;
 use toml_edit::DocumentMut;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Pip {
-    pub project_path: PathBuf,
+    pub converter_options: ConverterOptions,
     pub requirements_files: Vec<String>,
     pub dev_requirements_files: Vec<String>,
     pub is_pip_tools: bool,
 }
 
 impl Converter for Pip {
-    fn convert_to_uv(
-        &self,
-        dry_run: bool,
-        skip_lock: bool,
-        ignore_locked_versions: bool,
-        keep_old_metadata: bool,
-        _dependency_groups_strategy: DependencyGroupsStrategy,
-    ) {
-        let pyproject_path = self.project_path.join("pyproject.toml");
-        let updated_pyproject_string = self.perform_migration(ignore_locked_versions);
-
-        if dry_run {
-            let mut pyproject_updater = PyprojectUpdater {
-                pyproject: &mut updated_pyproject_string.parse::<DocumentMut>().unwrap(),
-            };
-            info!(
-                "{}\n{}",
-                "Migrated pyproject.toml:".bold(),
-                pyproject_updater
-                    .remove_constraint_dependencies()
-                    .map_or(updated_pyproject_string, ToString::to_string)
-            );
-        } else {
-            let mut pyproject_file = File::create(&pyproject_path).unwrap();
-
-            pyproject_file
-                .write_all(updated_pyproject_string.as_bytes())
-                .unwrap();
-
-            if !keep_old_metadata {
-                self.delete_requirements_files().unwrap();
-            }
-
-            if !dry_run
-                && !skip_lock
-                && lock_dependencies(self.project_path.as_ref(), false).is_err()
-            {
-                warn!(
-                    "An error occurred when locking dependencies, so \"{}\" was not created.",
-                    "uv.lock".bold()
-                );
-            }
-
-            // There are no locked dependencies for pip, so we only have to remove constraints for
-            // pip-tools.
-            if self.is_pip_tools && !ignore_locked_versions {
-                let mut pyproject_updater = PyprojectUpdater {
-                    pyproject: &mut updated_pyproject_string.parse::<DocumentMut>().unwrap(),
-                };
-                if let Some(updated_pyproject) = pyproject_updater.remove_constraint_dependencies()
-                {
-                    let mut pyproject_file = File::create(pyproject_path).unwrap();
-                    pyproject_file
-                        .write_all(updated_pyproject.to_string().as_bytes())
-                        .unwrap();
-
-                    // Lock dependencies a second time, to remove constraints from lock file.
-                    if !dry_run
-                        && !skip_lock
-                        && lock_dependencies(self.project_path.as_ref(), true).is_err()
-                    {
-                        warn!("An error occurred when locking dependencies after removing constraints.");
-                    }
-                }
-            }
-
-            info!(
-                "{}",
-                format!(
-                    "Successfully migrated project from {} to uv!\n",
-                    if self.is_pip_tools {
-                        "pip-tools"
-                    } else {
-                        "pip"
-                    }
-                )
-                .bold()
-                .green()
-            );
-        }
-    }
-
-    #[cfg(test)]
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-}
-
-impl Pip {
-    fn perform_migration(&self, ignore_locked_versions: bool) -> String {
-        let dev_dependencies =
-            dependencies::get(&self.project_path, self.dev_requirements_files.clone());
+    fn perform_migration(&self) -> String {
+        let dev_dependencies = dependencies::get(
+            &self.get_project_path(),
+            self.dev_requirements_files.clone(),
+        );
 
         let dependency_groups = dev_dependencies.map_or_else(
             || None,
@@ -145,16 +53,19 @@ impl Pip {
             name: Some(String::new()),
             // "version" is required by uv.
             version: Some("0.0.1".to_string()),
-            dependencies: dependencies::get(&self.project_path, self.requirements_files.clone()),
+            dependencies: dependencies::get(
+                &self.get_project_path(),
+                self.requirements_files.clone(),
+            ),
             ..Default::default()
         };
 
         let uv = Uv {
             package: Some(false),
             constraint_dependencies: get_constraint_dependencies(
-                ignore_locked_versions,
+                !self.respect_locked_versions(),
                 self.is_pip_tools,
-                &self.project_path,
+                &self.get_project_path(),
                 self.requirements_files.clone(),
                 self.dev_requirements_files.clone(),
             ),
@@ -162,7 +73,7 @@ impl Pip {
         };
 
         let pyproject_toml_content =
-            fs::read_to_string(self.project_path.join("pyproject.toml")).unwrap_or_default();
+            fs::read_to_string(self.get_project_path().join("pyproject.toml")).unwrap_or_default();
         let mut updated_pyproject = pyproject_toml_content.parse::<DocumentMut>().unwrap();
         let mut pyproject_updater = PyprojectUpdater {
             pyproject: &mut updated_pyproject,
@@ -180,35 +91,44 @@ impl Pip {
         updated_pyproject.to_string()
     }
 
-    fn delete_requirements_files(&self) -> std::io::Result<()> {
+    fn get_package_manager_name(&self) -> String {
+        if self.is_pip_tools {
+            return "pip-tools".to_string();
+        }
+        "pip".to_string()
+    }
+
+    fn get_converter_options(&self) -> &ConverterOptions {
+        &self.converter_options
+    }
+
+    fn respect_locked_versions(&self) -> bool {
+        // There are no locked dependencies for pip, so locked versions are only respected for
+        // pip-tools.
+        self.is_pip_tools && !self.get_converter_options().ignore_locked_versions
+    }
+
+    fn get_migrated_files_to_delete(&self) -> Vec<String> {
+        let mut files_to_delete: Vec<String> = Vec::new();
+
         for requirements_file in self
             .requirements_files
             .iter()
             .chain(&self.dev_requirements_files)
         {
-            let requirements_path = self.project_path.join(requirements_file);
+            files_to_delete.push(requirements_file.to_string());
 
-            if requirements_path.exists() {
-                remove_file(requirements_path.clone())?;
+            // For pip-tools, also delete `.txt` files generated from `.in` files.
+            if self.is_pip_tools {
+                files_to_delete.push(requirements_file.replace(".in", ".txt"));
             }
         }
 
-        // For pip-tools, also delete `.txt` files generated from `.in` files.
-        if self.is_pip_tools {
-            for requirements_file in self
-                .requirements_files
-                .iter()
-                .chain(&self.dev_requirements_files)
-                .map(|file| file.replace(".in", ".txt"))
-            {
-                let requirements_path = self.project_path.join(requirements_file);
+        files_to_delete
+    }
 
-                if requirements_path.exists() {
-                    remove_file(requirements_path.clone())?;
-                }
-            }
-        }
-
-        Ok(())
+    #[cfg(test)]
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
