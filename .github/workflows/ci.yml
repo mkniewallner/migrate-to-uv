@@ -14,6 +14,8 @@ env:
   # renovate: datasource=pypi depName=uv
   UV_VERSION: '0.5.21'
 
+permissions: {}
+
 jobs:
   quality:
     runs-on: ubuntu-24.04
