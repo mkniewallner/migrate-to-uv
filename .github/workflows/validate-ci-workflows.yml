@@ -16,6 +16,8 @@ env:
   # renovate: datasource=pypi depName=zizmor
   ZIZMOR_VERSION: '1.2.0'
 
+permissions: {}
+
 jobs:
   validate-ci-workflows:
     runs-on: ubuntu-24.04
