@@ -23,6 +23,8 @@ use std::path::PathBuf;
 use toml_edit::visit_mut::VisitMut;
 use toml_edit::DocumentMut;
 
+const FILES_TO_DELETE: &[&str] = &["Pipfile", "Pipfile.lock"];
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct Pipenv {
     pub project_path: PathBuf,
@@ -171,10 +173,12 @@ impl Pipenv {
     }
 
     fn delete_pipenv_references(&self) -> std::io::Result<()> {
-        let pipfile_path = self.project_path.join("Pipfile");
+        for file in FILES_TO_DELETE {
+            let path = self.project_path.join(file);
 
-        if pipfile_path.exists() {
-            remove_file(pipfile_path)?;
+            if path.exists() {
+                remove_file(path)?;
+            }
         }
 
         Ok(())
