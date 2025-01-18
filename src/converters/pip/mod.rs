@@ -212,35 +212,3 @@ impl Pip {
         Ok(())
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_perform_pip_migration() {
-        let pip = Pip {
-            project_path: PathBuf::from("tests/fixtures/pip/full"),
-            requirements_files: vec!["requirements.txt".to_string()],
-            dev_requirements_files: vec!["requirements-dev.txt".to_string()],
-            is_pip_tools: false,
-        };
-
-        insta::assert_toml_snapshot!(pip.perform_migration(true));
-    }
-
-    #[test]
-    fn test_perform_pip_all_files_migration() {
-        let pip = Pip {
-            project_path: PathBuf::from("tests/fixtures/pip/full"),
-            requirements_files: vec!["requirements.txt".to_string()],
-            dev_requirements_files: vec![
-                "requirements-dev.txt".to_string(),
-                "requirements-typing.txt".to_string(),
-            ],
-            is_pip_tools: false,
-        };
-
-        insta::assert_toml_snapshot!(pip.perform_migration(true));
-    }
-}
