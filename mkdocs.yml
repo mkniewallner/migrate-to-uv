@@ -11,6 +11,7 @@ nav:
   - Usage and configuration: usage-and-configuration.md
   - Supported package managers: supported-package-managers.md
   - Changelog: CHANGELOG.md
+  - Contributing: CONTRIBUTING.md
 
 plugins:
   - search
