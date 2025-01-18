@@ -90,14 +90,3 @@ pub fn cli() {
 
     process::exit(0)
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_cli() {
-        let cli = Cli::parse_from("migrate-to-uv --dry-run".split_whitespace());
-        assert!(cli.dry_run);
-    }
-}

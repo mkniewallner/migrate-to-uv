@@ -1,0 +1,33 @@
+---
+source: tests/pipenv.rs
+info:
+  program: migrate-to-uv
+  args:
+    - tests/fixtures/pipenv/with_lock_file
+    - "--dry-run"
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+----- stderr -----
+Migrated pyproject.toml:
+[project]
+name = ""
+version = "0.0.1"
+dependencies = ["arrow>=1.2.3"]
+
+[dependency-groups]
+dev = ["mypy>=1.13.0"]
+test = ["factory-boy>=3.2.1"]
+
+[tool.uv]
+package = false
+default-groups = [
+    "dev",
+    "test",
+]
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
