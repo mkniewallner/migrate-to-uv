@@ -21,15 +21,21 @@ pre-commit install
 
 This will automatically run the relevant git hooks based on the files that are modified whenever you commit.
 
+You can also run all hooks manually without committing with:
+
+```bash
+pre-commit run --all-files
+```
+
 ## Testing
 
-`migrate-to-uv` uses both unit and integration tests to ensure that the code work as intended. Both can be run with:
+Both unit and integration tests are used to ensure that the code work as intended. They can be run with:
 
 ```bash
 cargo test
 ```
 
-Unit tests are located in modules alongside the code under `src` directory, and can be run with:
+Unit tests are located in modules, alongside the code, under `src` directory, and can be run with:
 
 ```bash
 cargo test --lib
@@ -41,8 +47,8 @@ Integration tests are located under `tests` directory, and can be run with:
 cargo test --test '*' -- --test-threads 1
 ```
 
-As integration tests depend on [uv](https://docs.astral.sh/uv/) for performing locking, make sure it is present on your
-machine before running tests.
+As integration tests depend on [uv](https://docs.astral.sh/uv/) for performing locking, make sure that it is present on
+your machine before running them.
 
 ### Snapshots
 
@@ -65,7 +71,8 @@ fn test_with_snapshots() {
 }
 ```
 
-If you update code that changes the output of snapshots, you will be prompted to review the updated snapshots with:
+In both cases, if you update code that changes the output of snapshots, you will be prompted to review the updated
+snapshots with:
 
 ```bash
 cargo insta review
@@ -75,7 +82,8 @@ You can then accept the changes, if they look correct according to the changed c
 
 ## Documentation
 
-Documentation is built using [mkdocs](https://www.mkdocs.org/) and [mkdocs-material](https://squidfunk.github.io/mkdocs-material/).
+Documentation is built using [mkdocs](https://www.mkdocs.org/)
+and [mkdocs-material](https://squidfunk.github.io/mkdocs-material/).
 
 It can be run locally with [uv](https://docs.astral.sh/uv/) by using:
 
