@@ -1,0 +1,7 @@
+[build-system]
+requires = ["maturin>=1.5,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "test-project"
+version = "0.1.0"
