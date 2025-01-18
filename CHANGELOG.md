@@ -7,6 +7,10 @@
 * [poetry] Delete `poetry.toml` after migration ([#62](https://github.com/mkniewallner/migrate-to-uv/pull/62))
 * [pipenv] Delete `Pipfile.lock` after migration ([#66](https://github.com/mkniewallner/migrate-to-uv/pull/66))
 
+### Bug fixes
+
+* Ensure that lock file exists before parsing ([#67](https://github.com/mkniewallner/migrate-to-uv/pull/67))
+
 ### Documentation
 
 * Explain how to set credentials for private indexes ([#60](https://github.com/mkniewallner/migrate-to-uv/pull/60))
