@@ -16,26 +16,29 @@ pub enum PackageManager {
     Poetry,
 }
 
+/// Check if the projects already uses uv, and return the reason for it if we find that it does.
 fn project_already_uses_uv(project_path: &Path) -> (bool, String) {
+    // Check for uv.lock first
     if project_path.join("uv.lock").exists() {
         return (true, format!("\"{}\" detected", "uv.lock".bold()));
     }
 
+    // Check for pyproject.toml
     let pyproject_toml_path = project_path.join("pyproject.toml");
     if !pyproject_toml_path.exists() {
         return (false, String::new());
     }
 
-    let pyproject_toml_content = match fs::read_to_string(&pyproject_toml_path) {
-        Ok(content) => content,
-        Err(_) => return (false, String::new()),
+    // Read and parse pyproject.toml, returning false if there are any errors
+    let Ok(pyproject_toml_content) = fs::read_to_string(&pyproject_toml_path) else {
+        return (false, String::new());
     };
 
-    let pyproject_toml: PyProject = match toml::from_str(&pyproject_toml_content) {
-        Ok(parsed) => parsed,
-        Err(_) => return (false, String::new()),
+    let Ok(pyproject_toml) = toml::from_str::<PyProject>(&pyproject_toml_content) else {
+        return (false, String::new());
     };
 
+    // Check for [tool.uv] section
     if pyproject_toml.tool.is_some_and(|tool| tool.uv.is_some()) {
         return (
             true,
@@ -194,9 +197,8 @@ pub fn get_converter(
     }
 
     // Always check for uv first
-    match project_already_uses_uv(project_path) {
-        (true, reason) => return Err(format!("Project is already using uv ({reason})")),
-        (false, _) => (),
+    if let (true, reason) = project_already_uses_uv(project_path) {
+        return Err(format!("Project is already using uv ({reason})"));
     }
 
     if let Some(enforced_package_manager) = enforced_package_manager {
