@@ -1,8 +1,7 @@
 ---
-source: src/converters/poetry/mod.rs
-expression: "poetry.perform_migration(true, false, DependencyGroupsStrategy::IncludeInDev,)"
+source: tests/poetry.rs
+expression: "fs::read_to_string(project_path.join(\"pyproject.toml\")).unwrap()"
 ---
-'''
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -129,12 +128,15 @@ dev = [
     "dev-legacy==1.2.3",
     "dev-legacy-2==1.2.3",
     "dev-dep==1.2.3",
-    { include = "typing" },
 ]
 typing = ["typing-dep==1.2.3"]
 
 [tool.uv]
 package = false
+default-groups = [
+    "dev",
+    "typing",
+]
 
 [[tool.uv.index]]
 name = "PyPI"
@@ -252,4 +254,3 @@ fixable = ["I", "UP"]
 
 [tool.ruff.format]
 preview = true
-'''
