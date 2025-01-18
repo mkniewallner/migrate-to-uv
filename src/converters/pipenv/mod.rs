@@ -23,6 +23,8 @@ use std::path::PathBuf;
 use toml_edit::visit_mut::VisitMut;
 use toml_edit::DocumentMut;
 
+const FILES_TO_DELETE: &[&str] = &["Pipfile", "Pipfile.lock"];
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct Pipenv {
     pub project_path: PathBuf,
@@ -171,10 +173,12 @@ impl Pipenv {
     }
 
     fn delete_pipenv_references(&self) -> std::io::Result<()> {
-        let pipfile_path = self.project_path.join("Pipfile");
+        for file in FILES_TO_DELETE {
+            let path = self.project_path.join(file);
 
-        if pipfile_path.exists() {
-            remove_file(pipfile_path)?;
+            if path.exists() {
+                remove_file(path)?;
+            }
         }
 
         Ok(())
@@ -184,92 +188,57 @@ impl Pipenv {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_perform_migration() {
-        let pipenv = Pipenv {
-            project_path: PathBuf::from("tests/fixtures/pipenv/full"),
-        };
-
-        insta::assert_toml_snapshot!(
-            pipenv.perform_migration(true, DependencyGroupsStrategy::SetDefaultGroups)
-        );
-    }
-
-    #[test]
-    fn test_perform_migration_dep_group_include_in_dev() {
-        let pipenv = Pipenv {
-            project_path: PathBuf::from("tests/fixtures/pipenv/full"),
-        };
-
-        insta::assert_toml_snapshot!(
-            pipenv.perform_migration(true, DependencyGroupsStrategy::IncludeInDev)
-        );
-    }
-
-    #[test]
-    fn test_perform_migration_dep_group_keep_existing() {
-        let pipenv = Pipenv {
-            project_path: PathBuf::from("tests/fixtures/pipenv/full"),
-        };
-
-        insta::assert_toml_snapshot!(
-            pipenv.perform_migration(true, DependencyGroupsStrategy::KeepExisting)
-        );
-    }
-
-    #[test]
-    fn test_perform_migration_dep_group_merge_in_dev() {
-        let pipenv = Pipenv {
-            project_path: PathBuf::from("tests/fixtures/pipenv/full"),
-        };
-
-        insta::assert_toml_snapshot!(
-            pipenv.perform_migration(true, DependencyGroupsStrategy::MergeIntoDev)
-        );
-    }
+    use tempfile::tempdir;
 
     #[test]
     fn test_perform_migration_python_full_version() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pipfile_content = r#"
+        [requires]
+        python_full_version = "3.13.1"
+        "#;
+
+        let mut pipfile_file = File::create(project_path.join("Pipfile")).unwrap();
+        pipfile_file.write_all(pipfile_content.as_bytes()).unwrap();
+
         let pipenv = Pipenv {
-            project_path: PathBuf::from("tests/fixtures/pipenv/python_full_version"),
+            project_path: PathBuf::from(project_path),
         };
 
-        insta::assert_toml_snapshot!(
-            pipenv.perform_migration(true, DependencyGroupsStrategy::SetDefaultGroups)
-        );
+        insta::assert_snapshot!(pipenv.perform_migration(true, DependencyGroupsStrategy::SetDefaultGroups), @r###"
+        [project]
+        name = ""
+        version = "0.0.1"
+        requires-python = "==3.13.1"
+
+        [tool.uv]
+        package = false
+        "###);
     }
 
     #[test]
     fn test_perform_migration_empty_requires() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pipfile_content = "[requires]";
+
+        let mut pipfile_file = File::create(project_path.join("Pipfile")).unwrap();
+        pipfile_file.write_all(pipfile_content.as_bytes()).unwrap();
+
         let pipenv = Pipenv {
-            project_path: PathBuf::from("tests/fixtures/pipenv/empty_requires"),
+            project_path: PathBuf::from(project_path),
         };
 
-        insta::assert_toml_snapshot!(
-            pipenv.perform_migration(true, DependencyGroupsStrategy::SetDefaultGroups)
-        );
-    }
+        insta::assert_snapshot!(pipenv.perform_migration(true, DependencyGroupsStrategy::SetDefaultGroups), @r###"
+        [project]
+        name = ""
+        version = "0.0.1"
 
-    #[test]
-    fn test_perform_migration_minimal_pipfile() {
-        let pipenv = Pipenv {
-            project_path: PathBuf::from("tests/fixtures/pipenv/minimal"),
-        };
-
-        insta::assert_toml_snapshot!(
-            pipenv.perform_migration(true, DependencyGroupsStrategy::SetDefaultGroups)
-        );
-    }
-
-    #[test]
-    fn test_perform_migration_with_lock_file() {
-        let pipenv = Pipenv {
-            project_path: PathBuf::from("tests/fixtures/pipenv/with_lock_file"),
-        };
-
-        insta::assert_toml_snapshot!(
-            pipenv.perform_migration(false, DependencyGroupsStrategy::SetDefaultGroups)
-        );
+        [tool.uv]
+        package = false
+        "###);
     }
 }

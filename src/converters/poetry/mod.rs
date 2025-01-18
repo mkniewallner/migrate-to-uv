@@ -25,6 +25,8 @@ use std::path::PathBuf;
 use toml_edit::visit_mut::VisitMut;
 use toml_edit::DocumentMut;
 
+const FILES_TO_DELETE: &[&str] = &["poetry.lock", "poetry.toml"];
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct Poetry {
     pub project_path: PathBuf,
@@ -223,10 +225,12 @@ impl Poetry {
     }
 
     fn delete_poetry_references(&self) -> std::io::Result<()> {
-        let poetry_lock_path = self.project_path.join("poetry.lock");
+        for file in FILES_TO_DELETE {
+            let path = self.project_path.join(file);
 
-        if poetry_lock_path.exists() {
-            remove_file(poetry_lock_path)?;
+            if path.exists() {
+                remove_file(path)?;
+            }
         }
 
         Ok(())
@@ -245,108 +249,32 @@ fn remove_pyproject_poetry_section(pyproject: &mut DocumentMut) {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_perform_migration() {
-        let poetry = Poetry {
-            project_path: PathBuf::from("tests/fixtures/poetry/full"),
-        };
-
-        insta::assert_toml_snapshot!(poetry.perform_migration(
-            true,
-            false,
-            DependencyGroupsStrategy::SetDefaultGroups,
-        ));
-    }
-
-    #[test]
-    fn test_perform_migration_keep_old_metadata() {
-        let poetry = Poetry {
-            project_path: PathBuf::from("tests/fixtures/poetry/full"),
-        };
-
-        insta::assert_toml_snapshot!(poetry.perform_migration(
-            true,
-            true,
-            DependencyGroupsStrategy::SetDefaultGroups,
-        ));
-    }
-
-    #[test]
-    fn test_perform_migration_dep_group_include_in_dev() {
-        let poetry = Poetry {
-            project_path: PathBuf::from("tests/fixtures/poetry/full"),
-        };
-
-        insta::assert_toml_snapshot!(poetry.perform_migration(
-            true,
-            false,
-            DependencyGroupsStrategy::IncludeInDev,
-        ));
-    }
-
-    #[test]
-    fn test_perform_migration_dep_group_keep_existing() {
-        let poetry = Poetry {
-            project_path: PathBuf::from("tests/fixtures/poetry/full"),
-        };
-
-        insta::assert_toml_snapshot!(poetry.perform_migration(
-            true,
-            false,
-            DependencyGroupsStrategy::KeepExisting,
-        ));
-    }
-
-    #[test]
-    fn test_perform_migration_dep_group_merge_in_dev() {
-        let poetry = Poetry {
-            project_path: PathBuf::from("tests/fixtures/poetry/full"),
-        };
-
-        insta::assert_toml_snapshot!(poetry.perform_migration(
-            true,
-            false,
-            DependencyGroupsStrategy::MergeIntoDev,
-        ));
-    }
+    use tempfile::tempdir;
 
     #[test]
     fn test_perform_migration_multiple_readmes() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+        [tool.poetry]
+        readme = ["README1.md", "README2.md"]
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
         let poetry = Poetry {
-            project_path: PathBuf::from("tests/fixtures/poetry/multiple_readmes"),
+            project_path: PathBuf::from(project_path),
         };
 
-        insta::assert_toml_snapshot!(poetry.perform_migration(
-            true,
-            false,
-            DependencyGroupsStrategy::SetDefaultGroups,
-        ));
-    }
-
-    #[test]
-    fn test_perform_migration_minimal_pyproject() {
-        let poetry = Poetry {
-            project_path: PathBuf::from("tests/fixtures/poetry/minimal"),
-        };
-
-        insta::assert_toml_snapshot!(poetry.perform_migration(
-            true,
-            false,
-            DependencyGroupsStrategy::SetDefaultGroups,
-        ));
-    }
-
-    #[test]
-    fn test_perform_migration_with_lock_file() {
-        let poetry = Poetry {
-            project_path: PathBuf::from("tests/fixtures/poetry/with_lock_file"),
-        };
-
-        insta::assert_toml_snapshot!(poetry.perform_migration(
-            false,
-            false,
-            DependencyGroupsStrategy::SetDefaultGroups,
-        ));
+        insta::assert_snapshot!(poetry.perform_migration(true, false, DependencyGroupsStrategy::SetDefaultGroups), @r###"
+        [project]
+        name = ""
+        version = "0.0.1"
+        readme = "README1.md"
+        "###);
     }
 }

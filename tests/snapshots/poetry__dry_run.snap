@@ -1,0 +1,30 @@
+---
+source: tests/poetry.rs
+info:
+  program: migrate-to-uv
+  args:
+    - tests/fixtures/poetry/with_lock_file
+    - "--dry-run"
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+----- stderr -----
+Migrated pyproject.toml:
+[project]
+name = "foo"
+version = "0.0.1"
+requires-python = "~=3.11"
+dependencies = ["arrow>=1.2.3,<2"]
+
+[dependency-groups]
+dev = ["factory-boy>=3.2.1,<4"]
+typing = ["mypy>=1.13.0,<2"]
+
+[tool.uv]
+package = false
+default-groups = [
+    "dev",
+    "typing",
+]

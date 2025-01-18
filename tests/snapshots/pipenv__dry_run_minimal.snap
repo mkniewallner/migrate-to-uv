@@ -1,0 +1,20 @@
+---
+source: tests/pipenv.rs
+info:
+  program: migrate-to-uv
+  args:
+    - tests/fixtures/pipenv/minimal
+    - "--dry-run"
+---
+success: true
+exit_code: 0
+----- stdout -----
+
+----- stderr -----
+Migrated pyproject.toml:
+[project]
+name = ""
+version = "0.0.1"
+
+[tool.uv]
+package = false

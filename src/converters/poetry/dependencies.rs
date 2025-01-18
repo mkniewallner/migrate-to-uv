@@ -222,11 +222,11 @@ pub fn get_constraint_dependencies(
     ignore_locked_versions: bool,
     poetry_lock_path: &Path,
 ) -> Option<Vec<String>> {
-    if ignore_locked_versions {
+    if ignore_locked_versions || !poetry_lock_path.exists() {
         return None;
     }
 
-    let poetry_lock_content = fs::read_to_string(poetry_lock_path).unwrap_or_default();
+    let poetry_lock_content = fs::read_to_string(poetry_lock_path).unwrap();
     let Ok(poetry_lock) = toml::from_str::<PoetryLock>(poetry_lock_content.as_str()) else {
         warn!(
             "Could not parse \"{}\", dependencies will not be kept to their current locked versions.",
