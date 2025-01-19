@@ -10,7 +10,7 @@ pub struct Project {
     pub version: Option<String>,
     pub description: Option<String>,
     pub authors: Option<Vec<AuthorOrMaintainer>>,
-    #[serde(rename(serialize = "requires-python"))]
+    #[serde(rename = "requires-python")]
     pub requires_python: Option<String>,
     pub readme: Option<String>,
     pub license: Option<String>,
@@ -18,13 +18,13 @@ pub struct Project {
     pub keywords: Option<Vec<String>>,
     pub classifiers: Option<Vec<String>>,
     pub dependencies: Option<Vec<String>>,
-    #[serde(rename(serialize = "optional-dependencies"))]
+    #[serde(rename = "optional-dependencies")]
     pub optional_dependencies: Option<IndexMap<String, Vec<String>>>,
     pub urls: Option<IndexMap<String, String>>,
     pub scripts: Option<IndexMap<String, String>>,
-    #[serde(rename(serialize = "gui-scripts"))]
+    #[serde(rename = "gui-scripts")]
     pub gui_scripts: Option<IndexMap<String, String>>,
-    #[serde(rename(serialize = "entry-points"))]
+    #[serde(rename = "entry-points")]
     pub entry_points: Option<IndexMap<String, IndexMap<String, String>>>,
 }
 

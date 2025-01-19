@@ -6,7 +6,7 @@ use std::str::FromStr;
 
 #[derive(Deserialize, Serialize)]
 pub struct Poetry {
-    #[serde(rename(deserialize = "package-mode"))]
+    #[serde(rename = "package-mode")]
     pub package_mode: Option<bool>,
     pub name: Option<String>,
     pub version: Option<String>,
@@ -23,7 +23,7 @@ pub struct Poetry {
     pub source: Option<Vec<Source>>,
     pub dependencies: Option<IndexMap<String, DependencySpecification>>,
     pub extras: Option<IndexMap<String, Vec<String>>>,
-    #[serde(rename(deserialize = "dev-dependencies"))]
+    #[serde(rename = "dev-dependencies")]
     pub dev_dependencies: Option<IndexMap<String, DependencySpecification>>,
     pub group: Option<IndexMap<String, DependencyGroup>>,
     pub urls: Option<IndexMap<String, String>>,

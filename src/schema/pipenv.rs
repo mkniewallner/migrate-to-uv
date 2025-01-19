@@ -6,7 +6,7 @@ use std::collections::BTreeMap;
 pub struct Pipfile {
     pub source: Option<Vec<Source>>,
     pub packages: Option<IndexMap<String, DependencySpecification>>,
-    #[serde(rename(deserialize = "dev-packages"))]
+    #[serde(rename = "dev-packages")]
     pub dev_packages: Option<IndexMap<String, DependencySpecification>>,
     pub requires: Option<Requires>,
     /// Not used, this avoids having the section in `category_groups` below.
@@ -31,7 +31,7 @@ pub enum DependencySpecification {
         markers: Option<String>,
         index: Option<String>,
         git: Option<String>,
-        #[serde(rename(deserialize = "ref"))]
+        #[serde(rename = "ref")]
         ref_: Option<String>,
         path: Option<String>,
         editable: Option<bool>,
@@ -72,7 +72,7 @@ pub struct KeywordMarkers {
 pub struct PipenvLock {
     /// Not used, this avoids having the section in `category_groups` below.
     #[allow(dead_code)]
-    #[serde(rename(deserialize = "_meta"))]
+    #[serde(rename = "_meta")]
     meta: Option<Placeholder>,
     #[serde(flatten)]
     pub category_groups: Option<BTreeMap<String, BTreeMap<String, LockedPackage>>>,
