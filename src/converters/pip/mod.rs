@@ -1,6 +1,6 @@
 mod dependencies;
 
-use crate::converters::pip::dependencies::get_constraint_dependencies;
+use crate::converters::pip::dependencies::get;
 use crate::converters::pyproject_updater::PyprojectUpdater;
 use crate::converters::Converter;
 use crate::converters::ConverterOptions;
@@ -62,13 +62,7 @@ impl Converter for Pip {
 
         let uv = Uv {
             package: Some(false),
-            constraint_dependencies: get_constraint_dependencies(
-                !self.respect_locked_versions(),
-                self.is_pip_tools,
-                &self.get_project_path(),
-                self.requirements_files.clone(),
-                self.dev_requirements_files.clone(),
-            ),
+            constraint_dependencies: self.get_constraint_dependencies(),
             ..Default::default()
         };
 
@@ -125,6 +119,28 @@ impl Converter for Pip {
         }
 
         files_to_delete
+    }
+
+    fn get_constraint_dependencies(&self) -> Option<Vec<String>> {
+        if !self.is_pip_tools || self.is_dry_run() || !self.respect_locked_versions() {
+            return None;
+        }
+
+        if let Some(dependencies) = get(
+            self.get_project_path().as_path(),
+            self.requirements_files
+                .clone()
+                .into_iter()
+                .chain(self.dev_requirements_files.clone())
+                .map(|f| f.replace(".in", ".txt"))
+                .collect(),
+        ) {
+            if dependencies.is_empty() {
+                return None;
+            }
+            return Some(dependencies);
+        }
+        None
     }
 
     #[cfg(test)]

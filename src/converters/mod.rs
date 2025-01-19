@@ -6,6 +6,7 @@ use owo_colors::OwoColorize;
 #[cfg(test)]
 use std::any::Any;
 use std::fmt::Debug;
+use std::format;
 use std::fs::{remove_file, File};
 use std::io::{ErrorKind, Write};
 use std::path::{Path, PathBuf};
@@ -41,15 +42,10 @@ pub trait Converter: Debug {
         let updated_pyproject_string = self.build_uv_pyproject();
 
         if self.is_dry_run() {
-            let mut pyproject_updater = PyprojectUpdater {
-                pyproject: &mut updated_pyproject_string.parse::<DocumentMut>().unwrap(),
-            };
             info!(
                 "{}\n{}",
                 "Migrated pyproject.toml:".bold(),
-                pyproject_updater
-                    .remove_constraint_dependencies()
-                    .map_or(updated_pyproject_string, ToString::to_string)
+                updated_pyproject_string
             );
             return;
         }
@@ -139,12 +135,9 @@ pub trait Converter: Debug {
         Ok(())
     }
 
-    /// Lock dependencies with uv, unless dry-run mode is enabled, or user has explicitly opted out
-    /// from locking dependencies.
+    /// Lock dependencies with uv, unless user has explicitly opted out of locking dependencies.
     fn lock_dependencies(&self) {
-        if !self.is_dry_run()
-            && !self.skip_lock()
-            && lock_dependencies(self.get_project_path().as_ref(), false).is_err()
+        if !self.skip_lock() && lock_dependencies(self.get_project_path().as_ref(), false).is_err()
         {
             warn!(
                 "An error occurred when locking dependencies, so \"{}\" was not created.",
@@ -153,10 +146,16 @@ pub trait Converter: Debug {
         }
     }
 
+    /// Get dependencies constraints to set in `constraint-dependencies` under `[tool.uv]` section,
+    /// to keep dependencies locked to the same versions as they are with the current package
+    /// manager.
+    fn get_constraint_dependencies(&self) -> Option<Vec<String>>;
+
     /// Remove `constraint-dependencies` from `[tool.uv]` in `pyproject.toml`, unless user has
-    /// explicitly opted out of keeping versions locked in the current package manager.
+    /// opted out of keeping versions locked in the current package manager.
     ///
-    /// Also lock dependencies, to remove `constraints` from `[manifest]` in lock file.
+    /// Also lock dependencies, to remove `constraints` from `[manifest]` in lock file, unless user
+    /// has opted out of locking dependencies.
     fn remove_constraint_dependencies(&self, updated_pyproject_toml: String) {
         if !self.respect_locked_versions() {
             return;
@@ -173,8 +172,7 @@ pub trait Converter: Debug {
                 .unwrap();
 
             // Lock dependencies a second time, to remove constraints from lock file.
-            if !self.is_dry_run()
-                && !self.skip_lock()
+            if !self.skip_lock()
                 && lock_dependencies(self.get_project_path().as_ref(), true).is_err()
             {
                 warn!("An error occurred when locking dependencies after removing constraints.");

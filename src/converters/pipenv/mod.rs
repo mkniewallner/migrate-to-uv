@@ -2,15 +2,16 @@ mod dependencies;
 mod project;
 mod sources;
 
-use crate::converters::pipenv::dependencies::get_constraint_dependencies;
 use crate::converters::pyproject_updater::PyprojectUpdater;
 use crate::converters::Converter;
 use crate::converters::ConverterOptions;
 use crate::schema::pep_621::Project;
-use crate::schema::pipenv::Pipfile;
+use crate::schema::pipenv::{PipenvLock, Pipfile};
 use crate::schema::uv::{SourceContainer, Uv};
 use crate::toml::PyprojectPrettyFormatter;
 use indexmap::IndexMap;
+use log::warn;
+use owo_colors::OwoColorize;
 #[cfg(test)]
 use std::any::Any;
 use std::default::Default;
@@ -55,10 +56,7 @@ impl Converter for Pipenv {
                 Some(uv_source_index)
             },
             default_groups: uv_default_groups,
-            constraint_dependencies: get_constraint_dependencies(
-                !self.respect_locked_versions(),
-                &self.get_project_path().join("Pipfile.lock"),
-            ),
+            constraint_dependencies: self.get_constraint_dependencies(),
         };
 
         let pyproject_toml_content =
@@ -90,6 +88,38 @@ impl Converter for Pipenv {
 
     fn get_migrated_files_to_delete(&self) -> Vec<String> {
         vec!["Pipfile".to_string(), "Pipfile.lock".to_string()]
+    }
+
+    fn get_constraint_dependencies(&self) -> Option<Vec<String>> {
+        let pipenv_lock_path = self.get_project_path().join("Pipfile.lock");
+
+        if self.is_dry_run() || !self.respect_locked_versions() || !pipenv_lock_path.exists() {
+            return None;
+        }
+
+        let pipenv_lock_content = fs::read_to_string(pipenv_lock_path).unwrap();
+        let Ok(pipenv_lock) = serde_json::from_str::<PipenvLock>(pipenv_lock_content.as_str())
+        else {
+            warn!(
+            "Could not parse \"{}\", dependencies will not be kept to their current locked versions.",
+            "Pipfile.lock".bold()
+        );
+            return None;
+        };
+
+        let constraint_dependencies: Vec<String> = pipenv_lock
+            .category_groups
+            .unwrap_or_default()
+            .values()
+            .flatten()
+            .map(|(name, spec)| format!("{}{}", name, spec.version))
+            .collect();
+
+        if constraint_dependencies.is_empty() {
+            None
+        } else {
+            Some(constraint_dependencies)
+        }
     }
 
     #[cfg(test)]
