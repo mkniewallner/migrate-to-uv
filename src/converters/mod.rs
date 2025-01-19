@@ -135,12 +135,9 @@ pub trait Converter: Debug {
         Ok(())
     }
 
-    /// Lock dependencies with uv, unless dry-run mode is enabled, or user has explicitly opted out
-    /// from locking dependencies.
+    /// Lock dependencies with uv, unless user has explicitly opted out of locking dependencies.
     fn lock_dependencies(&self) {
-        if !self.is_dry_run()
-            && !self.skip_lock()
-            && lock_dependencies(self.get_project_path().as_ref(), false).is_err()
+        if !self.skip_lock() && lock_dependencies(self.get_project_path().as_ref(), false).is_err()
         {
             warn!(
                 "An error occurred when locking dependencies, so \"{}\" was not created.",
@@ -175,8 +172,7 @@ pub trait Converter: Debug {
                 .unwrap();
 
             // Lock dependencies a second time, to remove constraints from lock file.
-            if !self.is_dry_run()
-                && !self.skip_lock()
+            if !self.skip_lock()
                 && lock_dependencies(self.get_project_path().as_ref(), true).is_err()
             {
                 warn!("An error occurred when locking dependencies after removing constraints.");
