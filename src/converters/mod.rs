@@ -1,4 +1,5 @@
 use crate::converters::pyproject_updater::PyprojectUpdater;
+use crate::schema::pep_621::Project;
 use crate::schema::pyproject::DependencyGroupSpecification;
 use indexmap::IndexMap;
 use log::{error, info, warn};
@@ -73,6 +74,35 @@ pub trait Converter: Debug {
 
     /// Build `pyproject.toml` for uv package manager based on current package manager data.
     fn build_uv_pyproject(&self) -> String;
+
+    /// Build PEP 621 `[project]` section, keeping existing fields if the section is already
+    /// defined.
+    fn build_project(&self, current_project: Option<Project>, project: Project) -> Project {
+        let Some(current_project) = current_project else {
+            return project;
+        };
+
+        Project {
+            name: current_project.name.or(project.name),
+            version: current_project.version.or(project.version),
+            description: current_project.description.or(project.description),
+            authors: current_project.authors.or(project.authors),
+            requires_python: current_project.requires_python.or(project.requires_python),
+            readme: current_project.readme.or(project.readme),
+            license: current_project.license.or(project.license),
+            maintainers: current_project.maintainers.or(project.maintainers),
+            keywords: current_project.keywords.or(project.keywords),
+            classifiers: current_project.classifiers.or(project.classifiers),
+            dependencies: current_project.dependencies.or(project.dependencies),
+            optional_dependencies: current_project
+                .optional_dependencies
+                .or(project.optional_dependencies),
+            urls: current_project.urls.or(project.urls),
+            scripts: current_project.scripts.or(project.scripts),
+            gui_scripts: current_project.gui_scripts.or(project.gui_scripts),
+            entry_points: current_project.entry_points.or(project.entry_points),
+        }
+    }
 
     /// Name of the current package manager.
     fn get_package_manager_name(&self) -> String;

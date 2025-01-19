@@ -111,7 +111,7 @@ impl Converter for Poetry {
         pyproject_updater.insert_build_system(
             build_backend::get_new_build_system(pyproject.build_system).as_ref(),
         );
-        pyproject_updater.insert_pep_621(&project);
+        pyproject_updater.insert_pep_621(&self.build_project(pyproject.project, project));
         pyproject_updater.insert_dependency_groups(dependency_groups.as_ref());
         pyproject_updater.insert_uv(&uv);
         pyproject_updater.insert_hatch(hatch.as_ref());
