@@ -1,5 +1,5 @@
 use crate::converters;
-use crate::converters::Converter;
+use crate::converters::{Converter, ConverterOptions};
 use crate::schema::pyproject::PyProject;
 use log::debug;
 use owo_colors::OwoColorize;
@@ -56,10 +56,12 @@ fn project_already_uses_uv(project_path: &Path) -> (bool, String) {
 impl PackageManager {
     fn detected(
         &self,
-        project_path: &Path,
+        converter_options: &ConverterOptions,
         requirements_files: Vec<String>,
         dev_requirements_files: Vec<String>,
     ) -> Result<Box<dyn Converter>, String> {
+        let project_path = &converter_options.project_path;
+
         debug!("Checking if project uses {self}...");
 
         match self {
@@ -89,7 +91,7 @@ impl PackageManager {
 
                 debug!("{self} detected as a package manager.");
                 Ok(Box::new(converters::poetry::Poetry {
-                    project_path: project_path.to_path_buf(),
+                    converter_options: converter_options.clone(),
                 }))
             }
             Self::Pipenv => {
@@ -104,7 +106,7 @@ impl PackageManager {
 
                 debug!("{self} detected as a package manager.");
                 Ok(Box::new(converters::pipenv::Pipenv {
-                    project_path: project_path.to_path_buf(),
+                    converter_options: converter_options.clone(),
                 }))
             }
             Self::PipTools => {
@@ -131,7 +133,7 @@ impl PackageManager {
 
                 debug!("{self} detected as a package manager.");
                 Ok(Box::new(converters::pip::Pip {
-                    project_path: project_path.to_path_buf(),
+                    converter_options: converter_options.clone(),
                     requirements_files: found_requirements_files,
                     dev_requirements_files: found_dev_requirements_files,
                     is_pip_tools: true,
@@ -159,7 +161,7 @@ impl PackageManager {
 
                 debug!("{self} detected as a package manager.");
                 Ok(Box::new(converters::pip::Pip {
-                    project_path: project_path.to_path_buf(),
+                    converter_options: converter_options.clone(),
                     requirements_files: found_requirements_files,
                     dev_requirements_files: found_dev_requirements_files,
                     is_pip_tools: false,
@@ -183,11 +185,13 @@ impl Display for PackageManager {
 /// Auto-detects converter to use based on files (and their content) present in the project, or
 /// explicitly select the one associated to the package manager that could be enforced in the CLI.
 pub fn get_converter(
-    project_path: &Path,
+    converter_options: &ConverterOptions,
     requirements_files: Vec<String>,
     dev_requirements_files: Vec<String>,
     enforced_package_manager: Option<PackageManager>,
 ) -> Result<Box<dyn Converter>, String> {
+    let project_path = &converter_options.project_path;
+
     if !project_path.exists() {
         return Err(format!("{} does not exist.", project_path.display()));
     }
@@ -197,13 +201,13 @@ pub fn get_converter(
     }
 
     // Always check for uv first
-    if let (true, reason) = project_already_uses_uv(project_path) {
+    if let (true, reason) = project_already_uses_uv(project_path.as_path()) {
         return Err(format!("Project is already using uv ({reason})"));
     }
 
     if let Some(enforced_package_manager) = enforced_package_manager {
         return match enforced_package_manager.detected(
-            project_path,
+            converter_options,
             requirements_files,
             dev_requirements_files,
         ) {
@@ -219,7 +223,7 @@ pub fn get_converter(
         PackageManager::Pip,
     ] {
         match package_manager.detected(
-            project_path,
+            converter_options,
             requirements_files.clone(),
             dev_requirements_files.clone(),
         ) {
@@ -237,15 +241,29 @@ pub fn get_converter(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::converters::DependencyGroupsStrategy;
     use rstest::rstest;
     use std::path::PathBuf;
+
+    const fn get_converter_options(project_path: PathBuf) -> ConverterOptions {
+        ConverterOptions {
+            project_path,
+            dry_run: true,
+            skip_lock: true,
+            ignore_locked_versions: false,
+            keep_old_metadata: false,
+            dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+        }
+    }
 
     #[rstest]
     #[case("tests/fixtures/poetry/full")]
     #[case("tests/fixtures/poetry/minimal")]
     fn test_auto_detect_poetry_ok(#[case] project_path: &str) {
+        let converter_options = get_converter_options(PathBuf::from(project_path));
+
         let converter = get_converter(
-            Path::new(project_path),
+            &converter_options,
             vec!["requirements.txt".to_string()],
             vec!["requirements-dev.txt".to_string()],
             None,
@@ -256,9 +274,7 @@ mod tests {
                 .as_any()
                 .downcast_ref::<converters::poetry::Poetry>()
                 .unwrap(),
-            &converters::poetry::Poetry {
-                project_path: PathBuf::from(project_path)
-            }
+            &converters::poetry::Poetry { converter_options }
         );
     }
 
@@ -266,8 +282,10 @@ mod tests {
     #[case("tests/fixtures/pipenv/full")]
     #[case("tests/fixtures/pipenv/minimal")]
     fn test_auto_detect_pipenv_ok(#[case] project_path: &str) {
+        let converter_options = get_converter_options(PathBuf::from(project_path));
+
         let converter = get_converter(
-            Path::new(project_path),
+            &converter_options,
             vec!["requirements.txt".to_string()],
             vec!["requirements-dev.txt".to_string()],
             None,
@@ -278,16 +296,17 @@ mod tests {
                 .as_any()
                 .downcast_ref::<converters::pipenv::Pipenv>()
                 .unwrap(),
-            &converters::pipenv::Pipenv {
-                project_path: PathBuf::from(project_path)
-            }
+            &converters::pipenv::Pipenv { converter_options }
         );
     }
 
     #[test]
     fn test_auto_detect_pip_tools_ok() {
+        let converter_options =
+            get_converter_options(PathBuf::from("tests/fixtures/pip_tools/full"));
+
         let converter = get_converter(
-            Path::new("tests/fixtures/pip_tools/full"),
+            &converter_options,
             vec!["requirements.txt".to_string()],
             vec!["requirements-dev.txt".to_string()],
             None,
@@ -299,7 +318,7 @@ mod tests {
                 .downcast_ref::<converters::pip::Pip>()
                 .unwrap(),
             &converters::pip::Pip {
-                project_path: PathBuf::from("tests/fixtures/pip_tools/full"),
+                converter_options,
                 requirements_files: vec!["requirements.in".to_string()],
                 dev_requirements_files: vec!["requirements-dev.in".to_string()],
                 is_pip_tools: true,
@@ -309,8 +328,11 @@ mod tests {
 
     #[test]
     fn test_auto_detect_pip_ok() {
+        let converter_options =
+            get_converter_options(PathBuf::from("tests/fixtures/pip_tools/full"));
+
         let converter = get_converter(
-            Path::new("tests/fixtures/pip_tools/full"),
+            &converter_options,
             vec!["requirements.txt".to_string()],
             vec!["requirements-dev.txt".to_string()],
             None,
@@ -322,7 +344,7 @@ mod tests {
                 .downcast_ref::<converters::pip::Pip>()
                 .unwrap(),
             &converters::pip::Pip {
-                project_path: PathBuf::from("tests/fixtures/pip_tools/full"),
+                converter_options,
                 requirements_files: vec!["requirements.in".to_string()],
                 dev_requirements_files: vec!["requirements-dev.in".to_string()],
                 is_pip_tools: true,
@@ -344,8 +366,10 @@ mod tests {
         "Could not determine which package manager is used from the ones that are supported."
     )]
     fn test_auto_detect_err(#[case] project_path: &str, #[case] error: String) {
+        let converter_options = get_converter_options(PathBuf::from(project_path));
+
         let converter = get_converter(
-            Path::new(project_path),
+            &converter_options,
             vec!["requirements.txt".to_string()],
             vec!["requirements-dev.txt".to_string()],
             None,
@@ -357,8 +381,10 @@ mod tests {
     #[case("tests/fixtures/poetry/full")]
     #[case("tests/fixtures/poetry/minimal")]
     fn test_poetry_ok(#[case] project_path: &str) {
+        let converter_options = get_converter_options(PathBuf::from(project_path));
+
         let converter = get_converter(
-            Path::new(project_path),
+            &converter_options,
             vec!["requirements.txt".to_string()],
             vec!["requirements-dev.txt".to_string()],
             Some(PackageManager::Poetry),
@@ -369,9 +395,7 @@ mod tests {
                 .as_any()
                 .downcast_ref::<converters::poetry::Poetry>()
                 .unwrap(),
-            &converters::poetry::Poetry {
-                project_path: PathBuf::from(project_path)
-            }
+            &converters::poetry::Poetry { converter_options }
         );
     }
 
@@ -379,8 +403,10 @@ mod tests {
     #[case("tests/fixtures/poetry", format!("Directory does not contain a {} file.", "pyproject.toml".bold()))]
     #[case("tests/fixtures/pipenv/full", format!("{} does not contain a {} section.", "pyproject.toml".bold(), "[tool.poetry]".bold()))]
     fn test_poetry_err(#[case] project_path: &str, #[case] error: String) {
+        let converter_options = get_converter_options(PathBuf::from(project_path));
+
         let converter = get_converter(
-            Path::new(project_path),
+            &converter_options,
             vec!["requirements.txt".to_string()],
             vec!["requirements-dev.txt".to_string()],
             Some(PackageManager::Poetry),
@@ -392,8 +418,10 @@ mod tests {
     #[case("tests/fixtures/pipenv/full")]
     #[case("tests/fixtures/pipenv/minimal")]
     fn test_pipenv_ok(#[case] project_path: &str) {
+        let converter_options = get_converter_options(PathBuf::from(project_path));
+
         let converter = get_converter(
-            Path::new(project_path),
+            &converter_options,
             vec!["requirements.txt".to_string()],
             vec!["requirements-dev.txt".to_string()],
             Some(PackageManager::Pipenv),
@@ -404,16 +432,16 @@ mod tests {
                 .as_any()
                 .downcast_ref::<converters::pipenv::Pipenv>()
                 .unwrap(),
-            &converters::pipenv::Pipenv {
-                project_path: PathBuf::from(project_path)
-            }
+            &converters::pipenv::Pipenv { converter_options }
         );
     }
 
     #[test]
     fn test_pipenv_err() {
+        let converter_options = get_converter_options(PathBuf::from("tests/fixtures/pipenv"));
+
         let converter = get_converter(
-            Path::new("tests/fixtures/pipenv"),
+            &converter_options,
             vec!["requirements.txt".to_string()],
             vec!["requirements-dev.txt".to_string()],
             Some(PackageManager::Pipenv),
@@ -426,8 +454,11 @@ mod tests {
 
     #[test]
     fn test_pip_tools_ok() {
+        let converter_options =
+            get_converter_options(PathBuf::from("tests/fixtures/pip_tools/full"));
+
         let converter = get_converter(
-            Path::new("tests/fixtures/pip_tools/full"),
+            &converter_options,
             vec!["requirements.in".to_string()],
             vec![
                 "requirements-dev.in".to_string(),
@@ -442,7 +473,7 @@ mod tests {
                 .downcast_ref::<converters::pip::Pip>()
                 .unwrap(),
             &converters::pip::Pip {
-                project_path: PathBuf::from("tests/fixtures/pip_tools/full"),
+                converter_options,
                 requirements_files: vec!["requirements.in".to_string()],
                 dev_requirements_files: vec![
                     "requirements-dev.in".to_string(),
@@ -455,8 +486,10 @@ mod tests {
 
     #[test]
     fn test_pip_tools_err() {
+        let converter_options = get_converter_options(PathBuf::from("tests/fixtures/poetry/full"));
+
         let converter = get_converter(
-            Path::new("tests/fixtures/poetry/full"),
+            &converter_options,
             vec!["requirements.in".to_string()],
             vec![
                 "requirements-dev.in".to_string(),
@@ -472,8 +505,10 @@ mod tests {
 
     #[test]
     fn test_pip_ok() {
+        let converter_options = get_converter_options(PathBuf::from("tests/fixtures/pip/full"));
+
         let converter = get_converter(
-            Path::new("tests/fixtures/pip/full"),
+            &converter_options,
             vec!["requirements.txt".to_string()],
             vec![
                 "requirements-dev.txt".to_string(),
@@ -488,7 +523,7 @@ mod tests {
                 .downcast_ref::<converters::pip::Pip>()
                 .unwrap(),
             &converters::pip::Pip {
-                project_path: PathBuf::from("tests/fixtures/pip/full"),
+                converter_options,
                 requirements_files: vec!["requirements.txt".to_string()],
                 dev_requirements_files: vec![
                     "requirements-dev.txt".to_string(),
@@ -501,8 +536,10 @@ mod tests {
 
     #[test]
     fn test_pip_err() {
+        let converter_options = get_converter_options(PathBuf::from("tests/fixtures/poetry/full"));
+
         let converter = get_converter(
-            Path::new("tests/fixtures/poetry/full"),
+            &converter_options,
             vec!["requirements.txt".to_string()],
             vec![
                 "requirements-dev.txt".to_string(),
@@ -518,8 +555,10 @@ mod tests {
 
     #[test]
     fn test_auto_detect_already_using_uv() {
+        let converter_options = get_converter_options(PathBuf::from("tests/fixtures/uv/minimal"));
+
         let converter = get_converter(
-            Path::new("tests/fixtures/uv/minimal"),
+            &converter_options,
             vec!["requirements.txt".to_string()],
             vec!["requirements-dev.txt".to_string()],
             None,
@@ -536,8 +575,10 @@ mod tests {
 
     #[test]
     fn test_auto_detect_already_using_uv_by_config() {
+        let converter_options = get_converter_options(PathBuf::from("tests/fixtures/uv/minimal"));
+
         let converter = get_converter(
-            Path::new("tests/fixtures/uv/minimal"),
+            &converter_options,
             vec!["requirements.txt".to_string()],
             vec!["requirements-dev.txt".to_string()],
             None,
@@ -554,8 +595,10 @@ mod tests {
 
     #[test]
     fn test_auto_detect_already_using_uv_by_lock() {
+        let converter_options = get_converter_options(PathBuf::from("tests/fixtures/uv/with_lock"));
+
         let converter = get_converter(
-            Path::new("tests/fixtures/uv/with_lock"),
+            &converter_options,
             vec!["requirements.txt".to_string()],
             vec!["requirements-dev.txt".to_string()],
             None,

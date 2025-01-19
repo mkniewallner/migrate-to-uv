@@ -7,123 +7,28 @@ pub mod version;
 use crate::converters::poetry::build_backend::get_hatch;
 use crate::converters::poetry::dependencies::get_constraint_dependencies;
 use crate::converters::pyproject_updater::PyprojectUpdater;
-use crate::converters::DependencyGroupsStrategy;
-use crate::converters::{lock_dependencies, Converter};
+use crate::converters::Converter;
+use crate::converters::ConverterOptions;
 use crate::schema::pep_621::Project;
 use crate::schema::pyproject::PyProject;
 use crate::schema::uv::{SourceContainer, Uv};
 use crate::toml::PyprojectPrettyFormatter;
 use indexmap::IndexMap;
-use log::{info, warn};
-use owo_colors::OwoColorize;
 #[cfg(test)]
 use std::any::Any;
 use std::fs;
-use std::fs::{remove_file, File};
-use std::io::Write;
-use std::path::PathBuf;
 use toml_edit::visit_mut::VisitMut;
 use toml_edit::DocumentMut;
 
-const FILES_TO_DELETE: &[&str] = &["poetry.lock", "poetry.toml"];
-
 #[derive(Debug, PartialEq, Eq)]
 pub struct Poetry {
-    pub project_path: PathBuf,
+    pub converter_options: ConverterOptions,
 }
 
 impl Converter for Poetry {
-    fn convert_to_uv(
-        &self,
-        dry_run: bool,
-        skip_lock: bool,
-        ignore_locked_versions: bool,
-        keep_old_metadata: bool,
-        dependency_groups_strategy: DependencyGroupsStrategy,
-    ) {
-        let pyproject_path = self.project_path.join("pyproject.toml");
-        let updated_pyproject_string = self.perform_migration(
-            ignore_locked_versions,
-            keep_old_metadata,
-            dependency_groups_strategy,
-        );
-
-        if dry_run {
-            let mut pyproject_updater = PyprojectUpdater {
-                pyproject: &mut updated_pyproject_string.parse::<DocumentMut>().unwrap(),
-            };
-            info!(
-                "{}\n{}",
-                "Migrated pyproject.toml:".bold(),
-                pyproject_updater
-                    .remove_constraint_dependencies()
-                    .map_or(updated_pyproject_string, ToString::to_string)
-            );
-            return;
-        }
-
-        let mut pyproject_file = File::create(&pyproject_path).unwrap();
-
-        pyproject_file
-            .write_all(updated_pyproject_string.as_bytes())
-            .unwrap();
-
-        if !keep_old_metadata {
-            self.delete_poetry_references().unwrap();
-        }
-
-        if !dry_run && !skip_lock && lock_dependencies(self.project_path.as_ref(), false).is_err() {
-            warn!(
-                "An error occurred when locking dependencies, so \"{}\" was not created.",
-                "uv.lock".bold()
-            );
-        }
-
-        if !ignore_locked_versions {
-            let mut pyproject_updater = PyprojectUpdater {
-                pyproject: &mut updated_pyproject_string.parse::<DocumentMut>().unwrap(),
-            };
-            if let Some(updated_pyproject) = pyproject_updater.remove_constraint_dependencies() {
-                let mut pyproject_file = File::create(pyproject_path).unwrap();
-                pyproject_file
-                    .write_all(updated_pyproject.to_string().as_bytes())
-                    .unwrap();
-
-                // Lock dependencies a second time, to remove constraints from lock file.
-                if !dry_run
-                    && !skip_lock
-                    && lock_dependencies(self.project_path.as_ref(), true).is_err()
-                {
-                    warn!(
-                        "An error occurred when locking dependencies after removing constraints."
-                    );
-                }
-            }
-        }
-
-        info!(
-            "{}",
-            "Successfully migrated project from Poetry to uv!\n"
-                .bold()
-                .green()
-        );
-    }
-
-    #[cfg(test)]
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-}
-
-impl Poetry {
-    fn perform_migration(
-        &self,
-        ignore_locked_versions: bool,
-        keep_old_metadata: bool,
-        dependency_groups_strategy: DependencyGroupsStrategy,
-    ) -> String {
+    fn build_uv_pyproject(&self) -> String {
         let pyproject_toml_content =
-            fs::read_to_string(self.project_path.join("pyproject.toml")).unwrap_or_default();
+            fs::read_to_string(self.get_project_path().join("pyproject.toml")).unwrap_or_default();
         let pyproject: PyProject = toml::from_str(pyproject_toml_content.as_str()).unwrap();
 
         let poetry = pyproject.tool.unwrap().poetry.unwrap();
@@ -133,7 +38,7 @@ impl Poetry {
             dependencies::get_dependency_groups_and_default_groups(
                 &poetry,
                 &mut uv_source_index,
-                dependency_groups_strategy,
+                self.get_dependency_groups_strategy(),
             );
         let mut poetry_dependencies = poetry.dependencies;
 
@@ -188,8 +93,8 @@ impl Poetry {
             },
             default_groups: uv_default_groups,
             constraint_dependencies: get_constraint_dependencies(
-                ignore_locked_versions,
-                &self.project_path.join("poetry.lock"),
+                !self.respect_locked_versions(),
+                &self.get_project_path().join("poetry.lock"),
             ),
         };
 
@@ -212,7 +117,7 @@ impl Poetry {
         pyproject_updater.insert_uv(&uv);
         pyproject_updater.insert_hatch(hatch.as_ref());
 
-        if !keep_old_metadata {
+        if !self.keep_old_metadata() {
             remove_pyproject_poetry_section(&mut updated_pyproject);
         }
 
@@ -224,16 +129,21 @@ impl Poetry {
         updated_pyproject.to_string()
     }
 
-    fn delete_poetry_references(&self) -> std::io::Result<()> {
-        for file in FILES_TO_DELETE {
-            let path = self.project_path.join(file);
+    fn get_package_manager_name(&self) -> String {
+        "Poetry".to_string()
+    }
 
-            if path.exists() {
-                remove_file(path)?;
-            }
-        }
+    fn get_converter_options(&self) -> &ConverterOptions {
+        &self.converter_options
+    }
 
-        Ok(())
+    fn get_migrated_files_to_delete(&self) -> Vec<String> {
+        vec!["poetry.lock".to_string(), "poetry.toml".to_string()]
+    }
+
+    #[cfg(test)]
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -249,6 +159,10 @@ fn remove_pyproject_poetry_section(pyproject: &mut DocumentMut) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::converters::DependencyGroupsStrategy;
+    use std::fs::File;
+    use std::io::Write;
+    use std::path::PathBuf;
     use tempfile::tempdir;
 
     #[test]
@@ -267,10 +181,17 @@ mod tests {
             .unwrap();
 
         let poetry = Poetry {
-            project_path: PathBuf::from(project_path),
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+            },
         };
 
-        insta::assert_snapshot!(poetry.perform_migration(true, false, DependencyGroupsStrategy::SetDefaultGroups), @r###"
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r###"
         [project]
         name = ""
         version = "0.0.1"

@@ -4,120 +4,28 @@ mod sources;
 
 use crate::converters::pipenv::dependencies::get_constraint_dependencies;
 use crate::converters::pyproject_updater::PyprojectUpdater;
-use crate::converters::DependencyGroupsStrategy;
-use crate::converters::{lock_dependencies, Converter};
+use crate::converters::Converter;
+use crate::converters::ConverterOptions;
 use crate::schema::pep_621::Project;
 use crate::schema::pipenv::Pipfile;
 use crate::schema::uv::{SourceContainer, Uv};
 use crate::toml::PyprojectPrettyFormatter;
 use indexmap::IndexMap;
-use log::{info, warn};
-use owo_colors::OwoColorize;
 #[cfg(test)]
 use std::any::Any;
 use std::default::Default;
 use std::fs;
-use std::fs::{remove_file, File};
-use std::io::Write;
-use std::path::PathBuf;
 use toml_edit::visit_mut::VisitMut;
 use toml_edit::DocumentMut;
 
-const FILES_TO_DELETE: &[&str] = &["Pipfile", "Pipfile.lock"];
-
 #[derive(Debug, PartialEq, Eq)]
 pub struct Pipenv {
-    pub project_path: PathBuf,
+    pub converter_options: ConverterOptions,
 }
 
 impl Converter for Pipenv {
-    fn convert_to_uv(
-        &self,
-        dry_run: bool,
-        skip_lock: bool,
-        ignore_locked_versions: bool,
-        keep_old_metadata: bool,
-        dependency_groups_strategy: DependencyGroupsStrategy,
-    ) {
-        let pyproject_path = self.project_path.join("pyproject.toml");
-        let updated_pyproject_string =
-            self.perform_migration(ignore_locked_versions, dependency_groups_strategy);
-
-        if dry_run {
-            let mut pyproject_updater = PyprojectUpdater {
-                pyproject: &mut updated_pyproject_string.parse::<DocumentMut>().unwrap(),
-            };
-            info!(
-                "{}\n{}",
-                "Migrated pyproject.toml:".bold(),
-                pyproject_updater
-                    .remove_constraint_dependencies()
-                    .map_or(updated_pyproject_string, ToString::to_string)
-            );
-        } else {
-            let mut pyproject_file = File::create(&pyproject_path).unwrap();
-
-            pyproject_file
-                .write_all(updated_pyproject_string.as_bytes())
-                .unwrap();
-
-            if !keep_old_metadata {
-                self.delete_pipenv_references().unwrap();
-            }
-
-            if !dry_run
-                && !skip_lock
-                && lock_dependencies(self.project_path.as_ref(), false).is_err()
-            {
-                warn!(
-                    "An error occurred when locking dependencies, so \"{}\" was not created.",
-                    "uv.lock".bold()
-                );
-            }
-
-            if !ignore_locked_versions {
-                let mut pyproject_updater = PyprojectUpdater {
-                    pyproject: &mut updated_pyproject_string.parse::<DocumentMut>().unwrap(),
-                };
-                if let Some(updated_pyproject) = pyproject_updater.remove_constraint_dependencies()
-                {
-                    let mut pyproject_file = File::create(pyproject_path).unwrap();
-                    pyproject_file
-                        .write_all(updated_pyproject.to_string().as_bytes())
-                        .unwrap();
-
-                    // Lock dependencies a second time, to remove constraints from lock file.
-                    if !dry_run
-                        && !skip_lock
-                        && lock_dependencies(self.project_path.as_ref(), true).is_err()
-                    {
-                        warn!("An error occurred when locking dependencies after removing constraints.");
-                    }
-                }
-            }
-
-            info!(
-                "{}",
-                "Successfully migrated project from Pipenv to uv!\n"
-                    .bold()
-                    .green()
-            );
-        }
-    }
-
-    #[cfg(test)]
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-}
-
-impl Pipenv {
-    fn perform_migration(
-        &self,
-        ignore_locked_versions: bool,
-        dependency_groups_strategy: DependencyGroupsStrategy,
-    ) -> String {
-        let pipfile_content = fs::read_to_string(self.project_path.join("Pipfile")).unwrap();
+    fn build_uv_pyproject(&self) -> String {
+        let pipfile_content = fs::read_to_string(self.get_project_path().join("Pipfile")).unwrap();
         let pipfile: Pipfile = toml::from_str(pipfile_content.as_str()).unwrap();
 
         let mut uv_source_index: IndexMap<String, SourceContainer> = IndexMap::new();
@@ -125,7 +33,7 @@ impl Pipenv {
             dependencies::get_dependency_groups_and_default_groups(
                 &pipfile,
                 &mut uv_source_index,
-                dependency_groups_strategy,
+                self.get_dependency_groups_strategy(),
             );
 
         let project = Project {
@@ -148,13 +56,13 @@ impl Pipenv {
             },
             default_groups: uv_default_groups,
             constraint_dependencies: get_constraint_dependencies(
-                ignore_locked_versions,
-                &self.project_path.join("Pipfile.lock"),
+                !self.respect_locked_versions(),
+                &self.get_project_path().join("Pipfile.lock"),
             ),
         };
 
         let pyproject_toml_content =
-            fs::read_to_string(self.project_path.join("pyproject.toml")).unwrap_or_default();
+            fs::read_to_string(self.get_project_path().join("pyproject.toml")).unwrap_or_default();
         let mut updated_pyproject = pyproject_toml_content.parse::<DocumentMut>().unwrap();
         let mut pyproject_updater = PyprojectUpdater {
             pyproject: &mut updated_pyproject,
@@ -172,22 +80,31 @@ impl Pipenv {
         updated_pyproject.to_string()
     }
 
-    fn delete_pipenv_references(&self) -> std::io::Result<()> {
-        for file in FILES_TO_DELETE {
-            let path = self.project_path.join(file);
+    fn get_package_manager_name(&self) -> String {
+        "Pipenv".to_string()
+    }
 
-            if path.exists() {
-                remove_file(path)?;
-            }
-        }
+    fn get_converter_options(&self) -> &ConverterOptions {
+        &self.converter_options
+    }
 
-        Ok(())
+    fn get_migrated_files_to_delete(&self) -> Vec<String> {
+        vec!["Pipfile".to_string(), "Pipfile.lock".to_string()]
+    }
+
+    #[cfg(test)]
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::converters::DependencyGroupsStrategy;
+    use std::fs::File;
+    use std::io::Write;
+    use std::path::PathBuf;
     use tempfile::tempdir;
 
     #[test]
@@ -204,10 +121,17 @@ mod tests {
         pipfile_file.write_all(pipfile_content.as_bytes()).unwrap();
 
         let pipenv = Pipenv {
-            project_path: PathBuf::from(project_path),
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+            },
         };
 
-        insta::assert_snapshot!(pipenv.perform_migration(true, DependencyGroupsStrategy::SetDefaultGroups), @r###"
+        insta::assert_snapshot!(pipenv.build_uv_pyproject(), @r###"
         [project]
         name = ""
         version = "0.0.1"
@@ -229,10 +153,17 @@ mod tests {
         pipfile_file.write_all(pipfile_content.as_bytes()).unwrap();
 
         let pipenv = Pipenv {
-            project_path: PathBuf::from(project_path),
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+            },
         };
 
-        insta::assert_snapshot!(pipenv.perform_migration(true, DependencyGroupsStrategy::SetDefaultGroups), @r###"
+        insta::assert_snapshot!(pipenv.build_uv_pyproject(), @r###"
         [project]
         name = ""
         version = "0.0.1"

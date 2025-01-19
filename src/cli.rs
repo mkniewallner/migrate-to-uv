@@ -1,4 +1,4 @@
-use crate::converters::DependencyGroupsStrategy;
+use crate::converters::{ConverterOptions, DependencyGroupsStrategy};
 use crate::detector::{get_converter, PackageManager};
 use crate::logger;
 use clap::builder::styling::{AnsiColor, Effects};
@@ -67,20 +67,23 @@ pub fn cli() {
 
     logger::configure(cli.verbose);
 
+    let converter_options = ConverterOptions {
+        project_path: PathBuf::from(&cli.path),
+        dry_run: cli.dry_run,
+        skip_lock: cli.skip_lock,
+        ignore_locked_versions: cli.ignore_locked_versions,
+        keep_old_metadata: cli.keep_current_data,
+        dependency_groups_strategy: cli.dependency_groups_strategy,
+    };
+
     match get_converter(
-        &cli.path,
+        &converter_options,
         cli.requirements_file,
         cli.dev_requirements_file,
         cli.package_manager,
     ) {
         Ok(converter) => {
-            converter.convert_to_uv(
-                cli.dry_run,
-                cli.skip_lock,
-                cli.ignore_locked_versions,
-                cli.keep_current_data,
-                cli.dependency_groups_strategy,
-            );
+            converter.convert_to_uv();
         }
         Err(error) => {
             error!("{}", error);
