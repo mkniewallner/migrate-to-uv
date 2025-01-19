@@ -25,7 +25,7 @@ pub struct Pip {
 }
 
 impl Converter for Pip {
-    fn perform_migration(&self) -> String {
+    fn build_uv_pyproject(&self) -> String {
         let dev_dependencies = dependencies::get(
             &self.get_project_path(),
             self.dev_requirements_files.clone(),

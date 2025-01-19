@@ -24,7 +24,7 @@ pub struct Pipenv {
 }
 
 impl Converter for Pipenv {
-    fn perform_migration(&self) -> String {
+    fn build_uv_pyproject(&self) -> String {
         let pipfile_content = fs::read_to_string(self.get_project_path().join("Pipfile")).unwrap();
         let pipfile: Pipfile = toml::from_str(pipfile_content.as_str()).unwrap();
 
@@ -131,7 +131,7 @@ mod tests {
             },
         };
 
-        insta::assert_snapshot!(pipenv.perform_migration(), @r###"
+        insta::assert_snapshot!(pipenv.build_uv_pyproject(), @r###"
         [project]
         name = ""
         version = "0.0.1"
@@ -163,7 +163,7 @@ mod tests {
             },
         };
 
-        insta::assert_snapshot!(pipenv.perform_migration(), @r###"
+        insta::assert_snapshot!(pipenv.build_uv_pyproject(), @r###"
         [project]
         name = ""
         version = "0.0.1"

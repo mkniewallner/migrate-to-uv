@@ -26,7 +26,7 @@ pub struct Poetry {
 }
 
 impl Converter for Poetry {
-    fn perform_migration(&self) -> String {
+    fn build_uv_pyproject(&self) -> String {
         let pyproject_toml_content =
             fs::read_to_string(self.get_project_path().join("pyproject.toml")).unwrap_or_default();
         let pyproject: PyProject = toml::from_str(pyproject_toml_content.as_str()).unwrap();
@@ -191,7 +191,7 @@ mod tests {
             },
         };
 
-        insta::assert_snapshot!(poetry.perform_migration(), @r###"
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r###"
         [project]
         name = ""
         version = "0.0.1"

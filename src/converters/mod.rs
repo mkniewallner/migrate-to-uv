@@ -38,7 +38,7 @@ pub trait Converter: Debug {
     /// Performs the conversion from the current package manager to uv.
     fn convert_to_uv(&self) {
         let pyproject_path = self.get_project_path().join("pyproject.toml");
-        let updated_pyproject_string = self.perform_migration();
+        let updated_pyproject_string = self.build_uv_pyproject();
 
         if self.is_dry_run() {
             let mut pyproject_updater = PyprojectUpdater {
@@ -75,8 +75,8 @@ pub trait Converter: Debug {
         );
     }
 
-    /// Performs the migration by handling current package manager specifics.
-    fn perform_migration(&self) -> String;
+    /// Build `pyproject.toml` for uv package manager based on current package manager data.
+    fn build_uv_pyproject(&self) -> String;
 
     /// Name of the current package manager.
     fn get_package_manager_name(&self) -> String;
