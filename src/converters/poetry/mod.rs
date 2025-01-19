@@ -5,15 +5,17 @@ mod sources;
 pub mod version;
 
 use crate::converters::poetry::build_backend::get_hatch;
-use crate::converters::poetry::dependencies::get_constraint_dependencies;
 use crate::converters::pyproject_updater::PyprojectUpdater;
 use crate::converters::Converter;
 use crate::converters::ConverterOptions;
 use crate::schema::pep_621::Project;
+use crate::schema::poetry::PoetryLock;
 use crate::schema::pyproject::PyProject;
 use crate::schema::uv::{SourceContainer, Uv};
 use crate::toml::PyprojectPrettyFormatter;
 use indexmap::IndexMap;
+use log::warn;
+use owo_colors::OwoColorize;
 #[cfg(test)]
 use std::any::Any;
 use std::fs;
@@ -92,10 +94,7 @@ impl Converter for Poetry {
                 Some(uv_source_index)
             },
             default_groups: uv_default_groups,
-            constraint_dependencies: get_constraint_dependencies(
-                !self.respect_locked_versions(),
-                &self.get_project_path().join("poetry.lock"),
-            ),
+            constraint_dependencies: self.get_constraint_dependencies(),
         };
 
         let hatch = get_hatch(
@@ -139,6 +138,36 @@ impl Converter for Poetry {
 
     fn get_migrated_files_to_delete(&self) -> Vec<String> {
         vec!["poetry.lock".to_string(), "poetry.toml".to_string()]
+    }
+
+    fn get_constraint_dependencies(&self) -> Option<Vec<String>> {
+        let poetry_lock_path = self.get_project_path().join("poetry.lock");
+
+        if self.is_dry_run() || !self.respect_locked_versions() || !poetry_lock_path.exists() {
+            return None;
+        }
+
+        let poetry_lock_content = fs::read_to_string(poetry_lock_path).unwrap();
+        let Ok(poetry_lock) = toml::from_str::<PoetryLock>(poetry_lock_content.as_str()) else {
+            warn!(
+            "Could not parse \"{}\", dependencies will not be kept to their current locked versions.",
+            "poetry.lock".bold()
+        );
+            return None;
+        };
+
+        let constraint_dependencies: Vec<String> = poetry_lock
+            .package
+            .unwrap_or_default()
+            .iter()
+            .map(|p| format!("{}=={}", p.name, p.version))
+            .collect();
+
+        if constraint_dependencies.is_empty() {
+            None
+        } else {
+            Some(constraint_dependencies)
+        }
     }
 
     #[cfg(test)]

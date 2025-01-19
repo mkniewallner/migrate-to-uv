@@ -1,15 +1,13 @@
 use crate::converters::poetry::sources;
 use crate::converters::{DependencyGroupsAndDefaultGroups, DependencyGroupsStrategy};
 use crate::schema;
-use crate::schema::poetry::{DependencySpecification, PoetryLock};
+use crate::schema::poetry::DependencySpecification;
 use crate::schema::pyproject::DependencyGroupSpecification;
 use crate::schema::uv::{SourceContainer, SourceIndex};
 use indexmap::IndexMap;
 use log::warn;
 use owo_colors::OwoColorize;
 use std::collections::HashSet;
-use std::fs;
-use std::path::Path;
 
 pub fn get(
     poetry_dependencies: Option<&IndexMap<String, DependencySpecification>>,
@@ -216,35 +214,4 @@ pub fn get_dependency_groups_and_default_groups(
             Some(default_groups)
         },
     )
-}
-
-pub fn get_constraint_dependencies(
-    ignore_locked_versions: bool,
-    poetry_lock_path: &Path,
-) -> Option<Vec<String>> {
-    if ignore_locked_versions || !poetry_lock_path.exists() {
-        return None;
-    }
-
-    let poetry_lock_content = fs::read_to_string(poetry_lock_path).unwrap();
-    let Ok(poetry_lock) = toml::from_str::<PoetryLock>(poetry_lock_content.as_str()) else {
-        warn!(
-            "Could not parse \"{}\", dependencies will not be kept to their current locked versions.",
-            "poetry.lock".bold()
-        );
-        return None;
-    };
-
-    let constraint_dependencies: Vec<String> = poetry_lock
-        .package
-        .unwrap_or_default()
-        .iter()
-        .map(|p| format!("{}=={}", p.name, p.version))
-        .collect();
-
-    if constraint_dependencies.is_empty() {
-        None
-    } else {
-        Some(constraint_dependencies)
-    }
 }
