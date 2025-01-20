@@ -43,6 +43,11 @@ struct Cli {
     ignore_locked_versions: bool,
     #[arg(
         long,
+        help = "Replace existing data in `[project]` section of `pyproject.toml` instead of keeping existing fields"
+    )]
+    replace_project_section: bool,
+    #[arg(
+        long,
         help = "Enforce a specific package manager instead of auto-detecting it"
     )]
     package_manager: Option<PackageManager>,
@@ -72,6 +77,7 @@ pub fn cli() {
         dry_run: cli.dry_run,
         skip_lock: cli.skip_lock,
         ignore_locked_versions: cli.ignore_locked_versions,
+        replace_project_section: cli.replace_project_section,
         keep_old_metadata: cli.keep_current_data,
         dependency_groups_strategy: cli.dependency_groups_strategy,
     };

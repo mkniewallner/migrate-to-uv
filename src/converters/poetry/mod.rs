@@ -83,6 +83,7 @@ impl Converter for Poetry {
             scripts: project::get_scripts(poetry.scripts, scripts_from_plugins),
             gui_scripts,
             entry_points: poetry_plugins,
+            ..Default::default()
         };
 
         let uv = Uv {
@@ -111,7 +112,7 @@ impl Converter for Poetry {
         pyproject_updater.insert_build_system(
             build_backend::get_new_build_system(pyproject.build_system).as_ref(),
         );
-        pyproject_updater.insert_pep_621(&project);
+        pyproject_updater.insert_pep_621(&self.build_project(pyproject.project, project));
         pyproject_updater.insert_dependency_groups(dependency_groups.as_ref());
         pyproject_updater.insert_uv(&uv);
         pyproject_updater.insert_hatch(hatch.as_ref());
@@ -215,6 +216,7 @@ mod tests {
                 dry_run: true,
                 skip_lock: true,
                 ignore_locked_versions: true,
+                replace_project_section: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
             },
