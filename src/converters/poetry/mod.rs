@@ -83,6 +83,7 @@ impl Converter for Poetry {
             scripts: project::get_scripts(poetry.scripts, scripts_from_plugins),
             gui_scripts,
             entry_points: poetry_plugins,
+            ..Default::default()
         };
 
         let uv = Uv {
