@@ -445,3 +445,49 @@ fn test_dry_run() {
     // Assert that `uv.lock` file was not generated.
     assert!(!project_path.join("uv.lock").exists());
 }
+
+#[test]
+fn test_preserves_existing_project() {
+    let project_path = Path::new(FIXTURES_PATH).join("existing_project");
+
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Migrated pyproject.toml:
+    [project]
+    name = "foobar"
+    version = "1.0.0"
+    requires-python = ">=3.13"
+    dependencies = ["arrow>=1.2.3"]
+
+    [tool.uv]
+    package = false
+    "###);
+}
+
+#[test]
+fn test_replaces_existing_project() {
+    let project_path = Path::new(FIXTURES_PATH).join("existing_project");
+
+    assert_cmd_snapshot!(cli()
+        .arg(&project_path)
+        .arg("--dry-run")
+        .arg("--replace-project-section"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Migrated pyproject.toml:
+    [project]
+    name = ""
+    version = "0.0.1"
+    dependencies = ["arrow>=1.2.3"]
+
+    [tool.uv]
+    package = false
+    "###);
+}

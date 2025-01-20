@@ -804,3 +804,66 @@ fn test_dry_run_minimal() {
     // Assert that `uv.lock` file was not generated.
     assert!(!project_path.join("uv.lock").exists());
 }
+
+#[test]
+fn test_preserves_existing_project() {
+    let project_path = Path::new(FIXTURES_PATH).join("existing_project");
+
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Migrated pyproject.toml:
+    [project]
+    name = "foobar"
+    version = "1.0.0"
+    description = "A description"
+    requires-python = ">=3.13"
+    dependencies = ["arrow>=1.2.3,<2"]
+
+    [dependency-groups]
+    dev = ["factory-boy>=3.2.1,<4"]
+    typing = ["mypy>=1.13.0,<2"]
+
+    [tool.uv]
+    default-groups = [
+        "dev",
+        "typing",
+    ]
+    "###);
+}
+
+#[test]
+fn test_replaces_existing_project() {
+    let project_path = Path::new(FIXTURES_PATH).join("existing_project");
+
+    assert_cmd_snapshot!(cli()
+        .arg(&project_path)
+        .arg("--dry-run")
+        .arg("--replace-project-section"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Migrated pyproject.toml:
+    [project]
+    name = "foo"
+    version = "0.0.1"
+    description = "A description"
+    requires-python = "~=3.11"
+    dependencies = ["arrow>=1.2.3,<2"]
+
+    [dependency-groups]
+    dev = ["factory-boy>=3.2.1,<4"]
+    typing = ["mypy>=1.13.0,<2"]
+
+    [tool.uv]
+    default-groups = [
+        "dev",
+        "typing",
+    ]
+    "###);
+}

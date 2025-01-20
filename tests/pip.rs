@@ -343,3 +343,87 @@ fn test_dry_run() {
     // Assert that `uv.lock` file was not generated.
     assert!(!project_path.join("uv.lock").exists());
 }
+
+#[test]
+fn test_preserves_existing_project() {
+    let project_path = Path::new(FIXTURES_PATH).join("existing_project");
+
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Migrated pyproject.toml:
+    [project]
+    name = "foobar"
+    version = "1.0.0"
+    requires-python = ">=3.13"
+    dependencies = [
+        "anyio==4.7.0",
+        "arrow==1.3.0",
+        "certifi==2024.12.14",
+        "click==8.1.8",
+        "h11==0.14.0",
+        "httpcore==1.0.7",
+        "httpx==0.28.1",
+        "idna==3.10",
+        "markdown-it-py==3.0.0",
+        "mdurl==0.1.2",
+        "pygments==2.18.0",
+        "python-dateutil==2.9.0.post0",
+        "rich==13.9.4",
+        "six==1.17.0",
+        "sniffio==1.3.1",
+        "types-python-dateutil==2.9.0.20241206",
+        "uvicorn @ git+https://github.com/encode/uvicorn",
+        "zstandard==0.23.0",
+    ]
+
+    [tool.uv]
+    package = false
+    "###);
+}
+
+#[test]
+fn test_replaces_existing_project() {
+    let project_path = Path::new(FIXTURES_PATH).join("existing_project");
+
+    assert_cmd_snapshot!(cli()
+        .arg(&project_path)
+        .arg("--dry-run")
+        .arg("--replace-project-section"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Migrated pyproject.toml:
+    [project]
+    name = ""
+    version = "0.0.1"
+    dependencies = [
+        "anyio==4.7.0",
+        "arrow==1.3.0",
+        "certifi==2024.12.14",
+        "click==8.1.8",
+        "h11==0.14.0",
+        "httpcore==1.0.7",
+        "httpx==0.28.1",
+        "idna==3.10",
+        "markdown-it-py==3.0.0",
+        "mdurl==0.1.2",
+        "pygments==2.18.0",
+        "python-dateutil==2.9.0.post0",
+        "rich==13.9.4",
+        "six==1.17.0",
+        "sniffio==1.3.1",
+        "types-python-dateutil==2.9.0.20241206",
+        "uvicorn @ git+https://github.com/encode/uvicorn",
+        "zstandard==0.23.0",
+    ]
+
+    [tool.uv]
+    package = false
+    "###);
+}

@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+Existing data in `[project]` section of `pyproject.toml` is now preserved by default when migrating. If you prefer that the section is fully replaced, this can be done by setting `--replace-project-section` flag, like so:
+
+```bash
+migrate-to-uv --replace-project-section
+```
+
+### Features
+
+* Preserve existing data in `[project]` section of `pyproject.toml` when migrating ([#84](https://github.com/mkniewallner/migrate-to-uv/pull/84))
+
 ## 0.5.0 - 2025-01-18
 
 ### Features

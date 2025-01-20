@@ -66,6 +66,17 @@ constraints.
 migrate-to-uv --ignore-locked-versions
 ```
 
+#### `--replace-project-section`
+
+By default, existing data in `[project]` section of `pyproject.toml` is preserved when migrating. This flag allows
+completely replacing existing content.
+
+**Example**:
+
+```bash
+migrate-to-uv --replace-project-section
+```
+
 #### `--package-manager`
 
 By default, `migrate-to-uv` tries to auto-detect the package manager based on the files (and their content) used by the

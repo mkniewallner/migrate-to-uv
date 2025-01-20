@@ -633,3 +633,74 @@ fn test_dry_run_minimal() {
     // Assert that `uv.lock` file was not generated.
     assert!(!project_path.join("uv.lock").exists());
 }
+
+#[test]
+fn test_preserves_existing_project() {
+    let project_path = Path::new(FIXTURES_PATH).join("existing_project");
+
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Migrated pyproject.toml:
+    [project]
+    name = "foobar"
+    version = "1.0.0"
+    requires-python = ">=3.13"
+    dependencies = ["arrow>=1.2.3"]
+
+    [dependency-groups]
+    dev = ["mypy>=1.13.0"]
+    test = ["factory-boy>=3.2.1"]
+
+    [tool.uv]
+    package = false
+    default-groups = [
+        "dev",
+        "test",
+    ]
+
+    [[tool.uv.index]]
+    name = "pypi"
+    url = "https://pypi.org/simple"
+    "###);
+}
+
+#[test]
+fn test_replaces_existing_project() {
+    let project_path = Path::new(FIXTURES_PATH).join("existing_project");
+
+    assert_cmd_snapshot!(cli()
+        .arg(&project_path)
+        .arg("--dry-run")
+        .arg("--replace-project-section"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Migrated pyproject.toml:
+    [project]
+    name = ""
+    version = "0.0.1"
+    requires-python = "~=3.13"
+    dependencies = ["arrow>=1.2.3"]
+
+    [dependency-groups]
+    dev = ["mypy>=1.13.0"]
+    test = ["factory-boy>=3.2.1"]
+
+    [tool.uv]
+    package = false
+    default-groups = [
+        "dev",
+        "test",
+    ]
+
+    [[tool.uv.index]]
+    name = "pypi"
+    url = "https://pypi.org/simple"
+    "###);
+}

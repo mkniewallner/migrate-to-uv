@@ -251,6 +251,7 @@ mod tests {
             dry_run: true,
             skip_lock: true,
             ignore_locked_versions: false,
+            replace_project_section: false,
             keep_old_metadata: false,
             dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
         }

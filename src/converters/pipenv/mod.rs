@@ -7,6 +7,7 @@ use crate::converters::Converter;
 use crate::converters::ConverterOptions;
 use crate::schema::pep_621::Project;
 use crate::schema::pipenv::{PipenvLock, Pipfile};
+use crate::schema::pyproject::PyProject;
 use crate::schema::uv::{SourceContainer, Uv};
 use crate::toml::PyprojectPrettyFormatter;
 use indexmap::IndexMap;
@@ -26,6 +27,10 @@ pub struct Pipenv {
 
 impl Converter for Pipenv {
     fn build_uv_pyproject(&self) -> String {
+        let pyproject_toml_content =
+            fs::read_to_string(self.get_project_path().join("pyproject.toml")).unwrap_or_default();
+        let pyproject: PyProject = toml::from_str(pyproject_toml_content.as_str()).unwrap();
+
         let pipfile_content = fs::read_to_string(self.get_project_path().join("Pipfile")).unwrap();
         let pipfile: Pipfile = toml::from_str(pipfile_content.as_str()).unwrap();
 
@@ -66,7 +71,7 @@ impl Converter for Pipenv {
             pyproject: &mut updated_pyproject,
         };
 
-        pyproject_updater.insert_pep_621(&project);
+        pyproject_updater.insert_pep_621(&self.build_project(pyproject.project, project));
         pyproject_updater.insert_dependency_groups(dependency_groups.as_ref());
         pyproject_updater.insert_uv(&uv);
 
@@ -156,6 +161,7 @@ mod tests {
                 dry_run: true,
                 skip_lock: true,
                 ignore_locked_versions: true,
+                replace_project_section: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
             },
@@ -188,6 +194,7 @@ mod tests {
                 dry_run: true,
                 skip_lock: true,
                 ignore_locked_versions: true,
+                replace_project_section: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
             },
