@@ -50,7 +50,21 @@ fn test_complete_workflow() {
     Successfully migrated project from pip-tools to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap());
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    [project]
+    name = ""
+    version = "0.0.1"
+    dependencies = ["arrow>=1.2.3"]
+
+    [dependency-groups]
+    dev = [
+        "factory-boy>=3.2.1",
+        "mypy>=1.13.0",
+    ]
+
+    [tool.uv]
+    package = false
+    "###);
 
     let uv_lock = toml::from_str::<UvLock>(
         fs::read_to_string(project_path.join("uv.lock"))
@@ -148,7 +162,21 @@ fn test_ignore_locked_versions() {
     Successfully migrated project from pip-tools to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap());
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    [project]
+    name = ""
+    version = "0.0.1"
+    dependencies = ["arrow>=1.2.3"]
+
+    [dependency-groups]
+    dev = [
+        "factory-boy>=3.2.1",
+        "mypy>=1.13.0",
+    ]
+
+    [tool.uv]
+    package = false
+    "###);
 
     let uv_lock = toml::from_str::<UvLock>(
         fs::read_to_string(project_path.join("uv.lock"))
@@ -220,7 +248,21 @@ fn test_keep_current_data() {
     Successfully migrated project from pip-tools to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap());
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    [project]
+    name = ""
+    version = "0.0.1"
+    dependencies = ["arrow>=1.2.3"]
+
+    [dependency-groups]
+    dev = [
+        "factory-boy>=3.2.1",
+        "mypy>=1.13.0",
+    ]
+
+    [tool.uv]
+    package = false
+    "###);
 
     // Assert that previous package manager files have not been removed.
     for file in requirements_files {
@@ -262,7 +304,21 @@ fn test_skip_lock() {
     Successfully migrated project from pip-tools to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap());
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    [project]
+    name = ""
+    version = "0.0.1"
+    dependencies = ["arrow>=1.2.3"]
+
+    [dependency-groups]
+    dev = [
+        "factory-boy>=3.2.1",
+        "mypy>=1.13.0",
+    ]
+
+    [tool.uv]
+    package = false
+    "###);
 
     // Assert that previous package manager files are correctly removed.
     for file in requirements_files {
@@ -307,7 +363,27 @@ fn test_skip_lock_full() {
     Successfully migrated project from pip-tools to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap());
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    [project]
+    name = ""
+    version = "0.0.1"
+    dependencies = [
+        "arrow",
+        "httpx[cli,zstd]==0.28.1",
+        "uvicorn @ git+https://github.com/encode/uvicorn",
+    ]
+
+    [dependency-groups]
+    dev = [
+        "pytest>=8.3.4",
+        "ruff==0.8.4",
+        "mypy==1.14.1",
+        "types-jsonschema==4.23.0.20241208",
+    ]
+
+    [tool.uv]
+    package = false
+    "###);
 
     // Assert that previous package manager files are correctly removed.
     for file in requirements_files {
@@ -336,7 +412,27 @@ fn test_dry_run() {
         .arg("requirements-dev.in")
         .arg("--dev-requirements-file")
         .arg("requirements-typing.in")
-        .arg("--dry-run"));
+        .arg("--dry-run"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Migrated pyproject.toml:
+    [project]
+    name = ""
+    version = "0.0.1"
+    dependencies = ["arrow>=1.2.3"]
+
+    [dependency-groups]
+    dev = [
+        "factory-boy>=3.2.1",
+        "mypy>=1.13.0",
+    ]
+
+    [tool.uv]
+    package = false
+    "###);
 
     // Assert that previous package manager files have not been removed.
     for file in requirements_files {
