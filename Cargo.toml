@@ -11,7 +11,7 @@ default-run = "migrate-to-uv"
 clap = { version = "=4.5.26", features = ["derive"] }
 clap-verbosity-flag = "=3.0.2"
 env_logger = "=0.11.6"
-indexmap = { version = "=2.7.0", features = ["serde"] }
+indexmap = { version = "=2.7.1", features = ["serde"] }
 log = "=0.4.25"
 owo-colors = "=4.1.0"
 pep440_rs = "=0.7.3"
