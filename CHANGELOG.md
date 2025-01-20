@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.0 - 2025-01-20
 
 Existing data in `[project]` section of `pyproject.toml` is now preserved by default when migrating. If you prefer that the section is fully replaced, this can be done by setting `--replace-project-section` flag, like so:
 
