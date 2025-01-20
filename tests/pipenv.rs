@@ -37,7 +37,27 @@ fn test_complete_workflow() {
     Successfully migrated project from Pipenv to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap());
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    [project]
+    name = ""
+    version = "0.0.1"
+    dependencies = ["arrow>=1.2.3"]
+
+    [dependency-groups]
+    dev = ["mypy>=1.13.0"]
+    test = ["factory-boy>=3.2.1"]
+
+    [tool.uv]
+    package = false
+    default-groups = [
+        "dev",
+        "test",
+    ]
+
+    [[tool.uv.index]]
+    name = "pypi"
+    url = "https://pypi.org/simple"
+    "###);
 
     let uv_lock = toml::from_str::<UvLock>(
         fs::read_to_string(project_path.join("uv.lock"))
@@ -120,7 +140,27 @@ fn test_ignore_locked_versions() {
     Successfully migrated project from Pipenv to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap());
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    [project]
+    name = ""
+    version = "0.0.1"
+    dependencies = ["arrow>=1.2.3"]
+
+    [dependency-groups]
+    dev = ["mypy>=1.13.0"]
+    test = ["factory-boy>=3.2.1"]
+
+    [tool.uv]
+    package = false
+    default-groups = [
+        "dev",
+        "test",
+    ]
+
+    [[tool.uv.index]]
+    name = "pypi"
+    url = "https://pypi.org/simple"
+    "###);
 
     let uv_lock = toml::from_str::<UvLock>(
         fs::read_to_string(project_path.join("uv.lock"))
@@ -177,7 +217,27 @@ fn test_keep_current_data() {
     Successfully migrated project from Pipenv to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap());
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    [project]
+    name = ""
+    version = "0.0.1"
+    dependencies = ["arrow>=1.2.3"]
+
+    [dependency-groups]
+    dev = ["mypy>=1.13.0"]
+    test = ["factory-boy>=3.2.1"]
+
+    [tool.uv]
+    package = false
+    default-groups = [
+        "dev",
+        "test",
+    ]
+
+    [[tool.uv.index]]
+    name = "pypi"
+    url = "https://pypi.org/simple"
+    "###);
 
     // Assert that previous package manager files have not been removed.
     assert!(project_path.join("Pipfile").exists());
@@ -216,7 +276,26 @@ fn test_dependency_groups_strategy_include_in_dev() {
     Successfully migrated project from Pipenv to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap());
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    [project]
+    name = ""
+    version = "0.0.1"
+    dependencies = ["arrow>=1.2.3"]
+
+    [dependency-groups]
+    dev = [
+        "mypy>=1.13.0",
+        { include = "test" },
+    ]
+    test = ["factory-boy>=3.2.1"]
+
+    [tool.uv]
+    package = false
+
+    [[tool.uv.index]]
+    name = "pypi"
+    url = "https://pypi.org/simple"
+    "###);
 
     // Assert that previous package manager files are correctly removed.
     assert!(!project_path.join("Pipfile").exists());
@@ -255,7 +334,23 @@ fn test_dependency_groups_strategy_keep_existing() {
     Successfully migrated project from Pipenv to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap());
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    [project]
+    name = ""
+    version = "0.0.1"
+    dependencies = ["arrow>=1.2.3"]
+
+    [dependency-groups]
+    dev = ["mypy>=1.13.0"]
+    test = ["factory-boy>=3.2.1"]
+
+    [tool.uv]
+    package = false
+
+    [[tool.uv.index]]
+    name = "pypi"
+    url = "https://pypi.org/simple"
+    "###);
 
     // Assert that previous package manager files are correctly removed.
     assert!(!project_path.join("Pipfile").exists());
@@ -294,7 +389,25 @@ fn test_dependency_groups_strategy_merge_into_dev() {
     Successfully migrated project from Pipenv to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap());
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    [project]
+    name = ""
+    version = "0.0.1"
+    dependencies = ["arrow>=1.2.3"]
+
+    [dependency-groups]
+    dev = [
+        "mypy>=1.13.0",
+        "factory-boy>=3.2.1",
+    ]
+
+    [tool.uv]
+    package = false
+
+    [[tool.uv.index]]
+    name = "pypi"
+    url = "https://pypi.org/simple"
+    "###);
 
     // Assert that previous package manager files are correctly removed.
     assert!(!project_path.join("Pipfile").exists());
@@ -321,7 +434,27 @@ fn test_skip_lock() {
     Successfully migrated project from Pipenv to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap());
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    [project]
+    name = ""
+    version = "0.0.1"
+    dependencies = ["arrow>=1.2.3"]
+
+    [dependency-groups]
+    dev = ["mypy>=1.13.0"]
+    test = ["factory-boy>=3.2.1"]
+
+    [tool.uv]
+    package = false
+    default-groups = [
+        "dev",
+        "test",
+    ]
+
+    [[tool.uv.index]]
+    name = "pypi"
+    url = "https://pypi.org/simple"
+    "###);
 
     // Assert that previous package manager files are correctly removed.
     assert!(!project_path.join("Pipfile").exists());
@@ -351,7 +484,79 @@ fn test_skip_lock_full() {
     Successfully migrated project from Pipenv to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap());
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    [project]
+    name = ""
+    version = "0.0.1"
+    requires-python = "~=3.13"
+    dependencies = [
+        "dep==1.2.3",
+        "dep-2>=1.2.3",
+        "dep-3~=1.2.3",
+        "dep-4~=1.2",
+        "with-version-only==1.2.3",
+        "with-extras[foo, bar]==1.2.3",
+        "with-source==1.2.3",
+        "local-package",
+        "local-package-2",
+        "local-package-editable",
+        "git",
+        "git-ref",
+        "markers==1.2.3 ; sys_platform == 'win32'",
+        "markers-2==1.2.3 ; os_name == 'nt' and sys_platform != 'darwin' and platform_machine == 'x86_64' and platform_python_implementation == 'CPython' and platform_release == '1.2.3' and platform_system == 'Windows' and platform_version == '1.2.3' and python_version > '3.8' and python_full_version > '3.8.0' and implementation_name != 'pypy' and implementation_version > '3.8' and sys_platform == 'win32'",
+    ]
+
+    [tool.ruff]
+    fix = true
+
+    [dependency-groups]
+    dev = [
+        "dev-package==1.2.3",
+        "dev-package-local",
+        "dev-package-source",
+    ]
+    packages-category = [
+        "category-package==1.2.3",
+        "category-package-2==1.2.3",
+    ]
+    packages-category-2 = [
+        "category-2-package==1.2.3",
+        "category-2-package-2 ; sys_platform == 'win32'",
+    ]
+
+    [tool.ruff.format]
+    preview = true
+
+    [tool.uv]
+    package = false
+    default-groups = [
+        "dev",
+        "packages-category",
+        "packages-category-2",
+    ]
+
+    [[tool.uv.index]]
+    name = "pypi"
+    url = "https://pypi.org/simple"
+
+    [[tool.uv.index]]
+    name = "other-index"
+    url = "https://example.com/simple"
+    explicit = true
+
+    [tool.uv.sources]
+    dev-package-local = { path = "package" }
+    dev-package-source = { index = "other-index" }
+    category-package-2 = { index = "other-index" }
+    category-2-package = { index = "other-index" }
+    category-2-package-2 = { git = "https://example.com/foo/bar.git", rev = "v1.2.3" }
+    with-source = { index = "other-index" }
+    local-package = { path = "package/" }
+    local-package-2 = { path = "another-package/", editable = false }
+    local-package-editable = { path = "package/dist/package-0.1.0.tar.gz", editable = true }
+    git = { git = "https://example.com/foo/bar.git" }
+    git-ref = { git = "https://example.com/foo/bar.git", rev = "v1.2.3" }
+    "###);
 
     // Assert that `uv.lock` file was not generated.
     assert!(!project_path.join("uv.lock").exists());
@@ -361,7 +566,33 @@ fn test_skip_lock_full() {
 fn test_dry_run() {
     let project_path = Path::new(FIXTURES_PATH).join("with_lock_file");
 
-    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"));
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Migrated pyproject.toml:
+    [project]
+    name = ""
+    version = "0.0.1"
+    dependencies = ["arrow>=1.2.3"]
+
+    [dependency-groups]
+    dev = ["mypy>=1.13.0"]
+    test = ["factory-boy>=3.2.1"]
+
+    [tool.uv]
+    package = false
+    default-groups = [
+        "dev",
+        "test",
+    ]
+
+    [[tool.uv.index]]
+    name = "pypi"
+    url = "https://pypi.org/simple"
+    "###);
 
     // Assert that previous package manager files have not been removed.
     assert!(project_path.join("Pipfile").exists());
@@ -378,7 +609,20 @@ fn test_dry_run() {
 fn test_dry_run_minimal() {
     let project_path = Path::new(FIXTURES_PATH).join("minimal");
 
-    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"));
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Migrated pyproject.toml:
+    [project]
+    name = ""
+    version = "0.0.1"
+
+    [tool.uv]
+    package = false
+    "###);
 
     // Assert that previous package manager files have not been removed.
     assert!(project_path.join("Pipfile").exists());
