@@ -31,7 +31,7 @@ pub fn get(
 
                 dependencies.push(format!("{}{}", name, specification.to_pep_508()));
             }
-            // Multiple constraints dependencies: https://python-poetry.org/docs/1.8/dependency-specification#multiple-constraints-dependencies
+            // Multiple constraints dependencies: https://python-poetry.org/docs/dependency-specification#multiple-constraints-dependencies
             DependencySpecification::Vec(specs) => {
                 let mut source_indexes: Vec<SourceIndex> = Vec::new();
 

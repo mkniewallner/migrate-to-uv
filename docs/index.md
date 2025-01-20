@@ -12,7 +12,8 @@ pipx run migrate-to-uv
 
 The following package managers are supported:
 
-- [Poetry](supported-package-managers.md#poetry)
+- [Poetry](supported-package-managers.md#poetry) (including projects
+  using [PEP 621 in Poetry 2.0+](https://python-poetry.org/blog/announcing-poetry-2.0.0/))
 - [Pipenv](supported-package-managers.md#pipenv)
 - [pip-tools](supported-package-managers.md#pip-tools)
 - [pip](supported-package-managers.md#pip)

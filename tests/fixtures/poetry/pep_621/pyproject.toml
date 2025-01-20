@@ -1,0 +1,49 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "foobar"
+version = "0.1.0"
+description = "A fabulous project."
+license = "MIT"
+authors = [{name = "John Doe", email = "john.doe@example.com"}]
+maintainers = [{name = "Dohn Joe", email = "dohn.joe@example.com"}]
+readme = "README.md"
+keywords = ["foo"]
+classifiers = ["Development Status :: 3 - Alpha"]
+requires-python = ">=3.11"
+dependencies = [
+    "arrow==1.2.3",
+    "git-dep",
+    "private-dep==3.4.5",
+]
+
+[tool.poetry.dependencies]
+git-dep = { git = "https://example.com/foo/bar", tag = "v1.2.3" }
+private-dep = { source = "supplemental" }
+
+[tool.poetry.group.dev.dependencies]
+factory-boy = "^3.2.1"
+
+[tool.poetry.group.typing.dependencies]
+mypy = "^1.13.0"
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+[[tool.poetry.source]]
+name = "supplemental"
+url = "https://supplemental.example.com/simple/"
+priority = "supplemental"
+
+[tool.ruff]
+fix = true
+
+[tool.ruff.lint]
+# This comment should be preserved.
+fixable = ["I", "UP"]
+
+[tool.ruff.format]
+preview = true
