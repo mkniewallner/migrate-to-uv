@@ -867,3 +867,70 @@ fn test_replaces_existing_project() {
     ]
     "###);
 }
+
+#[test]
+fn test_pep_621() {
+    let project_path = Path::new(FIXTURES_PATH).join("pep_621");
+
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Migrated pyproject.toml:
+    [build-system]
+    requires = ["hatchling"]
+    build-backend = "hatchling.build"
+
+    [project]
+    name = "foobar"
+    version = "0.1.0"
+    description = "A fabulous project."
+    authors = [{ name = "John Doe", email = "john.doe@example.com" }]
+    requires-python = ">=3.11"
+    readme = "README.md"
+    license = "MIT"
+    maintainers = [{ name = "Dohn Joe", email = "dohn.joe@example.com" }]
+    keywords = ["foo"]
+    classifiers = ["Development Status :: 3 - Alpha"]
+    dependencies = [
+        "arrow==1.2.3",
+        "git-dep",
+        "private-dep==3.4.5",
+    ]
+
+    [dependency-groups]
+    dev = ["factory-boy>=3.2.1,<4"]
+    typing = ["mypy>=1.13.0,<2"]
+
+    [tool.uv]
+    default-groups = [
+        "dev",
+        "typing",
+    ]
+
+    [[tool.uv.index]]
+    name = "PyPI"
+    url = "https://pypi.org/simple/"
+    default = true
+
+    [[tool.uv.index]]
+    name = "supplemental"
+    url = "https://supplemental.example.com/simple/"
+
+    [tool.uv.sources]
+    git-dep = { git = "https://example.com/foo/bar", tag = "v1.2.3" }
+    private-dep = { index = "supplemental" }
+
+    [tool.ruff]
+    fix = true
+
+    [tool.ruff.lint]
+    # This comment should be preserved.
+    fixable = ["I", "UP"]
+
+    [tool.ruff.format]
+    preview = true
+    "###);
+}

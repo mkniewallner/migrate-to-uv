@@ -20,7 +20,8 @@ pipx run migrate-to-uv
 
 The following package managers are supported:
 
-- [Poetry](https://python-poetry.org/)
+- [Poetry](https://python-poetry.org/) (including projects
+  using [PEP 621 in Poetry 2.0+](https://python-poetry.org/blog/announcing-poetry-2.0.0/))
 - [Pipenv](https://pipenv.pypa.io/en/stable/)
 - [pip-tools](https://pip-tools.readthedocs.io/en/stable/)
 - [pip](https://pip.pypa.io/en/stable/)

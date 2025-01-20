@@ -88,5 +88,5 @@ and [mkdocs-material](https://squidfunk.github.io/mkdocs-material/).
 It can be run locally with [uv](https://docs.astral.sh/uv/) by using:
 
 ```bash
-uv run --group docs mkdocs serve
+uv run --only-group docs mkdocs serve
 ```

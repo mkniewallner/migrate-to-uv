@@ -22,8 +22,8 @@ pub fn get_new_build_system(build_system: Option<BuildSystem>) -> Option<BuildSy
 }
 
 /// Construct hatch package metadata (<https://hatch.pypa.io/latest/config/build/>) from Poetry
-/// `packages` (<https://python-poetry.org/docs/1.8/pyproject/#packages>) and `include`/`exclude`
-/// (<https://python-poetry.org/docs/1.8/pyproject/#include-and-exclude>).
+/// `packages` (<https://python-poetry.org/docs/pyproject/#packages>) and `include`/`exclude`
+/// (<https://python-poetry.org/docs/pyproject/#exclude-and-include>).
 ///
 /// Poetry `packages` and `include` are converted to hatch `include`.
 ///
@@ -81,7 +81,7 @@ fn get_hatch_include(
     let mut wheel_include = Vec::new();
     let mut wheel_sources = IndexMap::new();
 
-    // https://python-poetry.org/docs/1.8/pyproject/#packages
+    // https://python-poetry.org/docs/pyproject/#packages
     if let Some(packages) = packages {
         for Package {
             include,
@@ -147,7 +147,7 @@ fn get_hatch_include(
         }
     }
 
-    // https://python-poetry.org/docs/1.8/pyproject/#include-and-exclude
+    // https://python-poetry.org/docs/pyproject/#exclude-and-include
     if let Some(include) = include {
         for inc in include {
             match inc {

@@ -8,9 +8,12 @@ Existing data in `[project]` section of `pyproject.toml` is now preserved by def
 migrate-to-uv --replace-project-section
 ```
 
+Poetry projects that use PEP 621 syntax to define project metadata, for which support was added in [Poetry 2.0](https://python-poetry.org/blog/announcing-poetry-2.0.0/), are now supported.
+
 ### Features
 
 * Preserve existing data in `[project]` section of `pyproject.toml` when migrating ([#84](https://github.com/mkniewallner/migrate-to-uv/pull/84))
+* [poetry] Support migrating projects using PEP 621 ([#85](https://github.com/mkniewallner/migrate-to-uv/pull/85))
 
 ## 0.5.0 - 2025-01-18
 
