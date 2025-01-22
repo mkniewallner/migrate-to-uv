@@ -25,7 +25,7 @@ jobs:
           persist-credentials: false
 
       - name: Build wheels
-        uses: PyO3/maturin-action@ea5bac0f1ccd0ab11c805e2b804bfcb65dac2eab # v1
+        uses: PyO3/maturin-action@5f8a1b3b0aad13193f46c9131f9b9e663def8ce5 # v1
         with:
           target: ${{ matrix.target }}
           manylinux: ${{ matrix.manylinux }}
@@ -49,7 +49,7 @@ jobs:
           persist-credentials: false
 
       - name: Build wheels
-        uses: PyO3/maturin-action@ea5bac0f1ccd0ab11c805e2b804bfcb65dac2eab # v1
+        uses: PyO3/maturin-action@5f8a1b3b0aad13193f46c9131f9b9e663def8ce5 # v1
         with:
           # Recent versions (last one tested 1.7.8) lead to failures on Windows aarch64, so forcing the version for now.
           maturin-version: '1.7.4'
@@ -74,7 +74,7 @@ jobs:
           persist-credentials: false
 
       - name: Build wheels
-        uses: PyO3/maturin-action@ea5bac0f1ccd0ab11c805e2b804bfcb65dac2eab # v1
+        uses: PyO3/maturin-action@5f8a1b3b0aad13193f46c9131f9b9e663def8ce5 # v1
         with:
           target: ${{ matrix.target }}
           args: --release --out dist
@@ -94,7 +94,7 @@ jobs:
           persist-credentials: false
 
       - name: Build sdist
-        uses: PyO3/maturin-action@ea5bac0f1ccd0ab11c805e2b804bfcb65dac2eab # v1
+        uses: PyO3/maturin-action@5f8a1b3b0aad13193f46c9131f9b9e663def8ce5 # v1
         with:
           command: sdist
           args: --out dist
@@ -124,7 +124,7 @@ jobs:
           subject-path: 'wheels-*/*'
 
       - name: Publish to PyPI
-        uses: PyO3/maturin-action@ea5bac0f1ccd0ab11c805e2b804bfcb65dac2eab # v1
+        uses: PyO3/maturin-action@5f8a1b3b0aad13193f46c9131f9b9e663def8ce5 # v1
         with:
           command: upload
           args: --non-interactive --skip-existing wheels-*/*
