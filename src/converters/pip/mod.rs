@@ -73,9 +73,7 @@ impl Converter for Pip {
         pyproject_updater.insert_dependency_groups(dependency_groups.as_ref());
         pyproject_updater.insert_uv(&uv);
 
-        let mut visitor = PyprojectPrettyFormatter {
-            parent_keys: Vec::new(),
-        };
+        let mut visitor = PyprojectPrettyFormatter::default();
         visitor.visit_document_mut(&mut updated_pyproject);
 
         updated_pyproject.to_string()

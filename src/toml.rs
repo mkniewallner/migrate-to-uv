@@ -3,6 +3,7 @@ use toml_edit::visit_mut::{
 };
 use toml_edit::{Array, InlineTable, Item, KeyMut, Value};
 
+#[derive(Default)]
 pub struct PyprojectPrettyFormatter {
     pub parent_keys: Vec<String>,
 }
