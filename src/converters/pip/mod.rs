@@ -34,22 +34,15 @@ impl Converter for Pip {
             self.dev_requirements_files.clone(),
         );
 
-        let dependency_groups = dev_dependencies.map_or_else(
-            || None,
-            |dependencies| {
-                let mut groups = IndexMap::new();
-
-                groups.insert(
-                    "dev".to_string(),
-                    dependencies
-                        .iter()
-                        .map(|dep| DependencyGroupSpecification::String(dep.to_string()))
-                        .collect(),
-                );
-
-                Some(groups)
-            },
-        );
+        let dependency_groups = dev_dependencies.map(|dependencies| {
+            IndexMap::from([(
+                "dev".to_string(),
+                dependencies
+                    .iter()
+                    .map(|dep| DependencyGroupSpecification::String(dep.to_string()))
+                    .collect(),
+            )])
+        });
 
         let project = Project {
             // "name" is required by uv.
