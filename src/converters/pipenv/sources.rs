@@ -9,11 +9,7 @@ pub fn get_indexes(pipenv_sources: Option<Vec<Source>>) -> Option<Vec<Index>> {
                 name: source.name.to_string(),
                 url: Some(source.url.to_string()),
                 // https://pipenv.pypa.io/en/stable/indexes.html#index-restricted-packages
-                explicit: if source.name.to_lowercase() == "pypi" {
-                    None
-                } else {
-                    Some(true)
-                },
+                explicit: (source.name.to_lowercase() != "pypi").then_some(true),
                 ..Default::default()
             })
             .collect(),
