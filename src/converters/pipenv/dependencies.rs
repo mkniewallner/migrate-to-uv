@@ -89,43 +89,31 @@ pub fn get(
 fn get_keyword_markers(keyword_markers: &KeywordMarkers) -> Vec<String> {
     let mut markers: Vec<String> = Vec::new();
 
-    // Surely there is a better way to handle all the markers in a less
-    // repetitive way with serde or a macro, but that will do for now.
-    if let Some(os_name) = &keyword_markers.os_name {
-        markers.push(format!("os_name {os_name}"));
+    macro_rules! push_marker {
+        ($field:expr, $name:expr) => {
+            if let Some(value) = &$field {
+                markers.push(format!("{} {}", $name, value));
+            }
+        };
     }
-    if let Some(sys_platform) = &keyword_markers.sys_platform {
-        markers.push(format!("sys_platform {sys_platform}"));
-    }
-    if let Some(platform_machine) = &keyword_markers.platform_machine {
-        markers.push(format!("platform_machine {platform_machine}"));
-    }
-    if let Some(platform_python_implementation) = &keyword_markers.platform_python_implementation {
-        markers.push(format!(
-            "platform_python_implementation {platform_python_implementation}"
-        ));
-    }
-    if let Some(platform_release) = &keyword_markers.platform_release {
-        markers.push(format!("platform_release {platform_release}"));
-    }
-    if let Some(platform_system) = &keyword_markers.platform_system {
-        markers.push(format!("platform_system {platform_system}"));
-    }
-    if let Some(platform_version) = &keyword_markers.platform_version {
-        markers.push(format!("platform_version {platform_version}"));
-    }
-    if let Some(python_version) = &keyword_markers.python_version {
-        markers.push(format!("python_version {python_version}"));
-    }
-    if let Some(python_full_version) = &keyword_markers.python_full_version {
-        markers.push(format!("python_full_version {python_full_version}"));
-    }
-    if let Some(implementation_name) = &keyword_markers.implementation_name {
-        markers.push(format!("implementation_name {implementation_name}"));
-    }
-    if let Some(implementation_version) = &keyword_markers.implementation_version {
-        markers.push(format!("implementation_version {implementation_version}"));
-    }
+
+    push_marker!(keyword_markers.os_name, "os_name");
+    push_marker!(keyword_markers.sys_platform, "sys_platform");
+    push_marker!(keyword_markers.platform_machine, "platform_machine");
+    push_marker!(
+        keyword_markers.platform_python_implementation,
+        "platform_python_implementation"
+    );
+    push_marker!(keyword_markers.platform_release, "platform_release");
+    push_marker!(keyword_markers.platform_system, "platform_system");
+    push_marker!(keyword_markers.platform_version, "platform_version");
+    push_marker!(keyword_markers.python_version, "python_version");
+    push_marker!(keyword_markers.python_full_version, "python_full_version");
+    push_marker!(keyword_markers.implementation_name, "implementation_name");
+    push_marker!(
+        keyword_markers.implementation_version,
+        "implementation_version"
+    );
 
     markers
 }
