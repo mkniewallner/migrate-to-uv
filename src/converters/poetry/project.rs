@@ -9,14 +9,13 @@ static AUTHOR_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^(?<name>[^<>]+)(?: <(?<email>.+?)>)?$").unwrap());
 
 pub fn get_readme(poetry_readme: Option<SingleOrVec<String>>) -> Option<String> {
-    match poetry_readme {
-        Some(SingleOrVec::Single(readme)) => Some(readme),
-        Some(SingleOrVec::Vec(readmes)) => {
+    poetry_readme.map(|readme| match readme {
+        SingleOrVec::Single(readme) => readme,
+        SingleOrVec::Vec(readmes) => {
             warn!("Found multiple readme files ({}). PEP 621 only supports setting one, so only the first one was added.", readmes.join(", "));
-            Some(readmes[0].clone())
+            readmes[0].clone()
         }
-        _ => None,
-    }
+    })
 }
 
 pub fn get_authors(authors: Option<Vec<String>>) -> Option<Vec<AuthorOrMaintainer>> {
