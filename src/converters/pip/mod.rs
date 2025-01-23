@@ -34,22 +34,15 @@ impl Converter for Pip {
             self.dev_requirements_files.clone(),
         );
 
-        let dependency_groups = dev_dependencies.map_or_else(
-            || None,
-            |dependencies| {
-                let mut groups = IndexMap::new();
-
-                groups.insert(
-                    "dev".to_string(),
-                    dependencies
-                        .iter()
-                        .map(|dep| DependencyGroupSpecification::String(dep.to_string()))
-                        .collect(),
-                );
-
-                Some(groups)
-            },
-        );
+        let dependency_groups = dev_dependencies.map(|dependencies| {
+            IndexMap::from([(
+                "dev".to_string(),
+                dependencies
+                    .iter()
+                    .map(|dep| DependencyGroupSpecification::String(dep.to_string()))
+                    .collect(),
+            )])
+        });
 
         let project = Project {
             // "name" is required by uv.
@@ -80,9 +73,7 @@ impl Converter for Pip {
         pyproject_updater.insert_dependency_groups(dependency_groups.as_ref());
         pyproject_updater.insert_uv(&uv);
 
-        let mut visitor = PyprojectPrettyFormatter {
-            parent_keys: Vec::new(),
-        };
+        let mut visitor = PyprojectPrettyFormatter::default();
         visitor.visit_document_mut(&mut updated_pyproject);
 
         updated_pyproject.to_string()

@@ -121,9 +121,7 @@ impl Converter for Poetry {
             remove_pyproject_poetry_section(&mut updated_pyproject);
         }
 
-        let mut visitor = PyprojectPrettyFormatter {
-            parent_keys: Vec::new(),
-        };
+        let mut visitor = PyprojectPrettyFormatter::default();
         visitor.visit_document_mut(&mut updated_pyproject);
 
         updated_pyproject.to_string()
