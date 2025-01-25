@@ -117,3 +117,8 @@ migrate-to-uv \
   can manually be set with [`--requirements-file`](usage-and-configuration.md#-requirements-file) or
   [`--dev-requirements-file`](usage-and-configuration.md#-dev-requirements-file)
 - Index URLs are not yet migrated
+
+## Setuptools
+
+`migrate-to-uv` supports migrating projects that use [Setuptools](https://setuptools.pypa.io/en/latest/index.html) and
+define their project metadata in `setup.cfg`.

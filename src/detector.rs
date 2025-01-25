@@ -14,6 +14,7 @@ pub enum PackageManager {
     PipTools,
     Pipenv,
     Poetry,
+    Setuptools,
 }
 
 /// Check if the projects already uses uv, and return the reason for it if we find that it does.
@@ -167,6 +168,16 @@ impl PackageManager {
                     is_pip_tools: false,
                 }))
             }
+            Self::Setuptools => {
+                if project_path.join("setup.cfg").exists() {
+                    debug!("{self} detected as a package manager.");
+                    return Ok(Box::new(converters::setuptools::Setuptools {
+                        converter_options: converter_options.clone(),
+                    }));
+                }
+
+                Err("Directory does not contain any supported setuptools file.".to_string())
+            }
         }
     }
 }
@@ -178,6 +189,7 @@ impl Display for PackageManager {
             Self::PipTools => write!(f, "pip-tools"),
             Self::Pipenv => write!(f, "Pipenv"),
             Self::Poetry => write!(f, "Poetry"),
+            Self::Setuptools => write!(f, "Setuptools"),
         }
     }
 }
@@ -225,6 +237,7 @@ pub fn get_converter(
         PackageManager::Pipenv,
         PackageManager::PipTools,
         PackageManager::Pip,
+        PackageManager::Setuptools,
     ] {
         match package_manager.detected(
             converter_options,
@@ -352,6 +365,26 @@ mod tests {
                 dev_requirements_files: vec!["requirements-dev.in".to_string()],
                 is_pip_tools: true,
             }
+        );
+    }
+
+    #[test]
+    fn test_auto_detect_setuptools_ok() {
+        let converter_options =
+            get_converter_options(PathBuf::from("tests/fixtures/setuptools/full"));
+
+        let converter = get_converter(
+            &converter_options,
+            vec!["requirements.txt".to_string()],
+            vec!["requirements-dev.txt".to_string()],
+            None,
+        )
+        .unwrap();
+        assert_eq!(
+            (converter.as_ref() as &dyn Any)
+                .downcast_ref::<converters::setuptools::Setuptools>()
+                .unwrap(),
+            &converters::setuptools::Setuptools { converter_options }
         );
     }
 
@@ -500,6 +533,42 @@ mod tests {
         assert_eq!(
             converter.unwrap_err(),
             "Directory does not contain any pip-tools requirements file.",
+        );
+    }
+
+    #[rstest]
+    fn test_setuptools_ok() {
+        let converter_options =
+            get_converter_options(PathBuf::from("tests/fixtures/setuptools/full"));
+
+        let converter = get_converter(
+            &converter_options,
+            vec!["requirements.txt".to_string()],
+            vec!["requirements-dev.txt".to_string()],
+            Some(PackageManager::Setuptools),
+        )
+        .unwrap();
+        assert_eq!(
+            (converter.as_ref() as &dyn Any)
+                .downcast_ref::<converters::setuptools::Setuptools>()
+                .unwrap(),
+            &converters::setuptools::Setuptools { converter_options }
+        );
+    }
+
+    #[test]
+    fn test_setuptools_err() {
+        let converter_options = get_converter_options(PathBuf::from("tests/fixtures/setuptools"));
+
+        let converter = get_converter(
+            &converter_options,
+            vec!["requirements.txt".to_string()],
+            vec!["requirements-dev.txt".to_string()],
+            Some(PackageManager::Setuptools),
+        );
+        assert_eq!(
+            converter.unwrap_err(),
+            "Directory does not contain any supported setuptools file.",
         );
     }
 
