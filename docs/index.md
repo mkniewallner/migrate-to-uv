@@ -17,9 +17,9 @@ The following package managers are supported:
 - [Pipenv](supported-package-managers.md#pipenv)
 - [pip-tools](supported-package-managers.md#pip-tools)
 - [pip](supported-package-managers.md#pip)
+- [setuptools](supported-package-managers.md#setuptools) (`setup.cfg` only)
 
-More package managers (e.g., [setuptools](https://setuptools.pypa.io/en/stable/)) could be implemented in the
-future.
+More package managers could be implemented in the future.
 
 ## Features
 

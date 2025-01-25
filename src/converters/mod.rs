@@ -17,6 +17,7 @@ pub mod pip;
 pub mod pipenv;
 pub mod poetry;
 mod pyproject_updater;
+pub mod setuptools;
 
 type DependencyGroupsAndDefaultGroups = (
     Option<IndexMap<String, Vec<DependencyGroupSpecification>>>,
