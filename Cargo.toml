@@ -24,7 +24,7 @@ toml_edit = { version = "=0.22.22", features = ["display", "serde"] }
 url = "=2.5.4"
 
 [dev-dependencies]
-insta = { version = "=1.42.0", features = ["filters"] }
+insta = { version = "=1.42.1", features = ["filters"] }
 insta-cmd = "=0.6.0"
 rstest = "=0.24.0"
 tempfile = "=3.15.0"
