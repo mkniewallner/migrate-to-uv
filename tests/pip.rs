@@ -36,6 +36,11 @@ fn test_complete_workflow() {
     ----- stdout -----
 
     ----- stderr -----
+    warning: Could not parse the following dependency specification as a PEP 508 one: requests==2.32.3  # Inline comment
+    warning: Could not parse the following dependency specification as a PEP 508 one: file:bar
+    warning: Could not parse the following dependency specification as a PEP 508 one: file:./bar
+    warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests
+    warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests#egg=requests
     Locking dependencies with "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
@@ -100,6 +105,11 @@ fn test_keep_current_data() {
     ----- stdout -----
 
     ----- stderr -----
+    warning: Could not parse the following dependency specification as a PEP 508 one: requests==2.32.3  # Inline comment
+    warning: Could not parse the following dependency specification as a PEP 508 one: file:bar
+    warning: Could not parse the following dependency specification as a PEP 508 one: file:./bar
+    warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests
+    warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests#egg=requests
     Locking dependencies with "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
@@ -163,6 +173,11 @@ fn test_skip_lock() {
     ----- stdout -----
 
     ----- stderr -----
+    warning: Could not parse the following dependency specification as a PEP 508 one: requests==2.32.3  # Inline comment
+    warning: Could not parse the following dependency specification as a PEP 508 one: file:bar
+    warning: Could not parse the following dependency specification as a PEP 508 one: file:./bar
+    warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests
+    warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests#egg=requests
     Successfully migrated project from pip to uv!
     "###);
 
@@ -218,6 +233,11 @@ fn test_dry_run() {
     ----- stdout -----
 
     ----- stderr -----
+    warning: Could not parse the following dependency specification as a PEP 508 one: requests==2.32.3  # Inline comment
+    warning: Could not parse the following dependency specification as a PEP 508 one: file:bar
+    warning: Could not parse the following dependency specification as a PEP 508 one: file:./bar
+    warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests
+    warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests#egg=requests
     Migrated pyproject.toml:
     [project]
     name = ""
