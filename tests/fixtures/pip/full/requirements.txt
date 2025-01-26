@@ -1,19 +1,21 @@
+# This will be ignored
+-c constraints.txt
+    -cconstraints2.txt
+
 # A comment
-anyio==4.7.0
+  ##    Another    comment
 arrow==1.3.0
-certifi==2024.12.14
-click==8.1.8
-h11==0.14.0
-httpcore==1.0.7
-httpx==0.28.1
-idna==3.10
-markdown-it-py==3.0.0
-mdurl==0.1.2
-pygments==2.18.0
-python-dateutil==2.9.0.post0
-rich==13.9.4
-six==1.17.0
-sniffio==1.3.1
-types-python-dateutil==2.9.0.20241206
+     httpx [ cli ] == 0.28.1
 uvicorn @ git+https://github.com/encode/uvicorn
-zstandard==0.23.0
+
+# Inline comments are not ignored, making parsing fail (https://github.com/mkniewallner/migrate-to-uv/issues/102)
+requests==2.32.3  # Inline comment
+
+# Non-PEP 508 compliant
+file:bar
+file:./bar
+-e file:bar
+-e file:./bar
+git+https://github.com/psf/requests
+git+https://github.com/psf/requests#egg=requests
+-e git+https://github.com/psf/requests#egg=requests
