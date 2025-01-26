@@ -48,40 +48,17 @@ fn test_complete_workflow() {
     name = ""
     version = "0.0.1"
     dependencies = [
-        "anyio==4.7.0",
         "arrow==1.3.0",
-        "certifi==2024.12.14",
-        "click==8.1.8",
-        "h11==0.14.0",
-        "httpcore==1.0.7",
-        "httpx==0.28.1",
-        "idna==3.10",
-        "markdown-it-py==3.0.0",
-        "mdurl==0.1.2",
-        "pygments==2.18.0",
-        "python-dateutil==2.9.0.post0",
-        "rich==13.9.4",
-        "six==1.17.0",
-        "sniffio==1.3.1",
-        "types-python-dateutil==2.9.0.20241206",
+        "httpx[cli]==0.28.1",
         "uvicorn @ git+https://github.com/encode/uvicorn",
-        "zstandard==0.23.0",
     ]
 
     [dependency-groups]
     dev = [
-        "iniconfig==2.0.0",
-        "packaging==24.2",
-        "pluggy==1.5.0",
         "pytest==8.3.4",
         "ruff==0.8.4",
-        "attrs==24.3.0",
         "mypy==1.14.1",
-        "mypy-extensions==1.0.0",
-        "referencing==0.35.1",
-        "rpds-py==0.22.3",
         "types-jsonschema==4.23.0.20241208",
-        "typing-extensions==4.12.2",
     ]
 
     [tool.uv]
@@ -135,40 +112,17 @@ fn test_keep_current_data() {
     name = ""
     version = "0.0.1"
     dependencies = [
-        "anyio==4.7.0",
         "arrow==1.3.0",
-        "certifi==2024.12.14",
-        "click==8.1.8",
-        "h11==0.14.0",
-        "httpcore==1.0.7",
-        "httpx==0.28.1",
-        "idna==3.10",
-        "markdown-it-py==3.0.0",
-        "mdurl==0.1.2",
-        "pygments==2.18.0",
-        "python-dateutil==2.9.0.post0",
-        "rich==13.9.4",
-        "six==1.17.0",
-        "sniffio==1.3.1",
-        "types-python-dateutil==2.9.0.20241206",
+        "httpx[cli]==0.28.1",
         "uvicorn @ git+https://github.com/encode/uvicorn",
-        "zstandard==0.23.0",
     ]
 
     [dependency-groups]
     dev = [
-        "iniconfig==2.0.0",
-        "packaging==24.2",
-        "pluggy==1.5.0",
         "pytest==8.3.4",
         "ruff==0.8.4",
-        "attrs==24.3.0",
         "mypy==1.14.1",
-        "mypy-extensions==1.0.0",
-        "referencing==0.35.1",
-        "rpds-py==0.22.3",
         "types-jsonschema==4.23.0.20241208",
-        "typing-extensions==4.12.2",
     ]
 
     [tool.uv]
@@ -217,40 +171,17 @@ fn test_skip_lock() {
     name = ""
     version = "0.0.1"
     dependencies = [
-        "anyio==4.7.0",
         "arrow==1.3.0",
-        "certifi==2024.12.14",
-        "click==8.1.8",
-        "h11==0.14.0",
-        "httpcore==1.0.7",
-        "httpx==0.28.1",
-        "idna==3.10",
-        "markdown-it-py==3.0.0",
-        "mdurl==0.1.2",
-        "pygments==2.18.0",
-        "python-dateutil==2.9.0.post0",
-        "rich==13.9.4",
-        "six==1.17.0",
-        "sniffio==1.3.1",
-        "types-python-dateutil==2.9.0.20241206",
+        "httpx[cli]==0.28.1",
         "uvicorn @ git+https://github.com/encode/uvicorn",
-        "zstandard==0.23.0",
     ]
 
     [dependency-groups]
     dev = [
-        "iniconfig==2.0.0",
-        "packaging==24.2",
-        "pluggy==1.5.0",
         "pytest==8.3.4",
         "ruff==0.8.4",
-        "attrs==24.3.0",
         "mypy==1.14.1",
-        "mypy-extensions==1.0.0",
-        "referencing==0.35.1",
-        "rpds-py==0.22.3",
         "types-jsonschema==4.23.0.20241208",
-        "typing-extensions==4.12.2",
     ]
 
     [tool.uv]
@@ -292,40 +223,17 @@ fn test_dry_run() {
     name = ""
     version = "0.0.1"
     dependencies = [
-        "anyio==4.7.0",
         "arrow==1.3.0",
-        "certifi==2024.12.14",
-        "click==8.1.8",
-        "h11==0.14.0",
-        "httpcore==1.0.7",
-        "httpx==0.28.1",
-        "idna==3.10",
-        "markdown-it-py==3.0.0",
-        "mdurl==0.1.2",
-        "pygments==2.18.0",
-        "python-dateutil==2.9.0.post0",
-        "rich==13.9.4",
-        "six==1.17.0",
-        "sniffio==1.3.1",
-        "types-python-dateutil==2.9.0.20241206",
+        "httpx[cli]==0.28.1",
         "uvicorn @ git+https://github.com/encode/uvicorn",
-        "zstandard==0.23.0",
     ]
 
     [dependency-groups]
     dev = [
-        "iniconfig==2.0.0",
-        "packaging==24.2",
-        "pluggy==1.5.0",
         "pytest==8.3.4",
         "ruff==0.8.4",
-        "attrs==24.3.0",
         "mypy==1.14.1",
-        "mypy-extensions==1.0.0",
-        "referencing==0.35.1",
-        "rpds-py==0.22.3",
         "types-jsonschema==4.23.0.20241208",
-        "typing-extensions==4.12.2",
     ]
 
     [tool.uv]
@@ -360,24 +268,9 @@ fn test_preserves_existing_project() {
     version = "1.0.0"
     requires-python = ">=3.13"
     dependencies = [
-        "anyio==4.7.0",
         "arrow==1.3.0",
-        "certifi==2024.12.14",
-        "click==8.1.8",
-        "h11==0.14.0",
-        "httpcore==1.0.7",
-        "httpx==0.28.1",
-        "idna==3.10",
-        "markdown-it-py==3.0.0",
-        "mdurl==0.1.2",
-        "pygments==2.18.0",
-        "python-dateutil==2.9.0.post0",
-        "rich==13.9.4",
-        "six==1.17.0",
-        "sniffio==1.3.1",
-        "types-python-dateutil==2.9.0.20241206",
+        "httpx[cli]==0.28.1",
         "uvicorn @ git+https://github.com/encode/uvicorn",
-        "zstandard==0.23.0",
     ]
 
     [tool.uv]
@@ -403,24 +296,9 @@ fn test_replaces_existing_project() {
     name = ""
     version = "0.0.1"
     dependencies = [
-        "anyio==4.7.0",
         "arrow==1.3.0",
-        "certifi==2024.12.14",
-        "click==8.1.8",
-        "h11==0.14.0",
-        "httpcore==1.0.7",
-        "httpx==0.28.1",
-        "idna==3.10",
-        "markdown-it-py==3.0.0",
-        "mdurl==0.1.2",
-        "pygments==2.18.0",
-        "python-dateutil==2.9.0.post0",
-        "rich==13.9.4",
-        "six==1.17.0",
-        "sniffio==1.3.1",
-        "types-python-dateutil==2.9.0.20241206",
+        "httpx[cli]==0.28.1",
         "uvicorn @ git+https://github.com/encode/uvicorn",
-        "zstandard==0.23.0",
     ]
 
     [tool.uv]
