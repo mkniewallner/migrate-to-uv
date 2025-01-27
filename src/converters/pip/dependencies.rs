@@ -22,7 +22,12 @@ pub fn get(project_path: &Path, requirements_files: Vec<String>) -> Option<Vec<S
                 continue;
             }
 
-            let dependency_specification = Requirement::<Url>::from_str(line);
+            let dependency = match line.split_once(" #") {
+                Some((dependency, _)) => dependency,
+                None => line,
+            };
+
+            let dependency_specification = Requirement::<Url>::from_str(dependency);
 
             if let Ok(dependency_specification) = dependency_specification {
                 dependencies.push(dependency_specification.to_string());
