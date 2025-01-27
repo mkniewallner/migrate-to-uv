@@ -30,13 +30,12 @@ fn test_complete_workflow() {
         .arg("--dev-requirements-file")
         .arg("requirements-dev.txt")
         .arg("--dev-requirements-file")
-        .arg("requirements-typing.txt"), @r###"
+        .arg("requirements-typing.txt"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    warning: Could not parse the following dependency specification as a PEP 508 one: requests==2.32.3  # Inline comment
     warning: Could not parse the following dependency specification as a PEP 508 one: file:bar
     warning: Could not parse the following dependency specification as a PEP 508 one: file:./bar
     warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests
@@ -46,9 +45,9 @@ fn test_complete_workflow() {
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip to uv!
-    "###);
+    "#);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
     name = ""
     version = "0.0.1"
@@ -56,6 +55,7 @@ fn test_complete_workflow() {
         "arrow==1.3.0",
         "httpx[cli]==0.28.1",
         "uvicorn @ git+https://github.com/encode/uvicorn",
+        "requests==2.32.3",
     ]
 
     [dependency-groups]
@@ -68,7 +68,7 @@ fn test_complete_workflow() {
 
     [tool.uv]
     package = false
-    "###);
+    "#);
 
     // Assert that previous package manager files are correctly removed.
     for file in requirements_files {
@@ -99,13 +99,12 @@ fn test_keep_current_data() {
         .arg("requirements-dev.txt")
         .arg("--dev-requirements-file")
         .arg("requirements-typing.txt")
-        .arg("--keep-current-data"), @r###"
+        .arg("--keep-current-data"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    warning: Could not parse the following dependency specification as a PEP 508 one: requests==2.32.3  # Inline comment
     warning: Could not parse the following dependency specification as a PEP 508 one: file:bar
     warning: Could not parse the following dependency specification as a PEP 508 one: file:./bar
     warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests
@@ -115,9 +114,9 @@ fn test_keep_current_data() {
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip to uv!
-    "###);
+    "#);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
     name = ""
     version = "0.0.1"
@@ -125,6 +124,7 @@ fn test_keep_current_data() {
         "arrow==1.3.0",
         "httpx[cli]==0.28.1",
         "uvicorn @ git+https://github.com/encode/uvicorn",
+        "requests==2.32.3",
     ]
 
     [dependency-groups]
@@ -137,7 +137,7 @@ fn test_keep_current_data() {
 
     [tool.uv]
     package = false
-    "###);
+    "#);
 
     // Assert that previous package manager files have not been removed.
     for file in requirements_files {
@@ -167,21 +167,20 @@ fn test_skip_lock() {
         .arg("requirements-dev.txt")
         .arg("--dev-requirements-file")
         .arg("requirements-typing.txt")
-        .arg("--skip-lock"), @r###"
+        .arg("--skip-lock"), @r"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    warning: Could not parse the following dependency specification as a PEP 508 one: requests==2.32.3  # Inline comment
     warning: Could not parse the following dependency specification as a PEP 508 one: file:bar
     warning: Could not parse the following dependency specification as a PEP 508 one: file:./bar
     warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests
     warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests#egg=requests
     Successfully migrated project from pip to uv!
-    "###);
+    ");
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
     name = ""
     version = "0.0.1"
@@ -189,6 +188,7 @@ fn test_skip_lock() {
         "arrow==1.3.0",
         "httpx[cli]==0.28.1",
         "uvicorn @ git+https://github.com/encode/uvicorn",
+        "requests==2.32.3",
     ]
 
     [dependency-groups]
@@ -201,7 +201,7 @@ fn test_skip_lock() {
 
     [tool.uv]
     package = false
-    "###);
+    "#);
 
     // Assert that previous package manager files are correctly removed.
     for file in requirements_files {
@@ -227,13 +227,12 @@ fn test_dry_run() {
         .arg("requirements-dev.txt")
         .arg("--dev-requirements-file")
         .arg("requirements-typing.txt")
-        .arg("--dry-run"), @r###"
+        .arg("--dry-run"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    warning: Could not parse the following dependency specification as a PEP 508 one: requests==2.32.3  # Inline comment
     warning: Could not parse the following dependency specification as a PEP 508 one: file:bar
     warning: Could not parse the following dependency specification as a PEP 508 one: file:./bar
     warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests
@@ -246,6 +245,7 @@ fn test_dry_run() {
         "arrow==1.3.0",
         "httpx[cli]==0.28.1",
         "uvicorn @ git+https://github.com/encode/uvicorn",
+        "requests==2.32.3",
     ]
 
     [dependency-groups]
@@ -258,7 +258,7 @@ fn test_dry_run() {
 
     [tool.uv]
     package = false
-    "###);
+    "#);
 
     // Assert that previous package manager files have not been removed.
     for file in requirements_files {
