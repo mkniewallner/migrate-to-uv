@@ -30,6 +30,7 @@ pub struct ConverterOptions {
     pub project_path: PathBuf,
     pub dry_run: bool,
     pub skip_lock: bool,
+    pub skip_uv_checks: bool,
     pub ignore_locked_versions: bool,
     pub replace_project_section: bool,
     pub keep_old_metadata: bool,
