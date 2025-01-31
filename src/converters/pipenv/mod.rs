@@ -62,6 +62,10 @@ impl Converter for Pipenv {
             },
             default_groups: uv_default_groups,
             constraint_dependencies: self.get_constraint_dependencies(),
+            environments: pyproject
+                .tool
+                .and_then(|tool| tool.uv)
+                .and_then(|uv| uv.environments),
         };
 
         let pyproject_toml_content =
