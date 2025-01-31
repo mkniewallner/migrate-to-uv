@@ -59,6 +59,10 @@ impl Converter for Pip {
         let uv = Uv {
             package: Some(false),
             constraint_dependencies: self.get_constraint_dependencies(),
+            environments: pyproject
+                .tool
+                .and_then(|tool| tool.uv)
+                .and_then(|uv| uv.environments),
             ..Default::default()
         };
 
