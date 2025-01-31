@@ -200,9 +200,13 @@ pub fn get_converter(
         return Err(format!("{} is not a directory.", project_path.display()));
     }
 
-    // Always check for uv first
-    if let (true, reason) = project_already_uses_uv(project_path.as_path()) {
-        return Err(format!("Project is already using uv ({reason})"));
+    if !converter_options.skip_uv_checks {
+        // Check if `uv` exists,
+        // except for when the user explicitly asks
+        // to skip these checks.
+        if let (true, reason) = project_already_uses_uv(project_path.as_path()) {
+            return Err(format!("Project is already using uv ({reason})"));
+        }
     }
 
     if let Some(enforced_package_manager) = enforced_package_manager {
@@ -250,6 +254,7 @@ mod tests {
             project_path,
             dry_run: true,
             skip_lock: true,
+            skip_uv_checks: false,
             ignore_locked_versions: false,
             replace_project_section: false,
             keep_old_metadata: false,
