@@ -580,6 +580,25 @@ mod tests {
     }
 
     #[test]
+    fn test_skip_auto_detect_using_uv() {
+        let mut converter_options =
+            get_converter_options(PathBuf::from("tests/fixtures/uv/minimal"));
+        converter_options.skip_uv_checks = true;
+
+        let converter = get_converter(
+            &converter_options,
+            vec!["requirements.txt".to_string()],
+            vec!["requirements-dev.txt".to_string()],
+            None,
+        );
+        assert_eq!(
+            converter.unwrap_err(),
+            "Could not determine which package manager is used from the ones that are supported."
+                .to_string(),
+        );
+    }
+
+    #[test]
     fn test_auto_detect_already_using_uv_by_config() {
         let converter_options = get_converter_options(PathBuf::from("tests/fixtures/uv/minimal"));
 
