@@ -66,6 +66,7 @@ or else it will fail to generate the `uv` configuration.
 
 ```bash
 migrate-to-uv --skip-uv-checks
+```
 
 #### `--ignore-locked-versions`
 
