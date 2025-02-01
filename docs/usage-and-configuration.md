@@ -53,6 +53,20 @@ behavior.
 migrate-to-uv --skip-lock
 ```
 
+#### `--skip-uv-checks`
+
+By default, `migrate-to-uv` will exit early if it sees that a project is already using `uv`.
+This flag disables that behavior, allowing `migrate-to-uv` to run on a `pyproject.toml`
+which already has `uv` configured.
+
+Note that the project must also have a valid non-`uv` package manager configured,
+or else it will fail to generate the `uv` configuration.
+
+**Example:**
+
+```bash
+migrate-to-uv --skip-uv-checks
+
 #### `--ignore-locked-versions`
 
 By default, when locking dependencies with `uv lock`, `migrate-to-uv` keeps dependencies to the versions they were
