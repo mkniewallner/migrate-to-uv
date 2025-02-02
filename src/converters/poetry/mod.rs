@@ -35,7 +35,7 @@ impl Converter for Poetry {
 
         let (base_uv, poetry) = {
             let tool = pyproject.tool.unwrap();
-            (tool.uv, tool.poetry.unwrap())
+            (tool.uv.unwrap_or_default(), tool.poetry.unwrap())
         };
 
         let mut uv_source_index: IndexMap<String, SourceContainer> = IndexMap::new();
@@ -89,11 +89,6 @@ impl Converter for Poetry {
             ..Default::default()
         };
 
-        let base_uv = if let Some(base_uv) = base_uv {
-            base_uv
-        } else {
-            Uv::default()
-        };
         let uv = Uv {
             package: poetry.package_mode,
             index: sources::get_indexes(poetry.source),

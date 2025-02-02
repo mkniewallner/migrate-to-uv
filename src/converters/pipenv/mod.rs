@@ -52,11 +52,7 @@ impl Converter for Pipenv {
             ..Default::default()
         };
 
-        let base_uv = if let Some(uv) = pyproject.tool.and_then(|tool| tool.uv) {
-            uv
-        } else {
-            Uv::default()
-        };
+        let base_uv = pyproject.tool.and_then(|tool| tool.uv).unwrap_or_default();
         let uv = Uv {
             package: Some(false),
             index: sources::get_indexes(pipfile.source),
