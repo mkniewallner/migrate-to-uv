@@ -33,7 +33,7 @@ impl Converter for Poetry {
             fs::read_to_string(self.get_project_path().join("pyproject.toml")).unwrap_or_default();
         let pyproject: PyProject = toml::from_str(pyproject_toml_content.as_str()).unwrap();
 
-        let (uv, poetry) = {
+        let (base_uv, poetry) = {
             let tool = pyproject.tool.unwrap();
             (tool.uv, tool.poetry.unwrap())
         };
@@ -89,6 +89,11 @@ impl Converter for Poetry {
             ..Default::default()
         };
 
+        let base_uv = if let Some(base_uv) = base_uv {
+            base_uv
+        } else {
+            Uv::default()
+        };
         let uv = Uv {
             package: poetry.package_mode,
             index: sources::get_indexes(poetry.source),
@@ -99,7 +104,7 @@ impl Converter for Poetry {
             },
             default_groups: uv_default_groups,
             constraint_dependencies: self.get_constraint_dependencies(),
-            environments: uv.and_then(|uv| uv.environments),
+            ..base_uv
         };
 
         let hatch = get_hatch(

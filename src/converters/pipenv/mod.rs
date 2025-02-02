@@ -52,6 +52,11 @@ impl Converter for Pipenv {
             ..Default::default()
         };
 
+        let base_uv = if let Some(uv) = pyproject.tool.and_then(|tool| tool.uv) {
+            uv
+        } else {
+            Uv::default()
+        };
         let uv = Uv {
             package: Some(false),
             index: sources::get_indexes(pipfile.source),
@@ -62,10 +67,7 @@ impl Converter for Pipenv {
             },
             default_groups: uv_default_groups,
             constraint_dependencies: self.get_constraint_dependencies(),
-            environments: pyproject
-                .tool
-                .and_then(|tool| tool.uv)
-                .and_then(|uv| uv.environments),
+            ..base_uv
         };
 
         let pyproject_toml_content =
