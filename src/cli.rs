@@ -38,6 +38,11 @@ struct Cli {
     skip_lock: bool,
     #[arg(
         long,
+        help = "Skip checks for whether or not the project is already using uv"
+    )]
+    skip_uv_checks: bool,
+    #[arg(
+        long,
         help = "Ignore current locked versions of dependencies when generating `uv.lock`"
     )]
     ignore_locked_versions: bool,
@@ -76,6 +81,7 @@ pub fn cli() {
         project_path: PathBuf::from(&cli.path),
         dry_run: cli.dry_run,
         skip_lock: cli.skip_lock,
+        skip_uv_checks: cli.skip_uv_checks,
         ignore_locked_versions: cli.ignore_locked_versions,
         replace_project_section: cli.replace_project_section,
         keep_old_metadata: cli.keep_current_data,
