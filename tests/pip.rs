@@ -30,7 +30,7 @@ fn test_complete_workflow() {
         .arg("--dev-requirements-file")
         .arg("requirements-dev.txt")
         .arg("--dev-requirements-file")
-        .arg("requirements-typing.txt"), @r#"
+        .arg("requirements-typing.txt"), @r###"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -43,9 +43,11 @@ fn test_complete_workflow() {
     Locking dependencies with "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
+       Updating https://github.com/encode/uvicorn (HEAD)
+        Updated https://github.com/encode/uvicorn (54d9575e75cd821cadef0eff64677ebd2fda4885)
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip to uv!
-    "#);
+    "###);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
@@ -99,7 +101,7 @@ fn test_keep_current_data() {
         .arg("requirements-dev.txt")
         .arg("--dev-requirements-file")
         .arg("requirements-typing.txt")
-        .arg("--keep-current-data"), @r#"
+        .arg("--keep-current-data"), @r###"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -112,9 +114,11 @@ fn test_keep_current_data() {
     Locking dependencies with "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
+       Updating https://github.com/encode/uvicorn (HEAD)
+        Updated https://github.com/encode/uvicorn (54d9575e75cd821cadef0eff64677ebd2fda4885)
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip to uv!
-    "#);
+    "###);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
