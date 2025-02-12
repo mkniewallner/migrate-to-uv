@@ -61,11 +61,10 @@ jobs:
           version: ${{ env.UV_VERSION }}
 
       - name: Run unit tests
-        run: cargo test --lib
+        run: make test-unit
 
       - name: Run integration tests
-        # Disable parallelism as this causes concurrency issues on Windows when uv cache is accessed.
-        run: cargo test --test '*' -- --test-threads 1
+        run: make test-integration
 
   check-docs:
     runs-on: ubuntu-24.04

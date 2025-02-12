@@ -32,19 +32,19 @@ pre-commit run --all-files
 Both unit and integration tests are used to ensure that the code work as intended. They can be run with:
 
 ```bash
-cargo test
+make test
 ```
 
 Unit tests are located in modules, alongside the code, under `src` directory, and can be run with:
 
 ```bash
-cargo test --lib
+make test-unit
 ```
 
 Integration tests are located under `tests` directory, and can be run with:
 
 ```bash
-cargo test --test '*' -- --test-threads 1
+make test-integration
 ```
 
 As integration tests depend on [uv](https://docs.astral.sh/uv/) for performing locking, make sure that it is present on
@@ -88,5 +88,5 @@ and [mkdocs-material](https://squidfunk.github.io/mkdocs-material/).
 It can be run locally with [uv](https://docs.astral.sh/uv/) by using:
 
 ```bash
-uv run --only-group docs mkdocs serve
+make doc-serve
 ```
