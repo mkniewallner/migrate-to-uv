@@ -186,7 +186,9 @@ typing-dep = "1.2.3"
 
 [tool.poetry.scripts]
 console-script = "foo:run"
-console-script-2 = "bar:run"
+# Although it's possible to set `extras`, it doesn't seem to actually do
+# anything (https://github.com/python-poetry/poetry/issues/6892).
+console-script-2 = { callable = "bar:run", extras = ["extra"] }
 
 [tool.poetry.plugins.console_scripts]
 console-script-2 = "override_bar:run"

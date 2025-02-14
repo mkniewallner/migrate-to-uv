@@ -6,6 +6,7 @@
 
 * [pip/pip-tools] Warn on unhandled dependency formats ([#103](https://github.com/mkniewallner/migrate-to-uv/pull/103))
 * [pip/pip-tools] Ignore inline comments when parsing dependencies ([#105](https://github.com/mkniewallner/migrate-to-uv/pull/105))
+* [poetry] Migrate scripts that use `scripts = { callable = "foo:run" }` format instead of crashing ([#138](https://github.com/mkniewallner/migrate-to-uv/pull/138))
 
 ## 0.6.0 - 2025-01-20
 
