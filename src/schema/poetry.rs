@@ -27,7 +27,7 @@ pub struct Poetry {
     pub dev_dependencies: Option<IndexMap<String, DependencySpecification>>,
     pub group: Option<IndexMap<String, DependencyGroup>>,
     pub urls: Option<IndexMap<String, String>>,
-    pub scripts: Option<IndexMap<String, String>>,
+    pub scripts: Option<IndexMap<String, Script>>,
     pub plugins: Option<IndexMap<String, IndexMap<String, String>>>,
     pub packages: Option<Vec<Package>>,
     pub include: Option<Vec<Include>>,
@@ -60,6 +60,17 @@ pub enum SourcePriority {
     Default,
     /// <https://python-poetry.org/docs/1.8/repositories/#secondary-package-sources-deprecated>.
     Secondary,
+}
+
+/// Represents the different ways a script can be defined in Poetry.
+#[derive(Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum Script {
+    String(String),
+    // Although not documented, a script can be set as a map, where `callable` is the script to run.
+    // An `extra` field also exists, but it doesn't seem to actually do
+    // anything (https://github.com/python-poetry/poetry/issues/6892).
+    Map { callable: Option<String> },
 }
 
 /// Represents the different ways dependencies can be defined in Poetry.
