@@ -1,4 +1,5 @@
 use crate::schema::pep_621::AuthorOrMaintainer;
+use crate::schema::poetry::Script;
 use crate::schema::utils::SingleOrVec;
 use indexmap::IndexMap;
 use log::warn;
@@ -69,10 +70,25 @@ pub fn get_urls(
 }
 
 pub fn get_scripts(
-    poetry_scripts: Option<IndexMap<String, String>>,
+    poetry_scripts: Option<IndexMap<String, Script>>,
     scripts_from_plugins: Option<IndexMap<String, String>>,
 ) -> Option<IndexMap<String, String>> {
-    let mut scripts: IndexMap<String, String> = poetry_scripts.unwrap_or_default();
+    let mut scripts: IndexMap<String, String> = IndexMap::new();
+
+    if let Some(poetry_scripts) = poetry_scripts {
+        for (name, script) in poetry_scripts {
+            match script {
+                Script::String(script) => {
+                    scripts.insert(name, script);
+                }
+                Script::Map { callable } => {
+                    if let Some(callable) = callable {
+                        scripts.insert(name, callable);
+                    }
+                }
+            }
+        }
+    }
 
     if let Some(scripts_from_plugins) = scripts_from_plugins {
         scripts.extend(scripts_from_plugins);
