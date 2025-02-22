@@ -2,9 +2,9 @@ mod dependencies;
 mod project;
 mod sources;
 
-use crate::converters::pyproject_updater::PyprojectUpdater;
 use crate::converters::Converter;
 use crate::converters::ConverterOptions;
+use crate::converters::pyproject_updater::PyprojectUpdater;
 use crate::schema::pep_621::Project;
 use crate::schema::pipenv::{PipenvLock, Pipfile};
 use crate::schema::pyproject::PyProject;
@@ -17,8 +17,8 @@ use owo_colors::OwoColorize;
 use std::any::Any;
 use std::default::Default;
 use std::fs;
-use toml_edit::visit_mut::VisitMut;
 use toml_edit::DocumentMut;
+use toml_edit::visit_mut::VisitMut;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Pipenv {
@@ -104,9 +104,9 @@ impl Converter for Pipenv {
         let Ok(pipenv_lock) = serde_json::from_str::<PipenvLock>(pipenv_lock_content.as_str())
         else {
             warn!(
-            "Could not parse \"{}\", dependencies will not be kept to their current locked versions.",
-            "Pipfile.lock".bold()
-        );
+                "Could not parse \"{}\", dependencies will not be kept to their current locked versions.",
+                "Pipfile.lock".bold()
+            );
             return None;
         };
 

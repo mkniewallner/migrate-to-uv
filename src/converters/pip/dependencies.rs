@@ -32,7 +32,9 @@ pub fn get(project_path: &Path, requirements_files: Vec<String>) -> Option<Vec<S
             if let Ok(dependency_specification) = dependency_specification {
                 dependencies.push(dependency_specification.to_string());
             } else {
-                warn!("Could not parse the following dependency specification as a PEP 508 one: {line}");
+                warn!(
+                    "Could not parse the following dependency specification as a PEP 508 one: {line}"
+                );
             }
         }
     }
