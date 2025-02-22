@@ -15,7 +15,7 @@ pub struct Project {
     #[serde(rename = "requires-python")]
     pub requires_python: Option<String>,
     pub readme: Option<String>,
-    pub license: Option<String>,
+    pub license: Option<License>,
     pub maintainers: Option<Vec<AuthorOrMaintainer>>,
     pub keywords: Option<Vec<String>>,
     pub classifiers: Option<Vec<String>>,
@@ -36,6 +36,16 @@ pub struct Project {
 pub struct AuthorOrMaintainer {
     pub name: Option<String>,
     pub email: Option<String>,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum License {
+    String(String),
+    Map {
+        text: Option<String>,
+        file: Option<String>,
+    },
 }
 
 #[derive(Deserialize, Serialize)]

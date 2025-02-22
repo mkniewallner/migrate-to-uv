@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Bug fixes
+
+* Handle map for PEP 621 `license` field ([#156](https://github.com/mkniewallner/migrate-to-uv/pull/156))
+
 ## 0.7.0 - 2025-02-15
 
 ### Features
