@@ -8,7 +8,7 @@ use crate::converters::Converter;
 use crate::converters::ConverterOptions;
 use crate::converters::poetry::build_backend::get_hatch;
 use crate::converters::pyproject_updater::PyprojectUpdater;
-use crate::schema::pep_621::Project;
+use crate::schema::pep_621::{License, Project};
 use crate::schema::poetry::PoetryLock;
 use crate::schema::pyproject::PyProject;
 use crate::schema::uv::{SourceContainer, Uv};
@@ -68,7 +68,7 @@ impl Converter for Poetry {
             authors: project::get_authors(poetry.authors),
             requires_python: python_specification.map(|p| p.to_pep_508()),
             readme: project::get_readme(poetry.readme),
-            license: poetry.license,
+            license: poetry.license.map(License::String),
             maintainers: project::get_authors(poetry.maintainers),
             keywords: poetry.keywords,
             classifiers: poetry.classifiers,
@@ -226,6 +226,86 @@ mod tests {
         name = ""
         version = "0.0.1"
         readme = "README1.md"
+        "###);
+    }
+
+    #[test]
+    fn test_perform_migration_license_text() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+        [project]
+        license = { text = "MIT" }
+
+        [tool.poetry.dependencies]
+        python = "^3.12"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                skip_uv_checks: false,
+                ignore_locked_versions: true,
+                replace_project_section: false,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r###"
+        [project]
+        name = ""
+        version = "0.0.1"
+        requires-python = "~=3.12"
+        license = { text = "MIT" }
+        "###);
+    }
+
+    #[test]
+    fn test_perform_migration_license_file() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+        [project]
+        license = { file = "LICENSE" }
+
+        [tool.poetry.dependencies]
+        python = "^3.12"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                skip_uv_checks: false,
+                ignore_locked_versions: true,
+                replace_project_section: false,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r###"
+        [project]
+        name = ""
+        version = "0.0.1"
+        requires-python = "~=3.12"
+        license = { file = "LICENSE" }
         "###);
     }
 }
