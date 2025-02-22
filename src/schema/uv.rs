@@ -13,6 +13,8 @@ pub struct Uv {
     pub default_groups: Option<Vec<String>>,
     #[serde(rename = "constraint-dependencies")]
     pub constraint_dependencies: Option<Vec<String>>,
+    /// <https://docs.astral.sh/uv/concepts/projects/config/#limited-resolution-environments>
+    pub environments: Option<Vec<String>>,
 }
 
 #[derive(Default, Deserialize, Serialize, Eq, PartialEq)]
