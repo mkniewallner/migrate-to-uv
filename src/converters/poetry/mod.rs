@@ -4,10 +4,10 @@ mod project;
 mod sources;
 pub mod version;
 
-use crate::converters::poetry::build_backend::get_hatch;
-use crate::converters::pyproject_updater::PyprojectUpdater;
 use crate::converters::Converter;
 use crate::converters::ConverterOptions;
+use crate::converters::poetry::build_backend::get_hatch;
+use crate::converters::pyproject_updater::PyprojectUpdater;
 use crate::schema::pep_621::Project;
 use crate::schema::poetry::PoetryLock;
 use crate::schema::pyproject::PyProject;
@@ -19,8 +19,8 @@ use owo_colors::OwoColorize;
 #[cfg(test)]
 use std::any::Any;
 use std::fs;
-use toml_edit::visit_mut::VisitMut;
 use toml_edit::DocumentMut;
+use toml_edit::visit_mut::VisitMut;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Poetry {
@@ -149,9 +149,9 @@ impl Converter for Poetry {
         let poetry_lock_content = fs::read_to_string(poetry_lock_path).unwrap();
         let Ok(poetry_lock) = toml::from_str::<PoetryLock>(poetry_lock_content.as_str()) else {
             warn!(
-            "Could not parse \"{}\", dependencies will not be kept to their current locked versions.",
-            "poetry.lock".bold()
-        );
+                "Could not parse \"{}\", dependencies will not be kept to their current locked versions.",
+                "poetry.lock".bold()
+            );
             return None;
         };
 

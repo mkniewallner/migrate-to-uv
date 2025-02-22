@@ -3,7 +3,7 @@ use crate::schema::pep_621::Project;
 use crate::schema::pyproject::{BuildSystem, DependencyGroupSpecification};
 use crate::schema::uv::Uv;
 use indexmap::IndexMap;
-use toml_edit::{table, value, DocumentMut};
+use toml_edit::{DocumentMut, table, value};
 
 /// Updates a `pyproject.toml` document.
 pub struct PyprojectUpdater<'a> {

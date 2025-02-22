@@ -8,7 +8,7 @@ use owo_colors::OwoColorize;
 use std::any::Any;
 use std::fmt::Debug;
 use std::format;
-use std::fs::{remove_file, File};
+use std::fs::{File, remove_file};
 use std::io::{ErrorKind, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};

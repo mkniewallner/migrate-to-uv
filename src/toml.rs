@@ -1,5 +1,5 @@
 use toml_edit::visit_mut::{
-    visit_array_mut, visit_item_mut, visit_table_like_kv_mut, visit_table_mut, VisitMut,
+    VisitMut, visit_array_mut, visit_item_mut, visit_table_like_kv_mut, visit_table_mut,
 };
 use toml_edit::{Array, InlineTable, Item, KeyMut, Value};
 

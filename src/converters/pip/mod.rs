@@ -1,8 +1,8 @@
 mod dependencies;
 
-use crate::converters::pyproject_updater::PyprojectUpdater;
 use crate::converters::Converter;
 use crate::converters::ConverterOptions;
+use crate::converters::pyproject_updater::PyprojectUpdater;
 use crate::schema::pep_621::Project;
 use crate::schema::pyproject::{DependencyGroupSpecification, PyProject};
 use crate::schema::uv::Uv;
@@ -12,8 +12,8 @@ use indexmap::IndexMap;
 use std::any::Any;
 use std::default::Default;
 use std::fs;
-use toml_edit::visit_mut::VisitMut;
 use toml_edit::DocumentMut;
+use toml_edit::visit_mut::VisitMut;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Pip {

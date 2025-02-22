@@ -3,7 +3,7 @@ use crate::schema::poetry::{Format, Include, Package};
 use crate::schema::pyproject::BuildSystem;
 use crate::schema::utils::SingleOrVec;
 use indexmap::IndexMap;
-use std::path::{Path, PathBuf, MAIN_SEPARATOR};
+use std::path::{MAIN_SEPARATOR, Path, PathBuf};
 
 type HatchTargetsIncludeAndSource = (
     Option<Vec<String>>,

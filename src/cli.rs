@@ -1,9 +1,9 @@
 use crate::converters::{ConverterOptions, DependencyGroupsStrategy};
-use crate::detector::{get_converter, PackageManager};
+use crate::detector::{PackageManager, get_converter};
 use crate::logger;
-use clap::builder::styling::{AnsiColor, Effects};
-use clap::builder::Styles;
 use clap::Parser;
+use clap::builder::Styles;
+use clap::builder::styling::{AnsiColor, Effects};
 use clap_verbosity_flag::{InfoLevel, Verbosity};
 use log::error;
 use std::path::PathBuf;
