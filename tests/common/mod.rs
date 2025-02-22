@@ -8,6 +8,7 @@ macro_rules! apply_lock_filters {
         settings.add_filter(r"Using .+", "Using [PYTHON_INTERPRETER]");
         settings.add_filter(r"Defaulting to `\S+`", "Defaulting to `[PYTHON_VERSION]`");
         settings.add_filter(r"Resolved \d+ packages in \S+", "Resolved [PACKAGES] packages in [TIME]");
+        settings.add_filter(r"Updated https://github.com/encode/uvicorn (\S+)", "Updated https://github.com/encode/uvicorn ([SHA1])");
         let _bound = settings.bind_to_scope();
     }
 }

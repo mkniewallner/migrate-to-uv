@@ -44,7 +44,7 @@ fn test_complete_workflow() {
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
        Updating https://github.com/encode/uvicorn (HEAD)
-        Updated https://github.com/encode/uvicorn (54d9575e75cd821cadef0eff64677ebd2fda4885)
+        Updated https://github.com/encode/uvicorn ([SHA1])
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip to uv!
     "###);
@@ -115,7 +115,7 @@ fn test_keep_current_data() {
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
        Updating https://github.com/encode/uvicorn (HEAD)
-        Updated https://github.com/encode/uvicorn (54d9575e75cd821cadef0eff64677ebd2fda4885)
+        Updated https://github.com/encode/uvicorn ([SHA1])
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip to uv!
     "###);
