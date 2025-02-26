@@ -119,7 +119,7 @@ jobs:
       - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4
 
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@520d128f165991a6c774bcb264f323e3d70747f4 # v2
+        uses: actions/attest-build-provenance@f9eaf234fc1c2e333c1eca18177db0f44fa6ba52 # v2
         with:
           subject-path: 'wheels-*/*'
 
