@@ -17,7 +17,7 @@ owo-colors = "=4.2.0"
 pep440_rs = "=0.7.3"
 pep508_rs = "=0.9.2"
 regex = "=1.11.1"
-serde = { version = "=1.0.218", features = ["derive"] }
+serde = { version = "=1.0.219", features = ["derive"] }
 serde_json = "=1.0.140"
 toml = "=0.8.20"
 toml_edit = { version = "=0.22.24", features = ["display", "serde"] }
