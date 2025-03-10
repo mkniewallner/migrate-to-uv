@@ -10,7 +10,7 @@ default-run = "migrate-to-uv"
 [dependencies]
 clap = { version = "=4.5.31", features = ["derive"] }
 clap-verbosity-flag = "=3.0.2"
-env_logger = "=0.11.6"
+env_logger = "=0.11.7"
 indexmap = { version = "=2.7.1", features = ["serde"] }
 log = "=0.4.26"
 owo-colors = "=4.2.0"
