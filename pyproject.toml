@@ -43,7 +43,7 @@ Funding = "https://github.com/sponsors/mkniewallner"
 [dependency-groups]
 docs = [
     "mkdocs==1.6.1",
-    "mkdocs-material==9.6.8",
+    "mkdocs-material==9.6.9",
 ]
 
 [tool.maturin]
