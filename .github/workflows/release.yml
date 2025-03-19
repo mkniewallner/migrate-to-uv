@@ -116,7 +116,7 @@ jobs:
       attestations: write
     if: ${{ github.event_name == 'release' }}
     steps:
-      - uses: actions/download-artifact@b14cf4c92620c250e1c074ab0a5800e37df86765 # v4
+      - uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2
