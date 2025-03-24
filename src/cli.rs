@@ -98,7 +98,7 @@ pub fn cli() {
             converter.convert_to_uv();
         }
         Err(error) => {
-            error!("{}", error);
+            error!("{error}");
             process::exit(1);
         }
     }
