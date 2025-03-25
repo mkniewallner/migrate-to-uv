@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Bug fixes
+
+* [pipenv] Handle `*` for version ([#212](https://github.com/mkniewallner/migrate-to-uv/pull/212))
+
 ## 0.7.1 - 2025-02-22
 
 ### Bug fixes

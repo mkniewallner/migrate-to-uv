@@ -13,9 +13,11 @@ dep = "==1.2.3"
 dep-2 = ">=1.2.3"
 dep-3 = "~=1.2.3"
 dep-4 = "~=1.2"
+dep-star = "*"
 
 # Tables
 with-version-only = { version = "==1.2.3" }
+with-version-only-star = { version = "*" }
 with-extras = { version = "==1.2.3", extras = ["foo", "bar"] }
 with-source = { version = "==1.2.3", index = "other-index" }
 
