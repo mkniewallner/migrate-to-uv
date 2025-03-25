@@ -46,9 +46,10 @@ pub fn get(
                 }
 
                 match specification {
-                    DependencySpecification::String(spec) => {
-                        format!("{name}{spec}")
-                    }
+                    DependencySpecification::String(spec) => match spec.as_str() {
+                        "*" => name.to_string(),
+                        _ => format!("{name}{spec}"),
+                    },
                     DependencySpecification::Map {
                         version,
                         extras,
@@ -65,7 +66,10 @@ pub fn get(
                         }
 
                         if let Some(version) = version {
-                            pep_508_version.push_str(version);
+                            match version.as_str() {
+                                "*" => (),
+                                _ => pep_508_version.push_str(version),
+                            }
                         }
 
                         if let Some(markers) = markers {
