@@ -8,8 +8,6 @@ use crate::schema::pyproject::{DependencyGroupSpecification, PyProject};
 use crate::schema::uv::Uv;
 use crate::toml::PyprojectPrettyFormatter;
 use indexmap::IndexMap;
-#[cfg(test)]
-use std::any::Any;
 use std::default::Default;
 use std::fs;
 use toml_edit::DocumentMut;
@@ -135,10 +133,5 @@ impl Converter for Pip {
             return Some(dependencies);
         }
         None
-    }
-
-    #[cfg(test)]
-    fn as_any(&self) -> &dyn Any {
-        self
     }
 }

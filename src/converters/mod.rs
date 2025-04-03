@@ -4,7 +4,6 @@ use crate::schema::pyproject::DependencyGroupSpecification;
 use indexmap::IndexMap;
 use log::{error, info, warn};
 use owo_colors::OwoColorize;
-#[cfg(test)]
 use std::any::Any;
 use std::fmt::Debug;
 use std::format;
@@ -38,7 +37,7 @@ pub struct ConverterOptions {
 }
 
 /// Converts a project from a package manager to uv.
-pub trait Converter: Debug {
+pub trait Converter: Any + Debug {
     /// Performs the conversion from the current package manager to uv.
     fn convert_to_uv(&self) {
         let pyproject_path = self.get_project_path().join("pyproject.toml");
@@ -222,9 +221,6 @@ pub trait Converter: Debug {
             }
         }
     }
-
-    #[cfg(test)]
-    fn as_any(&self) -> &dyn Any;
 }
 
 /// Lock dependencies with uv by running `uv lock` command.
