@@ -247,6 +247,7 @@ mod tests {
     use super::*;
     use crate::converters::DependencyGroupsStrategy;
     use rstest::rstest;
+    use std::any::Any;
     use std::path::PathBuf;
 
     const fn get_converter_options(project_path: PathBuf) -> ConverterOptions {
@@ -276,8 +277,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(
-            converter
-                .as_any()
+            (converter.as_ref() as &dyn Any)
                 .downcast_ref::<converters::poetry::Poetry>()
                 .unwrap(),
             &converters::poetry::Poetry { converter_options }
@@ -298,8 +298,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(
-            converter
-                .as_any()
+            (converter.as_ref() as &dyn Any)
                 .downcast_ref::<converters::pipenv::Pipenv>()
                 .unwrap(),
             &converters::pipenv::Pipenv { converter_options }
@@ -319,8 +318,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(
-            converter
-                .as_any()
+            (converter.as_ref() as &dyn Any)
                 .downcast_ref::<converters::pip::Pip>()
                 .unwrap(),
             &converters::pip::Pip {
@@ -345,8 +343,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(
-            converter
-                .as_any()
+            (converter.as_ref() as &dyn Any)
                 .downcast_ref::<converters::pip::Pip>()
                 .unwrap(),
             &converters::pip::Pip {
@@ -397,8 +394,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(
-            converter
-                .as_any()
+            (converter.as_ref() as &dyn Any)
                 .downcast_ref::<converters::poetry::Poetry>()
                 .unwrap(),
             &converters::poetry::Poetry { converter_options }
@@ -434,8 +430,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(
-            converter
-                .as_any()
+            (converter.as_ref() as &dyn Any)
                 .downcast_ref::<converters::pipenv::Pipenv>()
                 .unwrap(),
             &converters::pipenv::Pipenv { converter_options }
@@ -474,8 +469,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(
-            converter
-                .as_any()
+            (converter.as_ref() as &dyn Any)
                 .downcast_ref::<converters::pip::Pip>()
                 .unwrap(),
             &converters::pip::Pip {
@@ -524,8 +518,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(
-            converter
-                .as_any()
+            (converter.as_ref() as &dyn Any)
                 .downcast_ref::<converters::pip::Pip>()
                 .unwrap(),
             &converters::pip::Pip {

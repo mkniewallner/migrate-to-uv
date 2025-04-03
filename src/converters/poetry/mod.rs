@@ -16,8 +16,6 @@ use crate::toml::PyprojectPrettyFormatter;
 use indexmap::IndexMap;
 use log::warn;
 use owo_colors::OwoColorize;
-#[cfg(test)]
-use std::any::Any;
 use std::fs;
 use toml_edit::DocumentMut;
 use toml_edit::visit_mut::VisitMut;
@@ -167,11 +165,6 @@ impl Converter for Poetry {
         } else {
             Some(constraint_dependencies)
         }
-    }
-
-    #[cfg(test)]
-    fn as_any(&self) -> &dyn Any {
-        self
     }
 }
 
