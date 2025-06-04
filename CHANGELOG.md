@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Bug fixes
+
+* Use correct `include-group` name to include groups when using `--dependency-groups-strategy include-in-dev`
+
 ## 0.7.2 - 2025-03-25
 
 ### Bug fixes

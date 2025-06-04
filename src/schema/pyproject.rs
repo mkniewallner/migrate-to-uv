@@ -18,7 +18,10 @@ pub struct PyProject {
 #[serde(untagged)]
 pub enum DependencyGroupSpecification {
     String(String),
-    Map { include: Option<String> },
+    Map {
+        #[serde(rename = "include-group")]
+        include_group: Option<String>,
+    },
 }
 
 #[derive(Deserialize, Serialize)]

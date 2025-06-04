@@ -120,7 +120,7 @@ If this is not desirable, it is possible to change the strategy by using `--depe
   dependency groups in `default-groups` under `[tool.uv]` section (unless the only dependency group is `dev` one, as
   this is already uv's default)
 - `include-in-dev`:  Move each dependency group to its corresponding uv dependency group, and reference all dependency
-  groups (others than `dev` one) in `dev` dependency group by using `{ include = "<group>" }`
+  groups (others than `dev` one) in `dev` dependency group by using `{ include-group = "<group>" }`
 - `keep-existing`: Move each dependency group to its corresponding uv dependency group, without any further action
 - `merge-into-dev`: Merge dependencies from all dependency groups into `dev` dependency group
 
