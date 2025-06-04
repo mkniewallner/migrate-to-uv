@@ -187,14 +187,14 @@ pub fn get_dependency_groups_and_default_groups(
                 }
             }
             // When using `IncludeInDev` strategy, dependency groups (except `dev` one) are
-            // referenced from `dev` dependency group with `{ include = "<group>" }`.
+            // referenced from `dev` dependency group with `{ include-group = "<group>" }`.
             DependencyGroupsStrategy::IncludeInDev => {
                 dependency_groups
                     .entry("dev".to_string())
                     .or_default()
                     .extend(poetry_group.keys().filter(|&k| k != "dev").map(|g| {
                         DependencyGroupSpecification::Map {
-                            include: Some(g.to_string()),
+                            include_group: Some(g.to_string()),
                         }
                     }));
             }

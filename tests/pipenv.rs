@@ -285,7 +285,7 @@ fn test_dependency_groups_strategy_include_in_dev() {
     [dependency-groups]
     dev = [
         "mypy>=1.13.0",
-        { include = "test" },
+        { include-group = "test" },
     ]
     test = ["factory-boy>=3.2.1"]
 
