@@ -516,6 +516,7 @@ fn test_skip_lock_full() {
         "tilde-4~=1.2.3.4",
         "tilde-pre-release~=1.2.3b1",
         "exact==1.2.3",
+        "exact-2==1.2.3",
         "star",
         "star-2==1.*",
         "star-3==1.2.*",
