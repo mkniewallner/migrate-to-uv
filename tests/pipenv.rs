@@ -491,11 +491,13 @@ fn test_skip_lock_full() {
     requires-python = "~=3.13"
     dependencies = [
         "dep==1.2.3",
-        "dep-2>=1.2.3",
-        "dep-3~=1.2.3",
-        "dep-4~=1.2",
+        "dep-2==1.2.3",
+        "dep-3>=1.2.3",
+        "dep-4~=1.2.3",
+        "dep-5~=1.2",
         "dep-star",
         "with-version-only==1.2.3",
+        "with-version-only-2==1.2.3",
         "with-version-only-star",
         "with-extras[foo, bar]==1.2.3",
         "with-source==1.2.3",

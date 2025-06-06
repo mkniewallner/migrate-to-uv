@@ -6,6 +6,7 @@
 
 * Use correct `include-group` name to include groups when using `--dependency-groups-strategy include-in-dev` ([#283](https://github.com/mkniewallner/migrate-to-uv/pull/283))
 * [poetry] Handle `=` single equality ([#288](https://github.com/mkniewallner/migrate-to-uv/pull/288))
+* [pipenv] Handle raw versions ([#292](https://github.com/mkniewallner/migrate-to-uv/pull/292))
 
 ## 0.7.2 - 2025-03-25
 
