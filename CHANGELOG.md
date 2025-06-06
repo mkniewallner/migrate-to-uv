@@ -4,7 +4,8 @@
 
 ### Bug fixes
 
-* Use correct `include-group` name to include groups when using `--dependency-groups-strategy include-in-dev`
+* Use correct `include-group` name to include groups when using `--dependency-groups-strategy include-in-dev` ([#283](https://github.com/mkniewallner/migrate-to-uv/pull/283))
+* [poetry] Handle `=` single equality ([#288](https://github.com/mkniewallner/migrate-to-uv/pull/288))
 
 ## 0.7.2 - 2025-03-25
 

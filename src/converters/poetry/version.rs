@@ -67,6 +67,7 @@ impl FromStr for PoetryPep440 {
             ("*", "") => Ok(Self::String(String::new())),
             ("^", version) => Ok(Self::from_caret(version.trim())),
             ("~", version) => Ok(Self::from_tilde(version.trim())),
+            ("=", version) => Ok(Self::String(format!("=={version}"))),
             _ => Ok(Self::String(format!("=={s}"))),
         }
     }
