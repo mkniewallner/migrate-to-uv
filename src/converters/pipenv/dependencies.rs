@@ -46,10 +46,19 @@ pub fn get(
                 }
 
                 match specification {
-                    DependencySpecification::String(spec) => match spec.as_str() {
-                        "*" => name.to_string(),
-                        _ => format!("{name}{spec}"),
-                    },
+                    DependencySpecification::String(spec) => {
+                        if spec.as_str() == "*" {
+                            name.to_string()
+                        } else {
+                            // Handle raw versions like "1.2.3", which, while undocumented, are also
+                            // valid for Pipenv.
+                            if spec.chars().next().unwrap_or_default().is_ascii_digit() {
+                                format!("{name}=={spec}")
+                            } else {
+                                format!("{name}{spec}")
+                            }
+                        }
+                    }
                     DependencySpecification::Map {
                         version,
                         extras,
@@ -66,9 +75,13 @@ pub fn get(
                         }
 
                         if let Some(version) = version {
-                            match version.as_str() {
-                                "*" => (),
-                                _ => pep_508_version.push_str(version),
+                            if version.as_str() != "*" {
+                                // Handle raw versions like "1.2.3", which, while undocumented, are
+                                // also valid for Pipenv.
+                                if version.chars().next().unwrap_or_default().is_ascii_digit() {
+                                    pep_508_version.push_str("==");
+                                }
+                                pep_508_version.push_str(version);
                             }
                         }
 
