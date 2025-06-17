@@ -181,6 +181,12 @@ dev-dep = "1.2.3"
 [tool.poetry.group.typing.dependencies]
 typing-dep = "1.2.3"
 
+[tool.poetry.group.profiling]
+optional = true
+
+[tool.poetry.group.profiling.dependencies]
+pyinstrument = "5.0.2"
+
 [tool.poetry.urls]
 "First link" = "https://first.example.com"
 "Another link" = "https://another.example.com"

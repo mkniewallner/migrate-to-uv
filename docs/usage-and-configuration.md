@@ -110,19 +110,22 @@ Most package managers that support dependency groups install dependencies from a
 By default, uv will [only install `dev` one](https://docs.astral.sh/uv/concepts/projects/dependencies/#default-groups).
 
 In order to match the workflow in the current package manager as closely as possible, by default, `migrate-to-uv` will
-move each dependency group to its corresponding one in uv, and set all dependency groups in `default-groups` under
-`[tool.uv]` section (unless the only dependency group is `dev` one, as this is already uv's default).
+move each dependency group to its corresponding one in uv, and set all dependency groups (except the ones that could be
+optional, like [Poetry allows to do](https://python-poetry.org/docs/managing-dependencies#optional-groups)) in
+`default-groups` under `[tool.uv]` section (unless the only dependency group is `dev` one, as this is already uv's
+default).
 
 If this is not desirable, it is possible to change the strategy by using `--dependency-groups-strategy <VALUE>`, where
 `<VALUE>` can be one of the following:
 
 - `set-default-groups` (default): Move each dependency group to its corresponding uv dependency group, and add all
-  dependency groups in `default-groups` under `[tool.uv]` section (unless the only dependency group is `dev` one, as
-  this is already uv's default)
-- `include-in-dev`:  Move each dependency group to its corresponding uv dependency group, and reference all dependency
-  groups (others than `dev` one) in `dev` dependency group by using `{ include-group = "<group>" }`
+  non-optional dependency groups in `default-groups` under `[tool.uv]` section (unless the only dependency group is
+  `dev` one, as this is already uv's default)
+- `include-in-dev`:  Move each dependency group to its corresponding uv dependency group, and reference all non-optional
+  dependency groups (others than `dev` one) in `dev` dependency group by using `{ include-group = "<group>" }`
 - `keep-existing`: Move each dependency group to its corresponding uv dependency group, without any further action
-- `merge-into-dev`: Merge dependencies from all dependency groups into `dev` dependency group
+- `merge-into-dev`: Merge dependencies from all non-optional dependency groups into `dev` dependency group (optional
+  dependency groups are moved to their corresponding uv dependency groups)
 
 **Example**:
 
