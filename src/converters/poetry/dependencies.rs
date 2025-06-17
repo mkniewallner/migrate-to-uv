@@ -159,13 +159,22 @@ pub fn get_dependency_groups_and_default_groups(
     }
 
     // Add dependencies from `[poetry.group.<group>.dependencies]` into `<group>` dependency group,
-    // unless `MergeIntoDev` strategy is used, in which case we add them into `dev` dependency
-    // group.
+    // unless `MergeIntoDev` strategy is used, in which case:
+    // - we add non-optional groups into `dev` dependency group
+    // - we keep the original group for optional groups
     if let Some(poetry_group) = &poetry.group {
+        let mut optional_groups = HashSet::new();
+
         for (group, dependency_group) in poetry_group {
+            if dependency_group.optional == Some(true) {
+                optional_groups.insert(group.to_string());
+            }
+
             dependency_groups
                 .entry(match dependency_groups_strategy {
-                    DependencyGroupsStrategy::MergeIntoDev => "dev".to_string(),
+                    DependencyGroupsStrategy::MergeIntoDev if !optional_groups.contains(group) => {
+                        "dev".to_string()
+                    }
                     _ => group.to_string(),
                 })
                 .or_default()
@@ -178,25 +187,33 @@ pub fn get_dependency_groups_and_default_groups(
         }
 
         match dependency_groups_strategy {
-            // When using `SetDefaultGroups` strategy, all dependency groups are referenced in
-            // `default-groups` under `[tool.uv]` section. If we only have `dev` dependency group,
-            // do not set `default-groups`, as this is already uv's default.
+            // When using `SetDefaultGroups` strategy, all non-optional dependency groups are
+            // referenced in `default-groups` under `[tool.uv]` section. If we only have `dev`
+            // dependency group, do not set `default-groups`, as this is already uv's default.
             DependencyGroupsStrategy::SetDefaultGroups => {
                 if !dependency_groups.keys().eq(["dev"]) {
-                    default_groups.extend(dependency_groups.keys().map(ToString::to_string));
+                    default_groups.extend(
+                        dependency_groups
+                            .keys()
+                            .filter(|&group| !optional_groups.contains(group))
+                            .map(ToString::to_string),
+                    );
                 }
             }
-            // When using `IncludeInDev` strategy, dependency groups (except `dev` one) are
-            // referenced from `dev` dependency group with `{ include-group = "<group>" }`.
+            // When using `IncludeInDev` strategy, non-optional dependency groups (except `dev` one)
+            // are referenced from `dev` dependency group with `{ include-group = "<group>" }`.
             DependencyGroupsStrategy::IncludeInDev => {
                 dependency_groups
                     .entry("dev".to_string())
                     .or_default()
-                    .extend(poetry_group.keys().filter(|&k| k != "dev").map(|g| {
-                        DependencyGroupSpecification::Map {
-                            include_group: Some(g.to_string()),
-                        }
-                    }));
+                    .extend(
+                        poetry_group
+                            .keys()
+                            .filter(|&k| k != "dev" && !optional_groups.contains(k))
+                            .map(|g| DependencyGroupSpecification::Map {
+                                include_group: Some(g.to_string()),
+                            }),
+                    );
             }
             _ => (),
         }

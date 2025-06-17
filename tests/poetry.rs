@@ -45,6 +45,7 @@ fn test_complete_workflow() {
     [dependency-groups]
     dev = ["factory-boy>=3.2.1,<4"]
     typing = ["mypy>=1.13.0,<2"]
+    profiling = ["pyinstrument>=5.0.2,<6"]
 
     [tool.uv]
     package = false
@@ -144,6 +145,7 @@ fn test_ignore_locked_versions() {
     [dependency-groups]
     dev = ["factory-boy>=3.2.1,<4"]
     typing = ["mypy>=1.13.0,<2"]
+    profiling = ["pyinstrument>=5.0.2,<6"]
 
     [tool.uv]
     package = false
@@ -220,6 +222,7 @@ fn test_keep_current_data() {
     [dependency-groups]
     dev = ["factory-boy>=3.2.1,<4"]
     typing = ["mypy>=1.13.0,<2"]
+    profiling = ["pyinstrument>=5.0.2,<6"]
 
     [tool.poetry.dependencies]
     python = "^3.11"
@@ -237,6 +240,12 @@ fn test_keep_current_data() {
 
     [tool.poetry.group.typing.dependencies]
     mypy = "^1.13.0"
+
+    [tool.poetry.group.profiling]
+    optional = true
+
+    [tool.poetry.group.profiling.dependencies]
+    pyinstrument = "^5.0.2"
     "###);
 
     // Assert that previous package manager files have not been removed.
@@ -287,6 +296,7 @@ fn test_dependency_groups_strategy_include_in_dev() {
         { include-group = "typing" },
     ]
     typing = ["mypy>=1.13.0,<2"]
+    profiling = ["pyinstrument>=5.0.2,<6"]
 
     [tool.uv]
     package = false
@@ -337,6 +347,7 @@ fn test_dependency_groups_strategy_keep_existing() {
     [dependency-groups]
     dev = ["factory-boy>=3.2.1,<4"]
     typing = ["mypy>=1.13.0,<2"]
+    profiling = ["pyinstrument>=5.0.2,<6"]
 
     [tool.uv]
     package = false
@@ -389,6 +400,7 @@ fn test_dependency_groups_strategy_merge_into_dev() {
         "factory-boy>=3.2.1,<4",
         "mypy>=1.13.0,<2",
     ]
+    profiling = ["pyinstrument>=5.0.2,<6"]
 
     [tool.uv]
     package = false
@@ -429,6 +441,7 @@ fn test_skip_lock() {
     [dependency-groups]
     dev = ["factory-boy>=3.2.1,<4"]
     typing = ["mypy>=1.13.0,<2"]
+    profiling = ["pyinstrument>=5.0.2,<6"]
 
     [tool.uv]
     package = false
@@ -599,6 +612,7 @@ fn test_skip_lock_full() {
         "dev-dep==1.2.3",
     ]
     typing = ["typing-dep==1.2.3"]
+    profiling = ["pyinstrument==5.0.2"]
 
     [tool.uv]
     package = false
@@ -750,6 +764,7 @@ fn test_dry_run() {
     [dependency-groups]
     dev = ["factory-boy>=3.2.1,<4"]
     typing = ["mypy>=1.13.0,<2"]
+    profiling = ["pyinstrument>=5.0.2,<6"]
 
     [tool.uv]
     package = false
@@ -904,6 +919,7 @@ fn test_pep_621() {
     [dependency-groups]
     dev = ["factory-boy>=3.2.1,<4"]
     typing = ["mypy>=1.13.0,<2"]
+    profiling = ["pyinstrument>=5.0.2,<6"]
 
     [tool.uv]
     default-groups = [

@@ -29,6 +29,12 @@ factory-boy = "^3.2.1"
 [tool.poetry.group.typing.dependencies]
 mypy = "^1.13.0"
 
+[tool.poetry.group.profiling]
+optional = true
+
+[tool.poetry.group.profiling.dependencies]
+pyinstrument = "^5.0.2"
+
 [[tool.poetry.source]]
 name = "PyPI"
 priority = "primary"

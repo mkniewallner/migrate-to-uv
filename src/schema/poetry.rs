@@ -37,6 +37,7 @@ pub struct Poetry {
 #[derive(Deserialize, Serialize)]
 pub struct DependencyGroup {
     pub dependencies: IndexMap<String, DependencySpecification>,
+    pub optional: Option<bool>,
 }
 
 /// Represents a package source: <https://python-poetry.org/docs/repositories/#package-sources>.
