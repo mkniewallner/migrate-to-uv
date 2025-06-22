@@ -1,5 +1,5 @@
-# This will be ignored
 -r requirements-typing.txt
+--requirement requirements-doc.txt
 
 # A comment
 pytest==8.3.4

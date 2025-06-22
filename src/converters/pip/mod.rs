@@ -27,10 +27,8 @@ impl Converter for Pip {
             fs::read_to_string(self.get_project_path().join("pyproject.toml")).unwrap_or_default();
         let pyproject: PyProject = toml::from_str(pyproject_toml_content.as_str()).unwrap();
 
-        let dev_dependencies = dependencies::get(
-            &self.get_project_path(),
-            self.dev_requirements_files.clone(),
-        );
+        let dev_dependencies =
+            dependencies::get(&self.get_project_path(), &self.dev_requirements_files);
 
         let dependency_groups = dev_dependencies.map(|dependencies| {
             IndexMap::from([(
@@ -47,10 +45,7 @@ impl Converter for Pip {
             name: Some(String::new()),
             // "version" is required by uv.
             version: Some("0.0.1".to_string()),
-            dependencies: dependencies::get(
-                &self.get_project_path(),
-                self.requirements_files.clone(),
-            ),
+            dependencies: dependencies::get(&self.get_project_path(), &self.requirements_files),
             ..Default::default()
         };
 
@@ -125,7 +120,8 @@ impl Converter for Pip {
                 .into_iter()
                 .chain(self.dev_requirements_files.clone())
                 .map(|f| f.replace(".in", ".txt"))
-                .collect(),
+                .collect::<Vec<String>>()
+                .as_slice(),
         ) {
             if dependencies.is_empty() {
                 return None;
