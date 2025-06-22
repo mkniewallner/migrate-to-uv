@@ -15,6 +15,9 @@ fn test_complete_workflow() {
         "requirements.txt",
         "requirements-dev.txt",
         "requirements-typing.txt",
+        // Files referenced in files above.
+        "requirements-doc.txt",
+        "requirements-nested.txt",
     ];
 
     let tmp_dir = tempdir().unwrap();
@@ -30,7 +33,7 @@ fn test_complete_workflow() {
         .arg("--dev-requirements-file")
         .arg("requirements-dev.txt")
         .arg("--dev-requirements-file")
-        .arg("requirements-typing.txt"), @r###"
+        .arg("requirements-typing.txt"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -47,7 +50,7 @@ fn test_complete_workflow() {
         Updated https://github.com/encode/uvicorn ([SHA1])
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
@@ -62,8 +65,10 @@ fn test_complete_workflow() {
 
     [dependency-groups]
     dev = [
+        "mkdocs==1.6.1",
         "pytest==8.3.4",
         "ruff==0.8.4",
+        "typing-extensions==4.14.0",
         "mypy==1.14.1",
         "types-jsonschema==4.23.0.20241208",
     ]
@@ -85,6 +90,9 @@ fn test_keep_current_data() {
         "requirements.txt",
         "requirements-dev.txt",
         "requirements-typing.txt",
+        // Files referenced in files above.
+        "requirements-doc.txt",
+        "requirements-nested.txt",
     ];
 
     let tmp_dir = tempdir().unwrap();
@@ -101,7 +109,7 @@ fn test_keep_current_data() {
         .arg("requirements-dev.txt")
         .arg("--dev-requirements-file")
         .arg("requirements-typing.txt")
-        .arg("--keep-current-data"), @r###"
+        .arg("--keep-current-data"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -118,7 +126,7 @@ fn test_keep_current_data() {
         Updated https://github.com/encode/uvicorn ([SHA1])
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
@@ -133,8 +141,10 @@ fn test_keep_current_data() {
 
     [dependency-groups]
     dev = [
+        "mkdocs==1.6.1",
         "pytest==8.3.4",
         "ruff==0.8.4",
+        "typing-extensions==4.14.0",
         "mypy==1.14.1",
         "types-jsonschema==4.23.0.20241208",
     ]
@@ -156,6 +166,9 @@ fn test_skip_lock() {
         "requirements.txt",
         "requirements-dev.txt",
         "requirements-typing.txt",
+        // Files referenced in files above.
+        "requirements-doc.txt",
+        "requirements-nested.txt",
     ];
 
     let tmp_dir = tempdir().unwrap();
@@ -197,8 +210,10 @@ fn test_skip_lock() {
 
     [dependency-groups]
     dev = [
+        "mkdocs==1.6.1",
         "pytest==8.3.4",
         "ruff==0.8.4",
+        "typing-extensions==4.14.0",
         "mypy==1.14.1",
         "types-jsonschema==4.23.0.20241208",
     ]
@@ -223,6 +238,9 @@ fn test_dry_run() {
         "requirements.txt",
         "requirements-dev.txt",
         "requirements-typing.txt",
+        // Files referenced in files above.
+        "requirements-doc.txt",
+        "requirements-nested.txt",
     ];
 
     assert_cmd_snapshot!(cli()
@@ -254,8 +272,10 @@ fn test_dry_run() {
 
     [dependency-groups]
     dev = [
+        "mkdocs==1.6.1",
         "pytest==8.3.4",
         "ruff==0.8.4",
+        "typing-extensions==4.14.0",
         "mypy==1.14.1",
         "types-jsonschema==4.23.0.20241208",
     ]
