@@ -15,7 +15,7 @@ pub struct Pipfile {
     /// Not used, this avoids having the section in `category_groups` below
     #[allow(dead_code)]
     scripts: Option<Placeholder>,
-    /// Assume that remaining keys are category groups (<https://pipenv.pypa.io/en/stable/pipfile.html#package-category-groups>).
+    /// Assume that the remaining keys are category groups (<https://pipenv.pypa.io/en/stable/pipfile.html#package-category-groups>).
     #[serde(flatten)]
     pub category_groups: Option<IndexMap<String, IndexMap<String, DependencySpecification>>>,
 }

@@ -53,11 +53,11 @@ Once uv build backend is out of preview and considered stable, it will be used f
 All existing [Pipenv](https://pipenv.pypa.io/en/stable/) metadata should be converted to uv when performing the
 migration:
 
-- [Dependencies and development dependencies](https://pipenv.pypa.io/en/stable/pipfile.html#example-pipfile) (PyPI,
+- [Dependencies](https://pipenv.pypa.io/en/stable/pipfile.html#packages-section) and [development dependencies](https://pipenv.pypa.io/en/stable/pipfile.html#development-packages-section) (PyPI,
   path, git, URL)
-- [Package category groups](https://pipenv.pypa.io/en/stable/pipfile.html#package-category-groups)
+- [Package category groups](https://pipenv.pypa.io/en/stable/pipfile.html#custom-package-categories)
 - [Package indexes](https://pipenv.pypa.io/en/stable/indexes.html)
-- [Dependency markers](https://pipenv.pypa.io/en/stable/specifiers.html#specifying-basically-anything)
+- [Dependency markers](https://pipenv.pypa.io/en/stable/specifiers.html#advanced-version-specifiers)
 - [Supported Python versions](https://pipenv.pypa.io/en/stable/advanced.html#automatic-python-installation)
 
 ## pip-tools

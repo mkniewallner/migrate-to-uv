@@ -8,7 +8,7 @@ pub struct PyProject {
     #[serde(rename = "build-system")]
     pub build_system: Option<BuildSystem>,
     pub project: Option<Project>,
-    /// <https://peps.python.org/pep-0735/>
+    /// <https://packaging.python.org/en/latest/specifications/dependency-groups/#dependency-groups>
     #[serde(rename = "dependency-groups")]
     pub dependency_groups: Option<IndexMap<String, Vec<DependencyGroupSpecification>>>,
     pub tool: Option<Tool>,
