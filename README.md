@@ -34,7 +34,7 @@ More package managers (e.g., [setuptools](https://setuptools.pypa.io/en/stable/)
 
 - [Project metadata](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#writing-pyproject-toml) (`name`, `version`, `authors`, ...)
 - [Dependencies and optional dependencies](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#dependencies-optional-dependencies)
-- [Dependency groups](https://peps.python.org/pep-0735/)
+- [Dependency groups](https://packaging.python.org/en/latest/specifications/dependency-groups/#dependency-groups)
 - [Dependency sources](https://docs.astral.sh/uv/concepts/projects/dependencies/#dependency-sources) (index, git, URL, path)
 - [Dependency markers](https://packaging.python.org/en/latest/specifications/dependency-specifiers/)
 - [Entry points](https://packaging.python.org/en/latest/specifications/pyproject-toml/#entry-points)

@@ -164,7 +164,7 @@ handle the cleaning yourself, or want to compare the differences first.
 
 By default, `migrate-to-uv` generates `uv.lock` with `uv lock` to lock dependencies. If you currently use a package
 manager with private indexes, credentials will need to be set for locking to work properly. This can be done by setting
-the [same environment variables as uv expects for private indexes](https://docs.astral.sh/uv/configuration/indexes/#providing-credentials).
+the [same environment variables as uv expects for private indexes](https://docs.astral.sh/uv/concepts/indexes/#providing-credentials-directly).
 
 Since the names of the indexes in uv should be the same as the ones in the current package manager before the migration,
 you should be able to adapt the environment variables based on what you previously used.
