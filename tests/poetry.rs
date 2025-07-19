@@ -20,20 +20,22 @@ fn test_complete_workflow() {
     }
 
     apply_lock_filters!();
-    assert_cmd_snapshot!(cli().arg(project_path), @r###"
+    assert_cmd_snapshot!(cli().arg(project_path), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     Locking dependencies with "uv lock"...
+    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Locking dependencies with "uv lock" again to remove constraints...
+    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
     [project]
@@ -123,17 +125,18 @@ fn test_ignore_locked_versions() {
     }
 
     apply_lock_filters!();
-    assert_cmd_snapshot!(cli().arg(project_path).arg("--ignore-locked-versions"), @r###"
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--ignore-locked-versions"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     Locking dependencies with "uv lock"...
+    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
     [project]
@@ -193,20 +196,22 @@ fn test_keep_current_data() {
     }
 
     apply_lock_filters!();
-    assert_cmd_snapshot!(cli().arg(project_path).arg("--keep-current-data"), @r###"
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--keep-current-data"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     Locking dependencies with "uv lock"...
+    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Locking dependencies with "uv lock" again to remove constraints...
+    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
     [project]
@@ -268,20 +273,22 @@ fn test_dependency_groups_strategy_include_in_dev() {
     assert_cmd_snapshot!(cli()
         .arg(project_path)
         .arg("--dependency-groups-strategy")
-        .arg("include-in-dev"), @r###"
+        .arg("include-in-dev"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     Locking dependencies with "uv lock"...
+    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Locking dependencies with "uv lock" again to remove constraints...
+    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
     [project]
@@ -322,20 +329,22 @@ fn test_dependency_groups_strategy_keep_existing() {
     assert_cmd_snapshot!(cli()
         .arg(project_path)
         .arg("--dependency-groups-strategy")
-        .arg("keep-existing"), @r###"
+        .arg("keep-existing"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     Locking dependencies with "uv lock"...
+    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Locking dependencies with "uv lock" again to remove constraints...
+    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
     [project]
@@ -373,20 +382,22 @@ fn test_dependency_groups_strategy_merge_into_dev() {
     assert_cmd_snapshot!(cli()
         .arg(project_path)
         .arg("--dependency-groups-strategy")
-        .arg("merge-into-dev"), @r###"
+        .arg("merge-into-dev"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     Locking dependencies with "uv lock"...
+    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Locking dependencies with "uv lock" again to remove constraints...
+    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
     [project]
