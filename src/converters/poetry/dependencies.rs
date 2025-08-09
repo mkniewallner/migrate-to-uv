@@ -48,10 +48,9 @@ pub fn get(
                             markers,
                             ..
                         } = spec
+                            && (python.is_some() || platform.is_some() || markers.is_some())
                         {
-                            if python.is_some() || platform.is_some() || markers.is_some() {
-                                source_index.marker = spec.get_marker();
-                            }
+                            source_index.marker = spec.get_marker();
                         }
 
                         source_indexes.push(source_index);

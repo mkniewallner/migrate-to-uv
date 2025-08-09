@@ -74,15 +74,15 @@ pub fn get(
                             pep_508_version.push_str(format!("[{}]", extras.join(", ")).as_str());
                         }
 
-                        if let Some(version) = version {
-                            if version.as_str() != "*" {
-                                // Handle raw versions like "1.2.3", which, while undocumented, are
-                                // also valid for Pipenv.
-                                if version.chars().next().unwrap_or_default().is_ascii_digit() {
-                                    pep_508_version.push_str("==");
-                                }
-                                pep_508_version.push_str(version);
+                        if let Some(version) = version
+                            && version.as_str() != "*"
+                        {
+                            // Handle raw versions like "1.2.3", which, while undocumented, are
+                            // also valid for Pipenv.
+                            if version.chars().next().unwrap_or_default().is_ascii_digit() {
+                                pep_508_version.push_str("==");
                             }
+                            pep_508_version.push_str(version);
                         }
 
                         if let Some(markers) = markers {
