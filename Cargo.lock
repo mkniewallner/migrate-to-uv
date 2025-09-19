@@ -535,7 +535,7 @@ dependencies = [
  "serde_json",
  "tempfile",
  "toml",
- "toml_edit 0.23.5",
+ "toml_edit 0.23.6",
  "url",
 ]
 
@@ -961,9 +961,9 @@ dependencies = [
 
 [[package]]
 name = "toml_edit"
-version = "0.23.5"
+version = "0.23.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2ad0b7ae9cfeef5605163839cb9221f453399f15cfb5c10be9885fcf56611f9"
+checksum = "f3effe7c0e86fdff4f69cdd2ccc1b96f933e24811c5441d44904e8683e27184b"
 dependencies = [
  "indexmap",
  "serde_core",
