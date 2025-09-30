@@ -27,7 +27,7 @@ url = "=2.5.7"
 insta = { version = "=1.43.2", features = ["filters"] }
 insta-cmd = "=0.6.0"
 rstest = "=0.26.1"
-tempfile = "=3.21.0"
+tempfile = "=3.23.0"
 
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
