@@ -6,8 +6,8 @@ pub fn get_indexes(pipenv_sources: Option<Vec<Source>>) -> Option<Vec<Index>> {
         pipenv_sources?
             .iter()
             .map(|source| Index {
-                name: source.name.to_string(),
-                url: Some(source.url.to_string()),
+                name: source.name.clone(),
+                url: Some(source.url.clone()),
                 // https://pipenv.pypa.io/en/stable/indexes.html#index-restricted-packages
                 explicit: (source.name.to_lowercase() != "pypi").then_some(true),
                 ..Default::default()

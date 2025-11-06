@@ -37,7 +37,7 @@ impl Converter for Pip {
                 "dev".to_string(),
                 dependencies
                     .iter()
-                    .map(|dep| DependencyGroupSpecification::String(dep.to_string()))
+                    .map(|dep| DependencyGroupSpecification::String(dep.clone()))
                     .collect(),
             )])
         });
@@ -102,7 +102,7 @@ impl Converter for Pip {
             .iter()
             .chain(&self.dev_requirements_files)
         {
-            files_to_delete.push(requirements_file.to_string());
+            files_to_delete.push(requirements_file.clone());
 
             // For pip-tools, also delete `.txt` files generated from `.in` files.
             if self.is_pip_tools {

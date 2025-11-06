@@ -26,7 +26,7 @@ pub fn get(
 
                 if let Some(source_index) = source_index {
                     uv_source_index
-                        .insert(name.to_string(), SourceContainer::SourceIndex(source_index));
+                        .insert(name.clone(), SourceContainer::SourceIndex(source_index));
                 }
 
                 dependencies.push(format!("{}{}", name, specification.to_pep_508()));
@@ -65,12 +65,10 @@ pub fn get(
                         dependencies.push(format!("{name}{}", spec.to_pep_508()));
                     }
                 } else {
-                    uv_source_index.insert(
-                        name.to_string(),
-                        SourceContainer::SourceIndexes(source_indexes),
-                    );
+                    uv_source_index
+                        .insert(name.clone(), SourceContainer::SourceIndexes(source_indexes));
 
-                    dependencies.push(name.to_string());
+                    dependencies.push(name.clone());
                 }
             }
         }
@@ -96,7 +94,7 @@ pub fn get_optional(
         .iter()
         .map(|(extra, extra_dependencies)| {
             (
-                extra.to_string(),
+                extra.clone(),
                 extra_dependencies
                     .iter()
                     .filter_map(|dependency| {
@@ -166,7 +164,7 @@ pub fn get_dependency_groups_and_default_groups(
 
         for (group, dependency_group) in poetry_group {
             if dependency_group.optional == Some(true) {
-                optional_groups.insert(group.to_string());
+                optional_groups.insert(group.clone());
             }
 
             dependency_groups
@@ -174,7 +172,7 @@ pub fn get_dependency_groups_and_default_groups(
                     DependencyGroupsStrategy::MergeIntoDev if !optional_groups.contains(group) => {
                         "dev".to_string()
                     }
-                    _ => group.to_string(),
+                    _ => group.clone(),
                 })
                 .or_default()
                 .extend(
@@ -210,7 +208,7 @@ pub fn get_dependency_groups_and_default_groups(
                             .keys()
                             .filter(|&k| k != "dev" && !optional_groups.contains(k))
                             .map(|g| DependencyGroupSpecification::Map {
-                                include_group: Some(g.to_string()),
+                                include_group: Some(g.clone()),
                             }),
                     );
             }

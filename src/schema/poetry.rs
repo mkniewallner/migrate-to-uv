@@ -151,7 +151,7 @@ impl DependencySpecification {
             }
 
             if let Some(markers) = markers {
-                combined_markers.push(markers.to_string());
+                combined_markers.push(markers.clone());
             }
 
             if let Some(platform) = platform {

@@ -7,11 +7,11 @@ pub fn get_source_index(dependency_specification: &DependencySpecification) -> O
             source: Some(source),
             ..
         } => Some(SourceIndex {
-            index: Some(source.to_string()),
+            index: Some(source.clone()),
             ..Default::default()
         }),
         DependencySpecification::Map { url: Some(url), .. } => Some(SourceIndex {
-            url: Some(url.to_string()),
+            url: Some(url.clone()),
             ..Default::default()
         }),
         DependencySpecification::Map {
@@ -19,7 +19,7 @@ pub fn get_source_index(dependency_specification: &DependencySpecification) -> O
             develop,
             ..
         } => Some(SourceIndex {
-            path: Some(path.to_string()),
+            path: Some(path.clone()),
             editable: *develop,
             ..Default::default()
         }),

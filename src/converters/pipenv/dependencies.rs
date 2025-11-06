@@ -17,7 +17,7 @@ pub fn get(
                     DependencySpecification::Map {
                         index: Some(index), ..
                     } => Some(SourceContainer::SourceIndex(SourceIndex {
-                        index: Some(index.to_string()),
+                        index: Some(index.clone()),
                         ..Default::default()
                     })),
                     DependencySpecification::Map {
@@ -25,7 +25,7 @@ pub fn get(
                         editable,
                         ..
                     } => Some(SourceContainer::SourceIndex(SourceIndex {
-                        path: Some(path.to_string()),
+                        path: Some(path.clone()),
                         editable: *editable,
                         ..Default::default()
                     })),
@@ -42,13 +42,13 @@ pub fn get(
                 };
 
                 if let Some(source_index) = source_index {
-                    uv_source_index.insert(name.to_string(), source_index);
+                    uv_source_index.insert(name.clone(), source_index);
                 }
 
                 match specification {
                     DependencySpecification::String(spec) => {
                         if spec.as_str() == "*" {
-                            name.to_string()
+                            name.clone()
                         } else {
                             // Handle raw versions like "1.2.3", which, while undocumented, are also
                             // valid for Pipenv.
@@ -86,7 +86,7 @@ pub fn get(
                         }
 
                         if let Some(markers) = markers {
-                            combined_markers.push(markers.to_string());
+                            combined_markers.push(markers.clone());
                         }
 
                         if !combined_markers.is_empty() {
@@ -95,7 +95,7 @@ pub fn get(
                             );
                         }
 
-                        pep_508_version.to_string()
+                        pep_508_version.clone()
                     }
                 }
             })
@@ -164,7 +164,7 @@ pub fn get_dependency_groups_and_default_groups(
             dependency_groups
                 .entry(match dependency_groups_strategy {
                     DependencyGroupsStrategy::MergeIntoDev => "dev".to_string(),
-                    _ => group.to_string(),
+                    _ => group.clone(),
                 })
                 .or_default()
                 .extend(
@@ -192,7 +192,7 @@ pub fn get_dependency_groups_and_default_groups(
                     .or_default()
                     .extend(category_group.keys().filter(|&k| k != "dev").map(|g| {
                         DependencyGroupSpecification::Map {
-                            include_group: Some(g.to_string()),
+                            include_group: Some(g.clone()),
                         }
                     }));
             }
