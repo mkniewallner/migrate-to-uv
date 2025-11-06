@@ -25,8 +25,7 @@ impl PoetryPep440 {
             return match version.clone().release() {
                 [0, 0, z] => Self::Inclusive(version, Version::new([0, 0, z + 1])),
                 [0, y] | [0, y, _, ..] => Self::Inclusive(version, Version::new([0, y + 1])),
-                [x, _, _, ..] | [x] => Self::Inclusive(version, Version::new([x + 1])),
-                [_, _] => Self::Compatible(version),
+                [x, _, ..] | [x] => Self::Inclusive(version, Version::new([x + 1])),
                 [..] => Self::String(String::new()),
             };
         }

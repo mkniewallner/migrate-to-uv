@@ -253,13 +253,13 @@ mod tests {
             },
         };
 
-        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r###"
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
         [project]
         name = ""
         version = "0.0.1"
-        requires-python = "~=3.12"
+        requires-python = ">=3.12,<4"
         license = { text = "MIT" }
-        "###);
+        "#);
     }
 
     #[test]
@@ -293,12 +293,12 @@ mod tests {
             },
         };
 
-        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r###"
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
         [project]
         name = ""
         version = "0.0.1"
-        requires-python = "~=3.12"
+        requires-python = ">=3.12,<4"
         license = { file = "LICENSE" }
-        "###);
+        "#);
     }
 }

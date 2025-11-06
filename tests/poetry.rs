@@ -27,21 +27,19 @@ fn test_complete_workflow() {
 
     ----- stderr -----
     Locking dependencies with "uv lock"...
-    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Locking dependencies with "uv lock" again to remove constraints...
-    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
     "#);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
     name = "foo"
     version = "0.0.1"
-    requires-python = "~=3.11"
+    requires-python = ">=3.11,<4"
     dependencies = ["arrow>=1.2.3,<2"]
 
     [dependency-groups]
@@ -55,7 +53,7 @@ fn test_complete_workflow() {
         "dev",
         "typing",
     ]
-    "###);
+    "#);
 
     let uv_lock = toml::from_str::<UvLock>(
         fs::read_to_string(project_path.join("uv.lock"))
@@ -132,17 +130,16 @@ fn test_ignore_locked_versions() {
 
     ----- stderr -----
     Locking dependencies with "uv lock"...
-    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
     "#);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
     name = "foo"
     version = "0.0.1"
-    requires-python = "~=3.11"
+    requires-python = ">=3.11,<4"
     dependencies = ["arrow>=1.2.3,<2"]
 
     [dependency-groups]
@@ -156,7 +153,7 @@ fn test_ignore_locked_versions() {
         "dev",
         "typing",
     ]
-    "###);
+    "#);
 
     let uv_lock = toml::from_str::<UvLock>(
         fs::read_to_string(project_path.join("uv.lock"))
@@ -203,21 +200,19 @@ fn test_keep_current_data() {
 
     ----- stderr -----
     Locking dependencies with "uv lock"...
-    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Locking dependencies with "uv lock" again to remove constraints...
-    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
     "#);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
     name = "foo"
     version = "0.0.1"
-    requires-python = "~=3.11"
+    requires-python = ">=3.11,<4"
     dependencies = ["arrow>=1.2.3,<2"]
 
     [tool.poetry]
@@ -251,7 +246,7 @@ fn test_keep_current_data() {
 
     [tool.poetry.group.profiling.dependencies]
     pyinstrument = "^5.0.2"
-    "###);
+    "#);
 
     // Assert that previous package manager files have not been removed.
     assert!(project_path.join("poetry.lock").exists());
@@ -280,21 +275,19 @@ fn test_dependency_groups_strategy_include_in_dev() {
 
     ----- stderr -----
     Locking dependencies with "uv lock"...
-    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Locking dependencies with "uv lock" again to remove constraints...
-    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
     "#);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
     name = "foo"
     version = "0.0.1"
-    requires-python = "~=3.11"
+    requires-python = ">=3.11,<4"
     dependencies = ["arrow>=1.2.3,<2"]
 
     [dependency-groups]
@@ -307,7 +300,7 @@ fn test_dependency_groups_strategy_include_in_dev() {
 
     [tool.uv]
     package = false
-    "###);
+    "#);
 
     // Assert that previous package manager files are correctly removed.
     assert!(!project_path.join("poetry.lock").exists());
@@ -336,21 +329,19 @@ fn test_dependency_groups_strategy_keep_existing() {
 
     ----- stderr -----
     Locking dependencies with "uv lock"...
-    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Locking dependencies with "uv lock" again to remove constraints...
-    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
     "#);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
     name = "foo"
     version = "0.0.1"
-    requires-python = "~=3.11"
+    requires-python = ">=3.11,<4"
     dependencies = ["arrow>=1.2.3,<2"]
 
     [dependency-groups]
@@ -360,7 +351,7 @@ fn test_dependency_groups_strategy_keep_existing() {
 
     [tool.uv]
     package = false
-    "###);
+    "#);
 
     // Assert that previous package manager files are correctly removed.
     assert!(!project_path.join("poetry.lock").exists());
@@ -389,21 +380,19 @@ fn test_dependency_groups_strategy_merge_into_dev() {
 
     ----- stderr -----
     Locking dependencies with "uv lock"...
-    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Locking dependencies with "uv lock" again to remove constraints...
-    warning: The `requires-python` specifier (`~=3.11`) in `foo` uses the tilde specifier (`~=`) without a patch version. This will be interpreted as `>=3.11, <4`. Did you mean `~=3.11.0` to constrain the version as `>=3.11.0, <3.12`? We recommend only using the tilde specifier with a patch version to avoid ambiguity.
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
     "#);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
     name = "foo"
     version = "0.0.1"
-    requires-python = "~=3.11"
+    requires-python = ">=3.11,<4"
     dependencies = ["arrow>=1.2.3,<2"]
 
     [dependency-groups]
@@ -415,7 +404,7 @@ fn test_dependency_groups_strategy_merge_into_dev() {
 
     [tool.uv]
     package = false
-    "###);
+    "#);
 
     // Assert that previous package manager files are correctly removed.
     assert!(!project_path.join("poetry.lock").exists());
@@ -442,11 +431,11 @@ fn test_skip_lock() {
     Successfully migrated project from Poetry to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
     name = "foo"
     version = "0.0.1"
-    requires-python = "~=3.11"
+    requires-python = ">=3.11,<4"
     dependencies = ["arrow>=1.2.3,<2"]
 
     [dependency-groups]
@@ -460,7 +449,7 @@ fn test_skip_lock() {
         "dev",
         "typing",
     ]
-    "###);
+    "#);
 
     // Assert that previous package manager files are correctly removed.
     assert!(!project_path.join("poetry.lock").exists());
@@ -493,7 +482,7 @@ fn test_skip_lock_full() {
     Successfully migrated project from Poetry to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [build-system]
     requires = ["hatchling"]
     build-backend = "hatchling.build"
@@ -503,7 +492,7 @@ fn test_skip_lock_full() {
     version = "0.1.0"
     description = "A fabulous project."
     authors = [{ name = "John Doe", email = "john.doe@example.com" }]
-    requires-python = "~=3.11"
+    requires-python = ">=3.11,<4"
     readme = "README.md"
     license = "MIT"
     maintainers = [
@@ -525,7 +514,7 @@ fn test_skip_lock_full() {
     ]
     dependencies = [
         "caret>=1.2.3,<2",
-        "caret-2~=1.2",
+        "caret-2>=1.2,<2",
         "caret-3>=1,<2",
         "caret-4>=0.2.3,<0.3",
         "caret-5>=0.0.3,<0.0.4",
@@ -551,7 +540,7 @@ fn test_skip_lock_full() {
         "with-platform==1.2.3 ; sys_platform == 'darwin'",
         "with-markers-python-platform==1.2.3 ; python_version >= '3.11' and python_version < '3.12' and platform_python_implementation == 'CPython' or platform_python_implementation == 'Jython' and sys_platform == 'darwin'",
         "with-source==1.2.3",
-        "python-restricted==1.2.3 ; python_version ~= '3.11'",
+        "python-restricted==1.2.3 ; python_version >= '3.11' and python_version < '4'",
         "python-restricted-2==1.2.3 ; python_version >= '3.11' and python_version < '3.12'",
         "python-restricted-3==1.2.3 ; python_version > '3.11'",
         "python-restricted-4==1.2.3 ; python_version >= '3.11'",
@@ -559,7 +548,7 @@ fn test_skip_lock_full() {
         "python-restricted-6==1.2.3 ; python_version <= '3.11'",
         "python-restricted-7==1.2.3 ; python_version > '3.11' and python_version < '3.13'",
         "python-restricted-with-source==1.2.3 ; python_version > '3.11' and python_version < '3.13'",
-        "whitespaces~=3.2",
+        "whitespaces>=3.2,<4",
         "whitespaces-2>   3.11,     <=     3.13",
         "optional-not-in-extra==1.2.3",
         "local-package",
@@ -748,7 +737,7 @@ fn test_skip_lock_full() {
 
     [tool.ruff.format]
     preview = true
-    "###);
+    "#);
 
     // Assert that `uv.lock` file was not generated.
     assert!(!project_path.join("uv.lock").exists());
@@ -759,7 +748,7 @@ fn test_dry_run() {
     let project_path = Path::new(FIXTURES_PATH).join("with_lock_file");
     let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
 
-    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r###"
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -769,7 +758,7 @@ fn test_dry_run() {
     [project]
     name = "foo"
     version = "0.0.1"
-    requires-python = "~=3.11"
+    requires-python = ">=3.11,<4"
     dependencies = ["arrow>=1.2.3,<2"]
 
     [dependency-groups]
@@ -783,7 +772,7 @@ fn test_dry_run() {
         "dev",
         "typing",
     ]
-    "###);
+    "#);
 
     // Assert that `pyproject.toml` was not updated.
     assert_eq!(
@@ -869,7 +858,7 @@ fn test_replaces_existing_project() {
     assert_cmd_snapshot!(cli()
         .arg(&project_path)
         .arg("--dry-run")
-        .arg("--replace-project-section"), @r###"
+        .arg("--replace-project-section"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -880,7 +869,7 @@ fn test_replaces_existing_project() {
     name = "foo"
     version = "0.0.1"
     description = "A description"
-    requires-python = "~=3.11"
+    requires-python = ">=3.11,<4"
     dependencies = ["arrow>=1.2.3,<2"]
 
     [dependency-groups]
@@ -892,7 +881,7 @@ fn test_replaces_existing_project() {
         "dev",
         "typing",
     ]
-    "###);
+    "#);
 }
 
 #[test]
