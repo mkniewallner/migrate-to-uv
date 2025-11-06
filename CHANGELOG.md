@@ -5,6 +5,7 @@
 ### Features
 
 * [poetry] Do not set optional groups as default ones ([#299](https://github.com/mkniewallner/migrate-to-uv/pull/299))
+* Indicate support for Python 3.14
 
 ### Bug fixes
 
