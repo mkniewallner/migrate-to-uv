@@ -4,11 +4,12 @@
 
 ### Features
 
-* [poetry]: do not set optional groups as default ones ([#299](https://github.com/mkniewallner/migrate-to-uv/pull/299))
+* [poetry] Do not set optional groups as default ones ([#299](https://github.com/mkniewallner/migrate-to-uv/pull/299))
 
 ### Bug fixes
 
-* [poetry]: use inclusion when converting `^x.y` versions ([#466](https://github.com/mkniewallner/migrate-to-uv/pull/466))
+* [poetry] Use inclusion when converting `^x.y` versions ([#466](https://github.com/mkniewallner/migrate-to-uv/pull/466))
+* [pip/pip-tools] Suggest how to add dependencies that could not be converted ([#350](https://github.com/mkniewallner/migrate-to-uv/pull/350))
 
 ## 0.7.3 - 2025-06-07
 
