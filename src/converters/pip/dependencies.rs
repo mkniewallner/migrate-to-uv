@@ -39,10 +39,11 @@ pub fn get(project_path: &Path, requirements_files: Vec<String>) -> Option<Vec<S
     }
 
     if !failed_dependencies.is_empty() {
-        warn!("The following dependencies could not be automatically migrated.");
-        warn!("Try running these commands manually:");
+        warn!(
+            "Some dependencies could not be automatically migrated. Try running these commands manually:"
+        );
         for dep in &failed_dependencies {
-            warn!("    uv add --frozen {}", dep);
+            warn!("    uv add --frozen {dep}");
         }
     }
 
