@@ -152,29 +152,29 @@ fn get_hatch_include(
         for inc in include {
             match inc {
                 Include::String(path) | Include::Map { path, format: None } => {
-                    sdist_include.push(path.to_string());
-                    wheel_include.push(path.to_string());
+                    sdist_include.push(path.clone());
+                    wheel_include.push(path.clone());
                 }
                 Include::Map {
                     path,
                     format: Some(SingleOrVec::Vec(format)),
                 } => match format[..] {
                     [] | [Format::Sdist, Format::Wheel] => {
-                        sdist_include.push(path.to_string());
-                        wheel_include.push(path.to_string());
+                        sdist_include.push(path.clone());
+                        wheel_include.push(path.clone());
                     }
-                    [Format::Sdist] => sdist_include.push(path.to_string()),
-                    [Format::Wheel] => wheel_include.push(path.to_string()),
+                    [Format::Sdist] => sdist_include.push(path.clone()),
+                    [Format::Wheel] => wheel_include.push(path.clone()),
                     _ => (),
                 },
                 Include::Map {
                     path,
                     format: Some(SingleOrVec::Single(Format::Sdist)),
-                } => sdist_include.push(path.to_string()),
+                } => sdist_include.push(path.clone()),
                 Include::Map {
                     path,
                     format: Some(SingleOrVec::Single(Format::Wheel)),
-                } => wheel_include.push(path.to_string()),
+                } => wheel_include.push(path.clone()),
             }
         }
     }

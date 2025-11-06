@@ -15,11 +15,13 @@ macro_rules! apply_lock_filters {
 
 pub(crate) use apply_lock_filters;
 
+#[allow(dead_code)]
 #[derive(Deserialize, Eq, PartialEq, Debug)]
 pub struct UvLock {
     pub package: Option<Vec<LockedPackage>>,
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize, Eq, PartialEq, Debug)]
 pub struct LockedPackage {
     pub name: String,

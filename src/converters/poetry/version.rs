@@ -75,7 +75,7 @@ impl FromStr for PoetryPep440 {
 impl std::fmt::Display for PoetryPep440 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = match &self {
-            Self::String(s) => s.to_string(),
+            Self::String(s) => s.clone(),
             Self::Compatible(version) => format!("~={version}"),
             Self::Matching(version) => format!("=={version}"),
             Self::Inclusive(lower, upper) => format!(">={lower},<{upper}"),
