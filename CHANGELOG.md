@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+* [poetry]: do not set optional groups as default ones ([#299](https://github.com/mkniewallner/migrate-to-uv/pull/299))
+
+### Bug fixes
+
+* [poetry]: use inclusion when converting `^x.y` versions ([#466](https://github.com/mkniewallner/migrate-to-uv/pull/466))
+
 ## 0.7.3 - 2025-06-07
 
 ### Bug fixes
