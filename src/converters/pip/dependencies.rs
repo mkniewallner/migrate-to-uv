@@ -7,6 +7,7 @@ use url::Url;
 
 pub fn get(project_path: &Path, requirements_files: Vec<String>) -> Option<Vec<String>> {
     let mut dependencies: Vec<String> = Vec::new();
+    let mut failed_dependencies: Vec<String> = Vec::new();
 
     for requirements_file in requirements_files {
         let requirements_content =
@@ -32,10 +33,17 @@ pub fn get(project_path: &Path, requirements_files: Vec<String>) -> Option<Vec<S
             if let Ok(dependency_specification) = dependency_specification {
                 dependencies.push(dependency_specification.to_string());
             } else {
-                warn!(
-                    "Could not parse the following dependency specification as a PEP 508 one: {line}"
-                );
+                failed_dependencies.push(dependency.to_string());
             }
+        }
+    }
+
+    if !failed_dependencies.is_empty() {
+        warn!(
+            "Some dependencies could not be automatically migrated. Try running these commands manually:"
+        );
+        for dep in &failed_dependencies {
+            warn!("    uv add --frozen {dep}");
         }
     }
 
