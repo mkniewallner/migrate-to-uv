@@ -30,16 +30,17 @@ fn test_complete_workflow() {
         .arg("--dev-requirements-file")
         .arg("requirements-dev.txt")
         .arg("--dev-requirements-file")
-        .arg("requirements-typing.txt"), @r###"
+        .arg("requirements-typing.txt"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    warning: Could not parse the following dependency specification as a PEP 508 one: file:bar
-    warning: Could not parse the following dependency specification as a PEP 508 one: file:./bar
-    warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests
-    warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests#egg=requests
+    warning: Some dependencies could not be automatically migrated. Try running these commands manually:
+    warning:     uv add --frozen file:bar
+    warning:     uv add --frozen file:./bar
+    warning:     uv add --frozen git+https://github.com/psf/requests
+    warning:     uv add --frozen git+https://github.com/psf/requests#egg=requests
     Locking dependencies with "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
@@ -47,7 +48,7 @@ fn test_complete_workflow() {
         Updated https://github.com/encode/uvicorn ([SHA1])
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
@@ -101,16 +102,17 @@ fn test_keep_current_data() {
         .arg("requirements-dev.txt")
         .arg("--dev-requirements-file")
         .arg("requirements-typing.txt")
-        .arg("--keep-current-data"), @r###"
+        .arg("--keep-current-data"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    warning: Could not parse the following dependency specification as a PEP 508 one: file:bar
-    warning: Could not parse the following dependency specification as a PEP 508 one: file:./bar
-    warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests
-    warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests#egg=requests
+    warning: Some dependencies could not be automatically migrated. Try running these commands manually:
+    warning:     uv add --frozen file:bar
+    warning:     uv add --frozen file:./bar
+    warning:     uv add --frozen git+https://github.com/psf/requests
+    warning:     uv add --frozen git+https://github.com/psf/requests#egg=requests
     Locking dependencies with "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
@@ -118,7 +120,7 @@ fn test_keep_current_data() {
         Updated https://github.com/encode/uvicorn ([SHA1])
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
@@ -177,10 +179,11 @@ fn test_skip_lock() {
     ----- stdout -----
 
     ----- stderr -----
-    warning: Could not parse the following dependency specification as a PEP 508 one: file:bar
-    warning: Could not parse the following dependency specification as a PEP 508 one: file:./bar
-    warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests
-    warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests#egg=requests
+    warning: Some dependencies could not be automatically migrated. Try running these commands manually:
+    warning:     uv add --frozen file:bar
+    warning:     uv add --frozen file:./bar
+    warning:     uv add --frozen git+https://github.com/psf/requests
+    warning:     uv add --frozen git+https://github.com/psf/requests#egg=requests
     Successfully migrated project from pip to uv!
     ");
 
@@ -237,10 +240,11 @@ fn test_dry_run() {
     ----- stdout -----
 
     ----- stderr -----
-    warning: Could not parse the following dependency specification as a PEP 508 one: file:bar
-    warning: Could not parse the following dependency specification as a PEP 508 one: file:./bar
-    warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests
-    warning: Could not parse the following dependency specification as a PEP 508 one: git+https://github.com/psf/requests#egg=requests
+    warning: Some dependencies could not be automatically migrated. Try running these commands manually:
+    warning:     uv add --frozen file:bar
+    warning:     uv add --frozen file:./bar
+    warning:     uv add --frozen git+https://github.com/psf/requests
+    warning:     uv add --frozen git+https://github.com/psf/requests#egg=requests
     Migrated pyproject.toml:
     [project]
     name = ""
