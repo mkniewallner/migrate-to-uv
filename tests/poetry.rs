@@ -214,7 +214,6 @@ fn test_keep_current_data() {
     version = "0.0.1"
     requires-python = ">=3.11,<4"
     dependencies = ["arrow>=1.2.3,<2"]
-
     [tool.poetry]
     package-mode = false
     name = "foo"
@@ -728,15 +727,43 @@ fn test_skip_lock_full() {
     packages-glob-to = "to/packages-glob-to"
     "from/packages-glob-from-to" = "to/packages-glob-from-to"
 
+    # This comment should be preserved.
     [tool.ruff]
     fix = true
 
+    # This comment should be preserved.
     [tool.ruff.lint]
     # This comment should be preserved.
     fixable = ["I", "UP"]
 
+    # This comment should be preserved.
     [tool.ruff.format]
     preview = true
+
+    # This comment should be preserved.
+    [tool.mypy]
+    files = [
+        "foo",
+        "tests", # handwritten tests
+    ]
+    # This comment should be preserved.
+
+    # This comment should be preserved.
+    warn_unused_configs = true
+
+    ## This comment should be preserved.
+    disallow_subclassing_any = true
+
+    ### This comment should be preserved.
+    #disallow_untyped_calls = true
+    #
+    ### foo
+    #no_implicit_reexport = true
+    #
+
+    [[tool.mypy.overrides]]
+    module = ["foo"]
+    warn_unused_ignores = true
     "#);
 
     // Assert that `uv.lock` file was not generated.

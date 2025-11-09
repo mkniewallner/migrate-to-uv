@@ -484,7 +484,7 @@ fn test_skip_lock_full() {
     Successfully migrated project from Pipenv to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
     name = ""
     version = "0.0.1"
@@ -509,7 +509,6 @@ fn test_skip_lock_full() {
         "markers==1.2.3 ; sys_platform == 'win32'",
         "markers-2==1.2.3 ; os_name == 'nt' and sys_platform != 'darwin' and platform_machine == 'x86_64' and platform_python_implementation == 'CPython' and platform_release == '1.2.3' and platform_system == 'Windows' and platform_version == '1.2.3' and python_version > '3.8' and python_full_version > '3.8.0' and implementation_name != 'pypy' and implementation_version > '3.8' and sys_platform == 'win32'",
     ]
-
     [tool.ruff]
     fix = true
 
@@ -560,7 +559,7 @@ fn test_skip_lock_full() {
     local-package-editable = { path = "package/dist/package-0.1.0.tar.gz", editable = true }
     git = { git = "https://example.com/foo/bar.git" }
     git-ref = { git = "https://example.com/foo/bar.git", rev = "v1.2.3" }
-    "###);
+    "#);
 
     // Assert that `uv.lock` file was not generated.
     assert!(!project_path.join("uv.lock").exists());

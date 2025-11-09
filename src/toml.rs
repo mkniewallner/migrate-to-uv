@@ -27,8 +27,6 @@ impl VisitMut for PyprojectPrettyFormatter {
     }
 
     fn visit_table_mut(&mut self, node: &mut toml_edit::Table) {
-        node.decor_mut().clear();
-
         if !node.is_empty() {
             node.set_implicit(true);
         }
