@@ -78,6 +78,20 @@ impl VisitMut for PyprojectPrettyFormatter {
             }
         }
 
+        // Ensure that a newline is inserted between the `[project]` section and the second section.
+        // If we already had a prefix for the section, preserve it and prepend a newline.
+        if let Some(table) = node.as_table_mut()
+            && table.position() == Some(1)
+        {
+            if let Some(prefix) = table.clone().decor().prefix() {
+                table
+                    .decor_mut()
+                    .set_prefix(format!("\n{}", prefix.as_str().unwrap_or_default()));
+            } else {
+                table.decor_mut().set_prefix("\n");
+            }
+        }
+
         visit_table_like_kv_mut(self, key, node);
 
         self.parent_keys.pop();

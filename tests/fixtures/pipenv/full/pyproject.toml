@@ -1,3 +1,4 @@
+# This comment should be preserved.
 [tool.ruff]
 fix = true
 

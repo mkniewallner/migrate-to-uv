@@ -509,6 +509,8 @@ fn test_skip_lock_full() {
         "markers==1.2.3 ; sys_platform == 'win32'",
         "markers-2==1.2.3 ; os_name == 'nt' and sys_platform != 'darwin' and platform_machine == 'x86_64' and platform_python_implementation == 'CPython' and platform_release == '1.2.3' and platform_system == 'Windows' and platform_version == '1.2.3' and python_version > '3.8' and python_full_version > '3.8.0' and implementation_name != 'pypy' and implementation_version > '3.8' and sys_platform == 'win32'",
     ]
+
+    # This comment should be preserved.
     [tool.ruff]
     fix = true
 

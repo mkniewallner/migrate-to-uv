@@ -214,6 +214,7 @@ fn test_keep_current_data() {
     version = "0.0.1"
     requires-python = ">=3.11,<4"
     dependencies = ["arrow>=1.2.3,<2"]
+
     [tool.poetry]
     package-mode = false
     name = "foo"
