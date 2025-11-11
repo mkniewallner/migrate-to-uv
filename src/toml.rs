@@ -27,8 +27,6 @@ impl VisitMut for PyprojectPrettyFormatter {
     }
 
     fn visit_table_mut(&mut self, node: &mut toml_edit::Table) {
-        node.decor_mut().clear();
-
         if !node.is_empty() {
             node.set_implicit(true);
         }
@@ -77,6 +75,20 @@ impl VisitMut for PyprojectPrettyFormatter {
 
                 key.fmt();
                 *node = Item::Table(table);
+            }
+        }
+
+        // Ensure that a newline is inserted between the `[project]` section and the second section.
+        // If we already had a prefix for the section, preserve it and prepend a newline.
+        if let Some(table) = node.as_table_mut()
+            && table.position() == Some(1)
+        {
+            if let Some(prefix) = table.clone().decor().prefix() {
+                table
+                    .decor_mut()
+                    .set_prefix(format!("\n{}", prefix.as_str().unwrap_or_default()));
+            } else {
+                table.decor_mut().set_prefix("\n");
             }
         }
 
