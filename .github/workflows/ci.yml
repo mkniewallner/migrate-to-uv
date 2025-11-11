@@ -84,4 +84,4 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Check if documentation can be built
-        run: uv run --only-group docs mkdocs build --strict
+        run: uv run --only-group docs zensical build --strict
