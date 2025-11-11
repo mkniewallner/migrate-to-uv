@@ -42,10 +42,7 @@ Changelog = "https://github.com/mkniewallner/migrate-to-uv/blob/main/CHANGELOG.m
 Funding = "https://github.com/sponsors/mkniewallner"
 
 [dependency-groups]
-docs = [
-    "mkdocs==1.6.1",
-    "mkdocs-material==9.7.0",
-]
+docs = ["zensical==0.0.11; python_version >= '3.10'"]
 
 [tool.maturin]
 bindings = "bin"
