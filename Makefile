@@ -12,4 +12,4 @@ test: test-unit test-integration
 
 .PHONY: doc-serve
 doc-serve:
-	uv run --only-group docs mkdocs serve
+	uv run --only-group docs zensical serve
