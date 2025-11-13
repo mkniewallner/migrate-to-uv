@@ -633,6 +633,7 @@ fn test_skip_lock_full() {
     [[tool.uv.index]]
     name = "supplemental"
     url = "https://supplemental.example.com/simple/"
+    explicit = true
 
     [[tool.uv.index]]
     name = "explicit"
@@ -963,6 +964,7 @@ fn test_pep_621() {
     [[tool.uv.index]]
     name = "supplemental"
     url = "https://supplemental.example.com/simple/"
+    explicit = true
 
     [tool.uv.sources]
     git-dep = { git = "https://example.com/foo/bar", tag = "v1.2.3" }
