@@ -54,12 +54,12 @@ packages = [
     { include = "text_file_wheel.txt", format = "wheel" },
 ]
 include = [
-    "include_sdist_wheel",
-    { path = "include_sdist_wheel_2" },
-    { path = "include_sdist_wheel_3", format = [] },
-    { path = "include_sdist_wheel_4", format = ["sdist", "wheel"] },
-    { path = "include_sdist", format = "sdist" },
-    { path = "include_sdist_2", format = ["sdist"] },
+    "include_sdist",
+    { path = "include_sdist_2" },
+    { path = "include_sdist_3", format = [] },
+    { path = "include_sdist_4", format = "sdist" },
+    { path = "include_sdist_5", format = ["sdist"] },
+    { path = "include_sdist_wheel", format = ["sdist", "wheel"] },
     { path = "include_wheel", format = "wheel" },
     { path = "include_wheel_2", format = ["wheel"] },
 ]

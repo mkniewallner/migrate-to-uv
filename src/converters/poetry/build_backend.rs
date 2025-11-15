@@ -152,14 +152,20 @@ fn get_hatch_include(
         for inc in include {
             match inc {
                 Include::String(path) | Include::Map { path, format: None } => {
+                    // https://python-poetry.org/docs/1.8/pyproject/#include-and-exclude
+                    // If there is no format specified, files are only added to sdist.
                     sdist_include.push(path.clone());
-                    wheel_include.push(path.clone());
                 }
                 Include::Map {
                     path,
                     format: Some(SingleOrVec::Vec(format)),
                 } => match format[..] {
-                    [] | [Format::Sdist, Format::Wheel] => {
+                    [] => {
+                        // https://python-poetry.org/docs/1.8/pyproject/#include-and-exclude
+                        // If there is no format specified, files are only added to sdist.
+                        sdist_include.push(path.clone());
+                    }
+                    [Format::Sdist, Format::Wheel] => {
                         sdist_include.push(path.clone());
                         wheel_include.push(path.clone());
                     }

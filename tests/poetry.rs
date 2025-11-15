@@ -692,12 +692,12 @@ fn test_skip_lock_full() {
         "from/packages_glob_from_to/**/*.py",
         "text_file_sdist_wheel.txt",
         "text_file_sdist.txt",
-        "include_sdist_wheel",
-        "include_sdist_wheel_2",
-        "include_sdist_wheel_3",
-        "include_sdist_wheel_4",
         "include_sdist",
         "include_sdist_2",
+        "include_sdist_3",
+        "include_sdist_4",
+        "include_sdist_5",
+        "include_sdist_wheel",
     ]
     exclude = [
         "exclude_sdist_wheel",
@@ -724,9 +724,6 @@ fn test_skip_lock_full() {
         "text_file_sdist_wheel.txt",
         "text_file_wheel.txt",
         "include_sdist_wheel",
-        "include_sdist_wheel_2",
-        "include_sdist_wheel_3",
-        "include_sdist_wheel_4",
         "include_wheel",
         "include_wheel_2",
     ]
