@@ -14,6 +14,8 @@ pub struct Build {
 #[derive(Default, Deserialize, Serialize, Eq, PartialEq)]
 pub struct BuildTarget {
     pub include: Option<Vec<String>>,
+    #[serde(rename = "force-include")]
+    pub force_include: Option<IndexMap<String, String>>,
     pub exclude: Option<Vec<String>>,
     pub sources: Option<IndexMap<String, String>>,
 }

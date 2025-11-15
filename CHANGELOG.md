@@ -10,7 +10,9 @@
 ### Bug fixes
 
 * [poetry] Use inclusion when converting `^x.y` versions ([#466](https://github.com/mkniewallner/migrate-to-uv/pull/466))
+* [poetry] Properly convert `include` to Hatch's build backend ([#477](https://github.com/mkniewallner/migrate-to-uv/pull/477))
 * [pip/pip-tools] Suggest how to add dependencies that could not be converted ([#350](https://github.com/mkniewallner/migrate-to-uv/pull/350))
+* Preserve comments for sections unrelated to migration ([#471](https://github.com/mkniewallner/migrate-to-uv/pull/471))
 
 ## 0.7.3 - 2025-06-07
 
