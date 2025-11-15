@@ -675,58 +675,72 @@ fn test_skip_lock_full() {
 
     [tool.hatch.build.targets.sdist]
     include = [
-        "packages-sdist-wheel",
-        "packages-sdist-wheel-2",
-        "packages-sdist-wheel-3/**/*.py",
-        "packages-sdist",
-        "packages-sdist-2",
-        "from/packages-from",
-        "packages-to",
-        "from/packages-from-to",
-        "packages-glob-to/**/*.py",
-        "from/packages-glob-from-to/**/*.py",
-        "include-sdist-wheel",
-        "include-sdist-wheel-2",
-        "include-sdist-wheel-3",
-        "include-sdist-wheel-4",
-        "include-sdist",
-        "include-sdist-2",
+        "packages_sdist_wheel",
+        "packages_sdist_wheel_2",
+        "packages_sdist_wheel_3",
+        "packages_sdist",
+        "packages_sdist_2",
+        "packages_glob_sdist_wheel/**/*.py",
+        "packages_glob_sdist_wheel_2/**/*.py",
+        "packages_glob_sdist_wheel_3/**/*.py",
+        "packages_glob_sdist/**/*.py",
+        "packages_glob_sdist_2/**/*.py",
+        "from/packages_from",
+        "packages_to",
+        "from/packages_from_to",
+        "packages_glob_to/**/*.py",
+        "from/packages_glob_from_to/**/*.py",
+        "text_file_sdist_wheel.txt",
+        "text_file_sdist.txt",
+        "include_sdist_wheel",
+        "include_sdist_wheel_2",
+        "include_sdist_wheel_3",
+        "include_sdist_wheel_4",
+        "include_sdist",
+        "include_sdist_2",
     ]
     exclude = [
-        "exclude-sdist-wheel",
-        "exclude-sdist-wheel-2",
+        "exclude_sdist_wheel",
+        "exclude_sdist_wheel_2",
     ]
 
     [tool.hatch.build.targets.wheel]
     include = [
-        "packages-sdist-wheel",
-        "packages-sdist-wheel-2",
-        "packages-sdist-wheel-3/**/*.py",
-        "packages-wheel",
-        "packages-wheel-2",
-        "from/packages-from",
-        "packages-to",
-        "from/packages-from-to",
-        "packages-glob-to/**/*.py",
-        "from/packages-glob-from-to/**/*.py",
-        "include-sdist-wheel",
-        "include-sdist-wheel-2",
-        "include-sdist-wheel-3",
-        "include-sdist-wheel-4",
-        "include-wheel",
-        "include-wheel-2",
+        "packages_sdist_wheel",
+        "packages_sdist_wheel_2",
+        "packages_sdist_wheel_3",
+        "packages_wheel",
+        "packages_wheel_2",
+        "packages_glob_sdist_wheel/**/*.py",
+        "packages_glob_sdist_wheel_2/**/*.py",
+        "packages_glob_sdist_wheel_3/**/*.py",
+        "packages_glob_wheel/**/*.py",
+        "packages_glob_wheel_2/**/*.py",
+        "from/packages_from",
+        "packages_to",
+        "from/packages_from_to",
+        "packages_glob_to/**/*.py",
+        "from/packages_glob_from_to/**/*.py",
+        "text_file_sdist_wheel.txt",
+        "text_file_wheel.txt",
+        "include_sdist_wheel",
+        "include_sdist_wheel_2",
+        "include_sdist_wheel_3",
+        "include_sdist_wheel_4",
+        "include_wheel",
+        "include_wheel_2",
     ]
     exclude = [
-        "exclude-sdist-wheel",
-        "exclude-sdist-wheel-2",
+        "exclude_sdist_wheel",
+        "exclude_sdist_wheel_2",
     ]
 
     [tool.hatch.build.targets.wheel.sources]
-    "from/packages-from" = "packages-from"
-    packages-to = "to/packages-to"
-    "from/packages-from-to" = "to/packages-from-to"
-    packages-glob-to = "to/packages-glob-to"
-    "from/packages-glob-from-to" = "to/packages-glob-from-to"
+    "from/packages_from" = "packages_from"
+    packages_to = "to/packages_to"
+    "from/packages_from_to" = "to/packages_from_to"
+    packages_glob_to = "to/packages_glob_to"
+    "from/packages_glob_from_to" = "to/packages_glob_from_to"
 
     # This comment should be preserved.
     [tool.ruff]
