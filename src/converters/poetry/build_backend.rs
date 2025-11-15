@@ -9,6 +9,8 @@ type HatchTargetsIncludeAndSource = (
     Option<Vec<String>>,
     Option<Vec<String>>,
     Option<IndexMap<String, String>>,
+    Option<IndexMap<String, String>>,
+    Option<IndexMap<String, String>>,
 );
 
 pub fn get_new_build_system(build_system: Option<BuildSystem>) -> Option<BuildSystem> {
@@ -40,15 +42,18 @@ pub fn get_hatch(
     exclude: Option<&Vec<String>>,
 ) -> Option<Hatch> {
     let mut targets = IndexMap::new();
-    let (sdist_include, wheel_include, wheel_sources) = get_hatch_include(packages, include);
+    let (sdist_include, wheel_include, sdist_force_include, wheel_force_include, wheel_sources) =
+        get_hatch_include(packages, include);
 
     let sdist_target = BuildTarget {
         include: sdist_include,
+        force_include: sdist_force_include,
         exclude: exclude.cloned(),
         sources: None,
     };
     let wheel_target = BuildTarget {
         include: wheel_include,
+        force_include: wheel_force_include,
         exclude: exclude.cloned(),
         sources: wheel_sources,
     };
@@ -79,6 +84,8 @@ fn get_hatch_include(
 ) -> HatchTargetsIncludeAndSource {
     let mut sdist_include = Vec::new();
     let mut wheel_include = Vec::new();
+    let mut sdist_force_include = IndexMap::new();
+    let mut wheel_force_include = IndexMap::new();
     let mut wheel_sources = IndexMap::new();
 
     // https://python-poetry.org/docs/pyproject/#packages
@@ -154,7 +161,7 @@ fn get_hatch_include(
                 Include::String(path) | Include::Map { path, format: None } => {
                     // https://python-poetry.org/docs/1.8/pyproject/#include-and-exclude
                     // If there is no format specified, files are only added to sdist.
-                    sdist_include.push(path.clone());
+                    sdist_force_include.insert(path.clone(), path.clone());
                 }
                 Include::Map {
                     path,
@@ -163,24 +170,32 @@ fn get_hatch_include(
                     [] => {
                         // https://python-poetry.org/docs/1.8/pyproject/#include-and-exclude
                         // If there is no format specified, files are only added to sdist.
-                        sdist_include.push(path.clone());
+                        sdist_force_include.insert(path.clone(), path.clone());
                     }
                     [Format::Sdist, Format::Wheel] => {
-                        sdist_include.push(path.clone());
-                        wheel_include.push(path.clone());
+                        sdist_force_include.insert(path.clone(), path.clone());
+                        wheel_force_include.insert(path.clone(), path.clone());
                     }
-                    [Format::Sdist] => sdist_include.push(path.clone()),
-                    [Format::Wheel] => wheel_include.push(path.clone()),
+                    [Format::Sdist] => {
+                        sdist_force_include.insert(path.clone(), path.clone());
+                    }
+                    [Format::Wheel] => {
+                        wheel_force_include.insert(path.clone(), path.clone());
+                    }
                     _ => (),
                 },
                 Include::Map {
                     path,
                     format: Some(SingleOrVec::Single(Format::Sdist)),
-                } => sdist_include.push(path.clone()),
+                } => {
+                    sdist_force_include.insert(path.clone(), path.clone());
+                }
                 Include::Map {
                     path,
                     format: Some(SingleOrVec::Single(Format::Wheel)),
-                } => wheel_include.push(path.clone()),
+                } => {
+                    wheel_force_include.insert(path.clone(), path.clone());
+                }
             }
         }
     }
@@ -195,6 +210,16 @@ fn get_hatch_include(
             None
         } else {
             Some(wheel_include)
+        },
+        if sdist_force_include.is_empty() {
+            None
+        } else {
+            Some(sdist_force_include)
+        },
+        if wheel_force_include.is_empty() {
+            None
+        } else {
+            Some(wheel_force_include)
         },
         if wheel_sources.is_empty() {
             None

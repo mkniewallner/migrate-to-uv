@@ -692,17 +692,19 @@ fn test_skip_lock_full() {
         "from/packages_glob_from_to/**/*.py",
         "text_file_sdist_wheel.txt",
         "text_file_sdist.txt",
-        "include_sdist",
-        "include_sdist_2",
-        "include_sdist_3",
-        "include_sdist_4",
-        "include_sdist_5",
-        "include_sdist_wheel",
     ]
     exclude = [
         "exclude_sdist_wheel",
         "exclude_sdist_wheel_2",
     ]
+
+    [tool.hatch.build.targets.sdist.force-include]
+    include_sdist = "include_sdist"
+    include_sdist_2 = "include_sdist_2"
+    include_sdist_3 = "include_sdist_3"
+    include_sdist_4 = "include_sdist_4"
+    include_sdist_5 = "include_sdist_5"
+    include_sdist_wheel = "include_sdist_wheel"
 
     [tool.hatch.build.targets.wheel]
     include = [
@@ -723,14 +725,16 @@ fn test_skip_lock_full() {
         "from/packages_glob_from_to/**/*.py",
         "text_file_sdist_wheel.txt",
         "text_file_wheel.txt",
-        "include_sdist_wheel",
-        "include_wheel",
-        "include_wheel_2",
     ]
     exclude = [
         "exclude_sdist_wheel",
         "exclude_sdist_wheel_2",
     ]
+
+    [tool.hatch.build.targets.wheel.force-include]
+    include_sdist_wheel = "include_sdist_wheel"
+    include_wheel = "include_wheel"
+    include_wheel_2 = "include_wheel_2"
 
     [tool.hatch.build.targets.wheel.sources]
     "from/packages_from" = "packages_from"
