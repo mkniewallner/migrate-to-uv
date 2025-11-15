@@ -228,6 +228,7 @@ mod tests {
                 replace_project_section: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
             },
         };
 
@@ -266,6 +267,7 @@ mod tests {
                 replace_project_section: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
             },
         };
 
@@ -306,6 +308,7 @@ mod tests {
                 replace_project_section: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
             },
         };
 
