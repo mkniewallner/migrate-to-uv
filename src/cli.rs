@@ -1,4 +1,4 @@
-use crate::converters::{ConverterOptions, DependencyGroupsStrategy};
+use crate::converters::{BuildBackend, ConverterOptions, DependencyGroupsStrategy};
 use crate::detector::{PackageManager, get_converter};
 use crate::logger;
 use clap::Parser;
@@ -62,6 +62,8 @@ struct Cli {
         help = "Strategy to use when migrating dependency groups"
     )]
     dependency_groups_strategy: DependencyGroupsStrategy,
+    #[arg(long, help = "Enforce a specific build backend to use when migrating")]
+    build_backend: Option<BuildBackend>,
     #[arg(long, help = "Keep data from current package manager")]
     keep_current_data: bool,
     #[arg(long, default_values = vec!["requirements.txt"], help = "Requirements file to migrate")]
@@ -86,6 +88,7 @@ pub fn cli() {
         replace_project_section: cli.replace_project_section,
         keep_old_metadata: cli.keep_current_data,
         dependency_groups_strategy: cli.dependency_groups_strategy,
+        build_backend: cli.build_backend,
     };
 
     match get_converter(
