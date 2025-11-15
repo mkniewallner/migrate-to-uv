@@ -4,10 +4,10 @@ mod project;
 mod sources;
 pub mod version;
 
-use crate::converters::Converter;
 use crate::converters::ConverterOptions;
-use crate::converters::poetry::build_backend::get_hatch;
+use crate::converters::poetry::build_backend::{get_hatch, get_uv};
 use crate::converters::pyproject_updater::PyprojectUpdater;
+use crate::converters::{BuildBackend, Converter};
 use crate::schema::pep_621::{License, Project};
 use crate::schema::poetry::PoetryLock;
 use crate::schema::pyproject::PyProject;
@@ -94,13 +94,16 @@ impl Converter for Poetry {
             },
             default_groups: uv_default_groups,
             constraint_dependencies: self.get_constraint_dependencies(),
+            build_backend: if self.get_build_backend() == Some(BuildBackend::Uv) {
+                get_uv(
+                    poetry.packages.as_ref(),
+                    poetry.include.as_ref(),
+                    poetry.exclude.as_ref(),
+                )
+            } else {
+                None
+            },
         };
-
-        let hatch = get_hatch(
-            poetry.packages.as_ref(),
-            poetry.include.as_ref(),
-            poetry.exclude.as_ref(),
-        );
 
         let mut updated_pyproject = pyproject_toml_content.parse::<DocumentMut>().unwrap();
         let mut pyproject_updater = PyprojectUpdater {
@@ -108,12 +111,23 @@ impl Converter for Poetry {
         };
 
         pyproject_updater.insert_build_system(
-            build_backend::get_new_build_system(pyproject.build_system).as_ref(),
+            build_backend::get_new_build_system(pyproject.build_system, self.get_build_backend())
+                .as_ref(),
         );
         pyproject_updater.insert_pep_621(&self.build_project(pyproject.project, project));
         pyproject_updater.insert_dependency_groups(dependency_groups.as_ref());
         pyproject_updater.insert_uv(&uv);
-        pyproject_updater.insert_hatch(hatch.as_ref());
+
+        if self.get_build_backend() == Some(BuildBackend::Hatch)
+            || self.get_build_backend().is_none()
+        {
+            let hatch = get_hatch(
+                poetry.packages.as_ref(),
+                poetry.include.as_ref(),
+                poetry.exclude.as_ref(),
+            );
+            pyproject_updater.insert_hatch(hatch.as_ref());
+        }
 
         if !self.keep_old_metadata() {
             remove_pyproject_poetry_section(&mut updated_pyproject);
