@@ -34,6 +34,7 @@ pub struct ConverterOptions {
     pub replace_project_section: bool,
     pub keep_old_metadata: bool,
     pub dependency_groups_strategy: DependencyGroupsStrategy,
+    pub build_backend: Option<BuildBackend>,
 }
 
 /// Converts a project from a package manager to uv.
@@ -154,6 +155,11 @@ pub trait Converter: Any + Debug {
     /// groups.
     fn get_dependency_groups_strategy(&self) -> DependencyGroupsStrategy {
         self.get_converter_options().dependency_groups_strategy
+    }
+
+    /// Build backend to use when migrating package distribution metadata.
+    fn get_build_backend(&self) -> Option<BuildBackend> {
+        self.get_converter_options().build_backend
     }
 
     /// List of files tied to the current package manager to delete at the end of the migration.
@@ -290,4 +296,10 @@ pub enum DependencyGroupsStrategy {
     IncludeInDev,
     KeepExisting,
     MergeIntoDev,
+}
+
+#[derive(clap::ValueEnum, Clone, Copy, PartialEq, Eq, Debug)]
+pub enum BuildBackend {
+    Hatch,
+    Uv,
 }
