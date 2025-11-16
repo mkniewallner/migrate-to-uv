@@ -1,4 +1,5 @@
 use crate::converters::pyproject_updater::PyprojectUpdater;
+use crate::errors::{MIGRATION_ERRORS, MigrationError};
 use crate::schema::pep_621::Project;
 use crate::schema::pyproject::DependencyGroupSpecification;
 use indexmap::IndexMap;
@@ -10,7 +11,7 @@ use std::format;
 use std::fs::{File, remove_file};
 use std::io::{ErrorKind, Write};
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
+use std::process::{Command, Stdio, exit};
 use toml_edit::DocumentMut;
 
 pub mod pip;
@@ -43,12 +44,15 @@ pub trait Converter: Any + Debug {
         let pyproject_path = self.get_project_path().join("pyproject.toml");
         let updated_pyproject_string = self.build_uv_pyproject();
 
+        self.manage_migration_errors();
+
         if self.is_dry_run() {
             info!(
                 "{}\n{}",
                 "Migrated pyproject.toml:".bold(),
                 updated_pyproject_string
             );
+            self.manage_migration_warnings();
             return;
         }
 
@@ -71,6 +75,39 @@ pub trait Converter: Any + Debug {
             .bold()
             .green()
         );
+
+        self.manage_migration_warnings();
+    }
+
+    fn manage_migration_errors(&self) {
+        let migration_errors = MIGRATION_ERRORS.lock().unwrap();
+        let unrecoverable_errors: Vec<&MigrationError> =
+            migration_errors.iter().filter(|e| !e.recoverable).collect();
+
+        if !unrecoverable_errors.is_empty() {
+            error!(
+                "Could not automatically migrate the project to uv because of the following errors:"
+            );
+
+            for error in &unrecoverable_errors {
+                error!("- {}", error.error);
+            }
+            exit(1);
+        }
+    }
+
+    fn manage_migration_warnings(&self) {
+        let migration_errors = MIGRATION_ERRORS.lock().unwrap();
+        let recoverable_errors: Vec<&MigrationError> =
+            migration_errors.iter().filter(|e| e.recoverable).collect();
+
+        if !recoverable_errors.is_empty() {
+            warn!("The following warnings occurred during the migration:");
+
+            for error in &recoverable_errors {
+                warn!("- {}", error.error);
+            }
+        }
     }
 
     /// Build `pyproject.toml` for uv package manager based on current package manager data.
