@@ -36,11 +36,6 @@ fn test_complete_workflow() {
     ----- stdout -----
 
     ----- stderr -----
-    warning: Some dependencies could not be automatically migrated. Try running these commands manually:
-    warning:     uv add --frozen file:bar
-    warning:     uv add --frozen file:./bar
-    warning:     uv add --frozen git+https://github.com/psf/requests
-    warning:     uv add --frozen git+https://github.com/psf/requests#egg=requests
     Locking dependencies with "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
@@ -48,6 +43,12 @@ fn test_complete_workflow() {
         Updated https://github.com/encode/uvicorn ([SHA1])
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip to uv!
+
+    warning: The following warnings occurred during the migration:
+    warning: - "file:bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:bar".
+    warning: - "file:./bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:./bar".
+    warning: - "git+https://github.com/psf/requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests".
+    warning: - "git+https://github.com/psf/requests#egg=requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests#egg=requests".
     "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
@@ -108,11 +109,6 @@ fn test_keep_current_data() {
     ----- stdout -----
 
     ----- stderr -----
-    warning: Some dependencies could not be automatically migrated. Try running these commands manually:
-    warning:     uv add --frozen file:bar
-    warning:     uv add --frozen file:./bar
-    warning:     uv add --frozen git+https://github.com/psf/requests
-    warning:     uv add --frozen git+https://github.com/psf/requests#egg=requests
     Locking dependencies with "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
@@ -120,6 +116,12 @@ fn test_keep_current_data() {
         Updated https://github.com/encode/uvicorn ([SHA1])
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip to uv!
+
+    warning: The following warnings occurred during the migration:
+    warning: - "file:bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:bar".
+    warning: - "file:./bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:./bar".
+    warning: - "git+https://github.com/psf/requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests".
+    warning: - "git+https://github.com/psf/requests#egg=requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests#egg=requests".
     "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
@@ -173,19 +175,20 @@ fn test_skip_lock() {
         .arg("requirements-dev.txt")
         .arg("--dev-requirements-file")
         .arg("requirements-typing.txt")
-        .arg("--skip-lock"), @r"
+        .arg("--skip-lock"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    warning: Some dependencies could not be automatically migrated. Try running these commands manually:
-    warning:     uv add --frozen file:bar
-    warning:     uv add --frozen file:./bar
-    warning:     uv add --frozen git+https://github.com/psf/requests
-    warning:     uv add --frozen git+https://github.com/psf/requests#egg=requests
     Successfully migrated project from pip to uv!
-    ");
+
+    warning: The following warnings occurred during the migration:
+    warning: - "file:bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:bar".
+    warning: - "file:./bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:./bar".
+    warning: - "git+https://github.com/psf/requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests".
+    warning: - "git+https://github.com/psf/requests#egg=requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests#egg=requests".
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
@@ -240,11 +243,6 @@ fn test_dry_run() {
     ----- stdout -----
 
     ----- stderr -----
-    warning: Some dependencies could not be automatically migrated. Try running these commands manually:
-    warning:     uv add --frozen file:bar
-    warning:     uv add --frozen file:./bar
-    warning:     uv add --frozen git+https://github.com/psf/requests
-    warning:     uv add --frozen git+https://github.com/psf/requests#egg=requests
     Migrated pyproject.toml:
     [project]
     name = ""
@@ -266,6 +264,12 @@ fn test_dry_run() {
 
     [tool.uv]
     package = false
+
+    warning: The following warnings occurred during the migration:
+    warning: - "file:bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:bar".
+    warning: - "file:./bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:./bar".
+    warning: - "git+https://github.com/psf/requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests".
+    warning: - "git+https://github.com/psf/requests#egg=requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests#egg=requests".
     "#);
 
     // Assert that previous package manager files have not been removed.

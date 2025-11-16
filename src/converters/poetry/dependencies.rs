@@ -1,11 +1,11 @@
 use crate::converters::poetry::sources;
 use crate::converters::{DependencyGroupsAndDefaultGroups, DependencyGroupsStrategy};
+use crate::errors::{MIGRATION_ERRORS, MigrationError};
 use crate::schema;
 use crate::schema::poetry::DependencySpecification;
 use crate::schema::pyproject::DependencyGroupSpecification;
 use crate::schema::uv::{SourceContainer, SourceIndex};
 use indexmap::IndexMap;
-use log::warn;
 use owo_colors::OwoColorize;
 use std::collections::HashSet;
 
@@ -101,11 +101,14 @@ pub fn get_optional(
                         // If dependency listed in extra does not exist, warn the user.
                         poetry_dependencies.get(dependency).map_or_else(
                             || {
-                                warn!(
-                                    "Could not find dependency \"{}\" listed in \"{}\" extra.",
-                                    dependency.bold(),
-                                    extra.bold()
-                                );
+                                MIGRATION_ERRORS.lock().unwrap().push(MigrationError::new(
+                                    format!(
+                                        "Could not find dependency \"{}\" listed in \"{}\" extra.",
+                                        dependency.bold(),
+                                        extra.bold()
+                                    ),
+                                    true,
+                                ));
                                 None
                             },
                             |dependency_specification| {

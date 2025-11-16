@@ -2,8 +2,19 @@
 
 ## Unreleased
 
+### Breaking changes
+
+#### Abort on unrecoverable errors and warn about recoverable ones
+
+Although `migrate-to-uv` tries its best to migrate a project to uv without changing the behaviour, some things that are accepted by package managers do not have any equivalent in uv. Previously, `migrate-to-uv` would warn about the issue, but still perform the migration. It now aborts the migration in case it is not able to perform the migration that would result in behaviour changes when migrating to uv.
+
+If errors occur and lead to aborting the migration, you are expected to manually update your setup and retry the migration.
+
+Warnings that occurred during the migration (which did not break the behaviour) are now also grouped and displayed at the very end of the migration.
+
 ### Features
 
+* feat!: abort on unrecoverable errors and warn about recoverable ones ([#480](https://github.com/mkniewallner/migrate-to-uv/pull/480))
 * [poetry] Do not set optional groups as default ones ([#299](https://github.com/mkniewallner/migrate-to-uv/pull/299))
 * Indicate support for Python 3.14
 

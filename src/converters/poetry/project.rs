@@ -1,8 +1,9 @@
+use crate::errors::{MIGRATION_ERRORS, MigrationError};
 use crate::schema::pep_621::AuthorOrMaintainer;
 use crate::schema::poetry::Script;
 use crate::schema::utils::SingleOrVec;
 use indexmap::IndexMap;
-use log::warn;
+use owo_colors::OwoColorize;
 use regex::Regex;
 use std::sync::LazyLock;
 
@@ -10,13 +11,27 @@ static AUTHOR_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^(?<name>[^<>]+)(?: <(?<email>.+?)>)?$").unwrap());
 
 pub fn get_readme(poetry_readme: Option<SingleOrVec<String>>) -> Option<String> {
-    poetry_readme.map(|readme| match readme {
-        SingleOrVec::Single(readme) => readme,
-        SingleOrVec::Vec(readmes) => {
-            warn!("Found multiple readme files ({}). PEP 621 only supports setting one, so only the first one was added.", readmes.join(", "));
-            readmes[0].clone()
+    match poetry_readme {
+        Some(SingleOrVec::Single(readme)) => Some(readme),
+        Some(SingleOrVec::Vec(readmes)) => {
+            if readmes.len() > 1 {
+                MIGRATION_ERRORS.lock().unwrap().push(
+                    MigrationError::new(
+                        format!(
+                            "Found multiple files ({}) in \"{}\". PEP 621 only supports setting one. Make sure to manually edit the section before migrating.",
+                            readmes.iter().map(|r|format!("\"{}\"", r.bold())).collect::<Vec<String>>().join(", "),
+                            "tool.poetry.readme".bold(),
+                        ),
+                        false,
+                    )
+                );
+                None
+            } else {
+                Some(readmes[0].clone())
+            }
         }
-    })
+        None => None,
+    }
 }
 
 pub fn get_authors(authors: Option<Vec<String>>) -> Option<Vec<AuthorOrMaintainer>> {

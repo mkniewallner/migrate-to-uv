@@ -1,0 +1,23 @@
+[tool.poetry]
+package-mode = false
+name = "foo"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+arrow = "^1.2.3"
+
+[tool.poetry.group.dev.dependencies]
+factory-boy = "^3.2.1"
+
+[tool.poetry.group.typing.dependencies]
+mypy = "^1.13.0"
+
+[tool.poetry.group.profiling]
+optional = true
+
+[tool.poetry.group.profiling.dependencies]
+pyinstrument = "^5.0.2"
+
+[tool.poetry.extras]
+# Extra references a non-existing dependency. This is a recoverable error that will be shown as a warning.
+extra-with-non-existing-dependencies = ["non-existing-dependency"]
