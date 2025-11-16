@@ -192,14 +192,14 @@ mod tests {
     use tempfile::tempdir;
 
     #[test]
-    fn test_perform_migration_multiple_readmes() {
+    fn test_readme_empty_array() {
         let tmp_dir = tempdir().unwrap();
         let project_path = tmp_dir.path();
 
-        let pyproject_content = r#"
+        let pyproject_content = r"
         [tool.poetry]
-        readme = ["README1.md", "README2.md"]
-        "#;
+        readme = []
+        ";
 
         let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
         pyproject_file
