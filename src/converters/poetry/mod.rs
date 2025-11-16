@@ -219,12 +219,11 @@ mod tests {
             },
         };
 
-        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r###"
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
         [project]
         name = ""
         version = "0.0.1"
-        readme = "README1.md"
-        "###);
+        "#);
     }
 
     #[test]
