@@ -1,4 +1,5 @@
-use log::warn;
+use crate::errors::{MIGRATION_ERRORS, MigrationError};
+use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
 use std::fs;
 use std::path::Path;
@@ -7,11 +8,10 @@ use url::Url;
 
 pub fn get(project_path: &Path, requirements_files: Vec<String>) -> Option<Vec<String>> {
     let mut dependencies: Vec<String> = Vec::new();
-    let mut failed_dependencies: Vec<String> = Vec::new();
 
     for requirements_file in requirements_files {
         let requirements_content =
-            fs::read_to_string(project_path.join(requirements_file)).unwrap();
+            fs::read_to_string(project_path.join(requirements_file.clone())).unwrap();
 
         for line in requirements_content.lines() {
             let line = line.trim();
@@ -33,17 +33,17 @@ pub fn get(project_path: &Path, requirements_files: Vec<String>) -> Option<Vec<S
             if let Ok(dependency_specification) = dependency_specification {
                 dependencies.push(dependency_specification.to_string());
             } else {
-                failed_dependencies.push(dependency.to_string());
+                MIGRATION_ERRORS.lock().unwrap().push(
+                    MigrationError::new(
+                        format!("\"{}\" from \"{}\" could not be automatically migrated, try running \"{}\".",
+                            dependency.bold(),
+                            requirements_file.bold(),
+                            format!("uv add {dependency}").bold(),
+                        ),
+                        true,
+                    )
+                );
             }
-        }
-    }
-
-    if !failed_dependencies.is_empty() {
-        warn!(
-            "Some dependencies could not be automatically migrated. Try running these commands manually:"
-        );
-        for dep in &failed_dependencies {
-            warn!("    uv add --frozen {dep}");
         }
     }
 

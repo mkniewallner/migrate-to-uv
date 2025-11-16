@@ -8,13 +8,13 @@ use crate::converters::Converter;
 use crate::converters::ConverterOptions;
 use crate::converters::poetry::build_backend::get_hatch;
 use crate::converters::pyproject_updater::PyprojectUpdater;
+use crate::errors::{MIGRATION_ERRORS, MigrationError};
 use crate::schema::pep_621::{License, Project};
 use crate::schema::poetry::PoetryLock;
 use crate::schema::pyproject::PyProject;
 use crate::schema::uv::{SourceContainer, Uv};
 use crate::toml::PyprojectPrettyFormatter;
 use indexmap::IndexMap;
-use log::warn;
 use owo_colors::OwoColorize;
 use std::fs;
 use toml_edit::DocumentMut;
@@ -146,9 +146,14 @@ impl Converter for Poetry {
 
         let poetry_lock_content = fs::read_to_string(poetry_lock_path).unwrap();
         let Ok(poetry_lock) = toml::from_str::<PoetryLock>(poetry_lock_content.as_str()) else {
-            warn!(
-                "Could not parse \"{}\", dependencies will not be kept to their current locked versions.",
-                "poetry.lock".bold()
+            MIGRATION_ERRORS.lock().unwrap().push(
+                MigrationError::new(
+                    format!(
+                        "\"{}\" could not be parsed, so dependencies were not kept to their previous locked versions.",
+                        "poetry.lock".bold(),
+                    ),
+                    true,
+                )
             );
             return None;
         };
