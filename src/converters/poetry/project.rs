@@ -13,23 +13,23 @@ static AUTHOR_REGEX: LazyLock<Regex> =
 pub fn get_readme(poetry_readme: Option<SingleOrVec<String>>) -> Option<String> {
     match poetry_readme {
         Some(SingleOrVec::Single(readme)) => Some(readme),
-        Some(SingleOrVec::Vec(readmes)) => {
-            if readmes.len() > 1 {
+        Some(SingleOrVec::Vec(readmes)) => match readmes.as_slice() {
+            [] => None,
+            [readme] => Some(readme.clone()),
+            _ => {
                 MIGRATION_ERRORS.lock().unwrap().push(
-                    MigrationError::new(
-                        format!(
-                            "Found multiple files ({}) in \"{}\". PEP 621 only supports setting one. Make sure to manually edit the section before migrating.",
-                            readmes.iter().map(|r|format!("\"{}\"", r.bold())).collect::<Vec<String>>().join(", "),
-                            "tool.poetry.readme".bold(),
-                        ),
-                        false,
-                    )
-                );
+                        MigrationError::new(
+                            format!(
+                                "Found multiple files ({}) in \"{}\". PEP 621 only supports setting one. Make sure to manually edit the section before migrating.",
+                                readmes.iter().map(|r|format!("\"{}\"", r.bold())).collect::<Vec<String>>().join(", "),
+                                "tool.poetry.readme".bold(),
+                            ),
+                            false,
+                        )
+                    );
                 None
-            } else {
-                Some(readmes[0].clone())
             }
-        }
+        },
         None => None,
     }
 }

@@ -22,6 +22,7 @@ Warnings that occurred during the migration (which did not break the behaviour) 
 
 * [poetry] Use inclusion when converting `^x.y` versions ([#466](https://github.com/mkniewallner/migrate-to-uv/pull/466))
 * [poetry] Properly convert `include` to Hatch's build backend ([#477](https://github.com/mkniewallner/migrate-to-uv/pull/477))
+* [poetry] Do not crash on empty `readme` array ([#481](https://github.com/mkniewallner/migrate-to-uv/pull/481))
 * [pip/pip-tools] Suggest how to add dependencies that could not be converted ([#350](https://github.com/mkniewallner/migrate-to-uv/pull/350))
 * Preserve comments for sections unrelated to migration ([#471](https://github.com/mkniewallner/migrate-to-uv/pull/471))
 
