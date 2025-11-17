@@ -10,6 +10,34 @@ uvx migrate-to-uv
 pipx run migrate-to-uv
 ```
 
+## Migration errors
+
+Although `migrate-to-uv` tries its best to match the current package manager definition when performing the migration,
+some package managers have features that have no equivalent in uv or
+in [PEP 621](https://packaging.python.org/en/latest/specifications/pyproject-toml/#pyproject-toml-spec) specification
+that is followed by uv.
+
+In case the current package manager definition uses features that cannot be translated to uv, `migrate-to-uv` will abort
+the migration, pointing at the errors, and suggesting what to do before attempting the migration again, e.g.:
+
+```console
+$ uvx migrate-to-uv
+error: Could not automatically migrate the project to uv because of the following errors:
+error: - Found multiple files ("README.md", "README2.md") in "tool.poetry.readme". PEP 621 only supports setting one. Make sure to manually edit the section before migrating.
+```
+
+For less problematic issues, `migrate-to-uv` will still perform the migration, but warn about what needs attention at
+the end of it, e.g.:
+
+```console
+$ uvx migrate-to-uv
+[...]
+Successfully migrated project from Poetry to uv!
+
+warning: The following warnings occurred during the migration:
+warning: - Could not find dependency "non-existing-dependency" listed in "extra-with-non-existing-dependencies" extra.
+```
+
 ## Configuration
 
 ### Project path
