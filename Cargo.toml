@@ -1,6 +1,6 @@
 [package]
 name = "migrate-to-uv"
-version = "0.7.3"
+version = "0.8.0"
 edition = "2024"
 rust-version = "1.91"
 license = "MIT"

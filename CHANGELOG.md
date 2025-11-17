@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.8.0 - 2025-11-17
 
 ### Breaking changes
 
@@ -16,7 +16,7 @@ Warnings that occurred during the migration (which did not break the behaviour) 
 
 * feat!: abort on unrecoverable errors and warn about recoverable ones ([#480](https://github.com/mkniewallner/migrate-to-uv/pull/480))
 * [poetry] Do not set optional groups as default ones ([#299](https://github.com/mkniewallner/migrate-to-uv/pull/299))
-* Indicate support for Python 3.14
+* Indicate support for Python 3.14 ([#468](https://github.com/mkniewallner/migrate-to-uv/pull/468))
 
 ### Bug fixes
 
