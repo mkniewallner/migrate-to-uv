@@ -2,3 +2,24 @@
 name = "foobar"
 # PEP 621 does not support multiple readme, this will abort the migration.
 readme = ["README.md", "README2.md"]
+
+[tool.poetry.dependencies]
+# PEP 621 does not support `||` operator, or `|` which are equivalent in Poetry, so this will abort the migration.
+caret-or = "^1.0||^2.0||^3.0"
+caret-or-single = "^1.0|^2.0|^3.0"
+caret-or-whitespaces = " ^1.0 || ^2.0  ||  ^3.0 "
+caret-or-mix-single-double-whitespaces = " ^1.0 | ^2.0  ||  ^3.0 "
+caret-or-table-version = { version = "^1.0||^2.0||^3.0" }
+caret-or-multiple-constraints = [
+    { python = ">=3.11", version = "^1.0||^2.0||^3.0" },
+    { python = "<3.11", version = "^1.0||^2.0" },
+]
+tilde-or = "~1.0||~2.0||~3.0"
+tilde-or-single = "~1.0|~2.0|~3.0"
+tilde-or-whitespaces = " ~1.0 || ~2.0  ||  ~3.0 "
+tilde-or-mix-single-double-whitespaces = " ~1.0 | ~2.0  ||  ~3.0 "
+tilde-or-table-version = { version = "~1.0||~2.0||~3.0" }
+tilde-or-multiple-constraints = [
+    { python = ">=3.11", version = "~1.0||~2.0||~3.0" },
+    { python = "<3.11", version = "~1.0||~2.0" },
+]

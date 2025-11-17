@@ -1,6 +1,6 @@
 use crate::converters::poetry::sources;
 use crate::converters::{DependencyGroupsAndDefaultGroups, DependencyGroupsStrategy};
-use crate::errors::add_recoverable_error;
+use crate::errors::{add_recoverable_error, add_unrecoverable_error};
 use crate::schema;
 use crate::schema::poetry::DependencySpecification;
 use crate::schema::pyproject::DependencyGroupSpecification;
@@ -18,10 +18,20 @@ pub fn get(
 
     for (name, specification) in poetry_dependencies {
         match specification {
-            DependencySpecification::String(_) => {
+            DependencySpecification::String(version) => {
+                if add_error_on_or_operator(name, version) {
+                    continue;
+                }
+
                 dependencies.push(format!("{}{}", name, specification.to_pep_508()));
             }
-            DependencySpecification::Map { .. } => {
+            DependencySpecification::Map { version, .. } => {
+                if let Some(version) = version
+                    && add_error_on_or_operator(name, version)
+                {
+                    continue;
+                }
+
                 let source_index = sources::get_source_index(specification);
 
                 if let Some(source_index) = source_index {
@@ -34,8 +44,23 @@ pub fn get(
             // Multiple constraints dependencies: https://python-poetry.org/docs/dependency-specification#multiple-constraints-dependencies
             DependencySpecification::Vec(specs) => {
                 let mut source_indexes: Vec<SourceIndex> = Vec::new();
+                let mut had_invalid_dependency = false;
 
                 for spec in specs {
+                    match spec {
+                        DependencySpecification::String(version)
+                        | DependencySpecification::Map {
+                            version: Some(version),
+                            ..
+                        } => {
+                            if add_error_on_or_operator(name, version) {
+                                had_invalid_dependency = true;
+                                continue;
+                            }
+                        }
+                        _ => (),
+                    }
+
                     let source_index = sources::get_source_index(spec);
 
                     // When using multiple constraints and a source is set, markers apply to the
@@ -55,6 +80,10 @@ pub fn get(
 
                         source_indexes.push(source_index);
                     }
+                }
+
+                if had_invalid_dependency {
+                    continue;
                 }
 
                 // If no source was found on any of the dependency specification, we add the
@@ -79,6 +108,25 @@ pub fn get(
     }
 
     Some(dependencies)
+}
+
+/// Add an unrecoverable error on the usage of `||` operator (or `|`, which is equivalent) in
+/// Poetry (e.g., "^1.0 || ^2.0 || ^3.0"), since this is not something that is supported by PEP 440.
+fn add_error_on_or_operator(name: &String, version: &String) -> bool {
+    for operator in ["||", "|"] {
+        if version.contains(operator) {
+            add_unrecoverable_error(format!(
+                "\"{}\" dependency with version \"{}\" contains \"{}\", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on \"{}\" before migrating.",
+                name.bold(),
+                version.bold(),
+                operator.bold(),
+                operator.bold(),
+            ));
+            return true;
+        }
+    }
+
+    false
 }
 
 pub fn get_optional(
