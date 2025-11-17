@@ -5,7 +5,7 @@ mod sources;
 use crate::converters::Converter;
 use crate::converters::ConverterOptions;
 use crate::converters::pyproject_updater::PyprojectUpdater;
-use crate::errors::{MIGRATION_ERRORS, MigrationError};
+use crate::errors::add_recoverable_error;
 use crate::schema::pep_621::Project;
 use crate::schema::pipenv::{PipenvLock, Pipfile};
 use crate::schema::pyproject::PyProject;
@@ -101,15 +101,10 @@ impl Converter for Pipenv {
         let pipenv_lock_content = fs::read_to_string(pipenv_lock_path).unwrap();
         let Ok(pipenv_lock) = serde_json::from_str::<PipenvLock>(pipenv_lock_content.as_str())
         else {
-            MIGRATION_ERRORS.lock().unwrap().push(
-                MigrationError::new(
-                    format!(
-                        "\"{}\" could not be parsed, so dependencies were not kept to their previous locked versions.",
-                        "Pipfile.lock".bold(),
-                    ),
-                    true,
-                )
-            );
+            add_recoverable_error(format!(
+                "\"{}\" could not be parsed, so dependencies were not kept to their previous locked versions.",
+                "Pipfile.lock".bold(),
+            ));
             return None;
         };
 

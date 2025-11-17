@@ -1,4 +1,4 @@
-use crate::errors::{MIGRATION_ERRORS, MigrationError};
+use crate::errors::add_recoverable_error;
 use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
 use std::fs;
@@ -33,16 +33,12 @@ pub fn get(project_path: &Path, requirements_files: Vec<String>) -> Option<Vec<S
             if let Ok(dependency_specification) = dependency_specification {
                 dependencies.push(dependency_specification.to_string());
             } else {
-                MIGRATION_ERRORS.lock().unwrap().push(
-                    MigrationError::new(
-                        format!("\"{}\" from \"{}\" could not be automatically migrated, try running \"{}\".",
-                            dependency.bold(),
-                            requirements_file.bold(),
-                            format!("uv add {dependency}").bold(),
-                        ),
-                        true,
-                    )
-                );
+                add_recoverable_error(format!(
+                    "\"{}\" from \"{}\" could not be automatically migrated, try running \"{}\".",
+                    dependency.bold(),
+                    requirements_file.bold(),
+                    format!("uv add {dependency}").bold(),
+                ));
             }
         }
     }
