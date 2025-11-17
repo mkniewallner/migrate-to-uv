@@ -1,4 +1,4 @@
-use crate::errors::{MIGRATION_ERRORS, MigrationError};
+use crate::errors::add_unrecoverable_error;
 use crate::schema::pep_621::AuthorOrMaintainer;
 use crate::schema::poetry::Script;
 use crate::schema::utils::SingleOrVec;
@@ -17,16 +17,15 @@ pub fn get_readme(poetry_readme: Option<SingleOrVec<String>>) -> Option<String> 
             [] => None,
             [readme] => Some(readme.clone()),
             _ => {
-                MIGRATION_ERRORS.lock().unwrap().push(
-                        MigrationError::new(
-                            format!(
-                                "Found multiple files ({}) in \"{}\". PEP 621 only supports setting one. Make sure to manually edit the section before migrating.",
-                                readmes.iter().map(|r|format!("\"{}\"", r.bold())).collect::<Vec<String>>().join(", "),
-                                "tool.poetry.readme".bold(),
-                            ),
-                            false,
-                        )
-                    );
+                add_unrecoverable_error(format!(
+                    "Found multiple files ({}) in \"{}\". PEP 621 only supports setting one. Make sure to manually edit the section before migrating.",
+                    readmes
+                        .iter()
+                        .map(|r| format!("\"{}\"", r.bold()))
+                        .collect::<Vec<String>>()
+                        .join(", "),
+                    "tool.poetry.readme".bold(),
+                ));
                 None
             }
         },

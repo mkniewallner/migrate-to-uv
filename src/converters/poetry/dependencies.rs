@@ -1,6 +1,6 @@
 use crate::converters::poetry::sources;
 use crate::converters::{DependencyGroupsAndDefaultGroups, DependencyGroupsStrategy};
-use crate::errors::{MIGRATION_ERRORS, MigrationError};
+use crate::errors::add_recoverable_error;
 use crate::schema;
 use crate::schema::poetry::DependencySpecification;
 use crate::schema::pyproject::DependencyGroupSpecification;
@@ -101,13 +101,10 @@ pub fn get_optional(
                         // If dependency listed in extra does not exist, warn the user.
                         poetry_dependencies.get(dependency).map_or_else(
                             || {
-                                MIGRATION_ERRORS.lock().unwrap().push(MigrationError::new(
-                                    format!(
-                                        "Could not find dependency \"{}\" listed in \"{}\" extra.",
-                                        dependency.bold(),
-                                        extra.bold()
-                                    ),
-                                    true,
+                                add_recoverable_error(format!(
+                                    "Could not find dependency \"{}\" listed in \"{}\" extra.",
+                                    dependency.bold(),
+                                    extra.bold()
                                 ));
                                 None
                             },
