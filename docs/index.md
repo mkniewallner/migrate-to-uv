@@ -21,6 +21,12 @@ The following package managers are supported:
 More package managers (e.g., [setuptools](https://setuptools.pypa.io/en/stable/)) could be implemented in the
 future.
 
+!!! warning
+
+    Although `migrate-to-uv` matches current package manager definition as closely as possible when performing the migration, it is still heavily recommended to double check the end result, especially if you are migrating a package that is meant to be publicly distributed.
+    
+    If you notice a behaviour that does not match the previous package manager when migrating, please [raise an issue](https://github.com/mkniewallner/migrate-to-uv/issues), if not already reported.
+
 ## Features
 
 `migrate-to-uv` converts most existing metadata from supported package managers when migrating to uv, including:
@@ -39,9 +45,3 @@ equivalent [PEP 440](https://peps.python.org/pep-0440/) for package managers tha
 At the end of the migration, `migrate-to-uv` also generates `uv.lock` file with `uv lock` command to lock dependencies,
 and keeps dependencies (both direct and transitive) to the exact same versions they were locked to with the previous
 package manager, if a lock file was found.
-
-!!! warning
-
-    Although `migrate-to-uv` matches current package manager definition as closely as possible when performing the migration, it is still heavily recommended to double check the end result, especially if you are migrating a package that is meant to be publicly distributed.
-    
-    If you notice a behaviour that does not match the previous package manager when migrating, please [raise an issue](https://github.com/mkniewallner/migrate-to-uv/issues), if not already reported.
