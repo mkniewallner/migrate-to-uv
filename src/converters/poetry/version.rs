@@ -62,13 +62,40 @@ impl FromStr for PoetryPep440 {
             return Ok(Self::String(s.to_string()));
         }
 
-        match s.split_at(1) {
-            ("*", "") => Ok(Self::String(String::new())),
-            ("^", version) => Ok(Self::from_caret(version.trim())),
-            ("~", version) => Ok(Self::from_tilde(version.trim())),
-            ("=", version) => Ok(Self::String(format!("=={version}"))),
-            _ => Ok(Self::String(format!("=={s}"))),
+        let mut pep_440_specifier = Vec::new();
+
+        // Even when using Poetry-specific version specifiers, it is still possible to define
+        // additional PEP 440 specifiers (e.g., "^1.0,!=1.1.0") or even define multiple Poetry
+        // specifiers (e.g., "^1.0,^1.1"), so we need to split over "," and treat each group
+        // separately, knowing that each group can either be a Poetry-specific specifier, or a PEP
+        // 440 one.
+        for specifier in s.split(',') {
+            let specifier = specifier.trim();
+
+            // If the subgroup is a valid PEP 440 specifier, we can directly use it without any
+            // transformation.
+            if VersionSpecifiers::from_str(specifier).is_ok() {
+                pep_440_specifier.push(Self::String(specifier.to_string()));
+            } else {
+                match specifier.split_at(1) {
+                    ("*", "") => pep_440_specifier.push(Self::String(String::new())),
+                    ("^", version) => pep_440_specifier.push(Self::from_caret(version.trim())),
+                    ("~", version) => pep_440_specifier.push(Self::from_tilde(version.trim())),
+                    ("=", version) => {
+                        pep_440_specifier.push(Self::String(format!("=={version}")));
+                    }
+                    _ => pep_440_specifier.push(Self::String(format!("=={s}"))),
+                }
+            }
         }
+
+        Ok(Self::String(
+            pep_440_specifier
+                .iter()
+                .map(ToString::to_string)
+                .collect::<Vec<String>>()
+                .join(","),
+        ))
     }
 }
 
