@@ -525,11 +525,23 @@ fn test_skip_lock_full() {
         "caret-8>=1.2.3.4,<2",
         "caret-9>=0.1.2.3,<0.2",
         "caret-pre-release>=1.2.3b1,<2",
+        "caret-and-caret>=1.0,<2,>=1.0,<2",
+        "caret-and-pep440>=1.0,<2,<1.3",
+        "caret-and-pep440-2>=1.0,<2,>=1.1,<1.3",
+        "caret-and-pep440-3>=1.0,<2,>=1.1,>=1.2,!=1.2.2,<1.3",
+        "caret-and-pep440-whitepsaces>=1.0,<2,>=   1.1,>=  1.2,!=   1.2.2,< 1.3",
+        "caret-and-caret-and-pep440>=1.0,<2,>=1.1,<2,<1.2",
         "tilde~=1.2.3",
         "tilde-2>=1.2,<1.3",
         "tilde-3>=1,<2",
         "tilde-4~=1.2.3.4",
         "tilde-pre-release~=1.2.3b1",
+        "tilde-and-tilde>=1.0,<1.1,>=1.0,<1.1",
+        "tilde-and-pep440>=1.0,<1.1,<1.3",
+        "tilde-and-pep440-2>=1.0,<1.1,>=1.0,<1.1",
+        "tilde-and-pep440-3>=1.0,<1.1,>=1.0,>=1.0.1,!=1.0.2,<1.3",
+        "tilde-and-pep440-whitepsaces>=1.0,<1.1,>=   1.0,>=  1.0.1,!=   1.0.2,< 1.3",
+        "tilde-and-tilde-and-pep440>=1.0,<1.1,~=1.0.1,<1.2",
         "exact==1.2.3",
         "exact-2==1.2.3",
         "star",
@@ -1022,6 +1034,7 @@ fn test_manage_errors() {
     error: - "caret-or-single" dependency with version "^1.0|^2.0|^3.0" contains "|", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "|" before migrating.
     error: - "caret-or-whitespaces" dependency with version " ^1.0 || ^2.0  ||  ^3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "caret-or-mix-single-double-whitespaces" dependency with version " ^1.0 | ^2.0  ||  ^3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
+    error: - "caret-or-and-pep-440" dependency with version "^1.0,<1.3||^2.0,<2.2" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "caret-or-table-version" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "caret-or-multiple-constraints" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "caret-or-multiple-constraints" dependency with version "^1.0||^2.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
@@ -1029,6 +1042,7 @@ fn test_manage_errors() {
     error: - "tilde-or-single" dependency with version "~1.0|~2.0|~3.0" contains "|", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "|" before migrating.
     error: - "tilde-or-whitespaces" dependency with version " ~1.0 || ~2.0  ||  ~3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "tilde-or-mix-single-double-whitespaces" dependency with version " ~1.0 | ~2.0  ||  ~3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
+    error: - "tilde-or-and-pep-440" dependency with version "~1.0,<1.1||~1.0.1,<1.0.2" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "tilde-or-table-version" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "tilde-or-multiple-constraints" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "tilde-or-multiple-constraints" dependency with version "~1.0||~2.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
@@ -1174,6 +1188,7 @@ fn test_manage_errors_dry_run() {
     error: - "caret-or-single" dependency with version "^1.0|^2.0|^3.0" contains "|", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "|" before migrating.
     error: - "caret-or-whitespaces" dependency with version " ^1.0 || ^2.0  ||  ^3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "caret-or-mix-single-double-whitespaces" dependency with version " ^1.0 | ^2.0  ||  ^3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
+    error: - "caret-or-and-pep-440" dependency with version "^1.0,<1.3||^2.0,<2.2" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "caret-or-table-version" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "caret-or-multiple-constraints" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "caret-or-multiple-constraints" dependency with version "^1.0||^2.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
@@ -1181,6 +1196,7 @@ fn test_manage_errors_dry_run() {
     error: - "tilde-or-single" dependency with version "~1.0|~2.0|~3.0" contains "|", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "|" before migrating.
     error: - "tilde-or-whitespaces" dependency with version " ~1.0 || ~2.0  ||  ~3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "tilde-or-mix-single-double-whitespaces" dependency with version " ~1.0 | ~2.0  ||  ~3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
+    error: - "tilde-or-and-pep-440" dependency with version "~1.0,<1.1||~1.0.1,<1.0.2" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "tilde-or-table-version" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "tilde-or-multiple-constraints" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "tilde-or-multiple-constraints" dependency with version "~1.0||~2.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
