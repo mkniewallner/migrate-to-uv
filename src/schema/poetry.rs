@@ -155,7 +155,20 @@ impl DependencySpecification {
             }
 
             if let Some(platform) = platform {
-                combined_markers.push(format!("sys_platform == '{platform}'"));
+                // Poetry allows pipe-delimited alternatives (darwin|linux)
+                // Must convert to PEP 508: sys_platform == 'darwin' or sys_platform == 'linux'
+                // See: https://python-poetry.org/docs/dependency-specification/#python-restricted-dependencies
+                if platform.contains('|') {
+                    let platforms: Vec<&str> = platform.split('|').map(|s| s.trim()).collect();
+                    let marker = platforms
+                        .iter()
+                        .map(|p| format!("sys_platform == '{}'", p))
+                        .collect::<Vec<String>>()
+                        .join(" or ");
+                    combined_markers.push(marker);
+                } else {
+                    combined_markers.push(format!("sys_platform == '{platform}'"));
+                }
             }
         }
 
@@ -202,4 +215,191 @@ pub struct PoetryLock {
 pub struct LockedPackage {
     pub name: String,
     pub version: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_platform_marker_single() {
+        // Poetry: platform = 'linux'
+        // Expected: sys_platform == 'linux'
+        let spec = DependencySpecification::Map {
+            version: Some("^1.0".to_string()),
+            platform: Some("linux".to_string()),
+            extras: None,
+            markers: None,
+            python: None,
+            source: None,
+            git: None,
+            branch: None,
+            rev: None,
+            tag: None,
+            subdirectory: None,
+            path: None,
+            develop: None,
+            url: None,
+        };
+        let marker = spec.get_marker();
+        assert_eq!(marker, Some("sys_platform == 'linux'".to_string()));
+    }
+
+    #[test]
+    fn test_platform_marker_pipe_delimited_two() {
+        // Poetry: platform = 'darwin|linux'
+        // Expected: sys_platform == 'darwin' or sys_platform == 'linux'
+        let spec = DependencySpecification::Map {
+            version: Some("^1.0".to_string()),
+            platform: Some("darwin|linux".to_string()),
+            extras: None,
+            markers: None,
+            python: None,
+            source: None,
+            git: None,
+            branch: None,
+            rev: None,
+            tag: None,
+            subdirectory: None,
+            path: None,
+            develop: None,
+            url: None,
+        };
+        let marker = spec.get_marker();
+        assert_eq!(
+            marker,
+            Some("sys_platform == 'darwin' or sys_platform == 'linux'".to_string())
+        );
+    }
+
+    #[test]
+    fn test_platform_marker_pipe_delimited_three() {
+        // Poetry: platform = 'linux|darwin|freebsd'
+        let spec = DependencySpecification::Map {
+            version: Some("^1.0".to_string()),
+            platform: Some("linux|darwin|freebsd".to_string()),
+            extras: None,
+            markers: None,
+            python: None,
+            source: None,
+            git: None,
+            branch: None,
+            rev: None,
+            tag: None,
+            subdirectory: None,
+            path: None,
+            develop: None,
+            url: None,
+        };
+        let marker = spec.get_marker();
+        assert_eq!(
+            marker,
+            Some("sys_platform == 'linux' or sys_platform == 'darwin' or sys_platform == 'freebsd'".to_string())
+        );
+    }
+
+    #[test]
+    fn test_platform_marker_pipe_with_whitespace() {
+        // Poetry: platform = 'darwin | linux'  (with spaces)
+        let spec = DependencySpecification::Map {
+            version: Some("^1.0".to_string()),
+            platform: Some("darwin | linux".to_string()),
+            extras: None,
+            markers: None,
+            python: None,
+            source: None,
+            git: None,
+            branch: None,
+            rev: None,
+            tag: None,
+            subdirectory: None,
+            path: None,
+            develop: None,
+            url: None,
+        };
+        let marker = spec.get_marker();
+        assert_eq!(
+            marker,
+            Some("sys_platform == 'darwin' or sys_platform == 'linux'".to_string())
+        );
+    }
+
+    #[test]
+    fn test_platform_marker_win32_cygwin() {
+        // Real-world case: platform = 'win32|cygwin'
+        let spec = DependencySpecification::Map {
+            version: Some("^2.0".to_string()),
+            platform: Some("win32|cygwin".to_string()),
+            extras: None,
+            markers: None,
+            python: None,
+            source: None,
+            git: None,
+            branch: None,
+            rev: None,
+            tag: None,
+            subdirectory: None,
+            path: None,
+            develop: None,
+            url: None,
+        };
+        let marker = spec.get_marker();
+        assert_eq!(
+            marker,
+            Some("sys_platform == 'win32' or sys_platform == 'cygwin'".to_string())
+        );
+    }
+
+    #[test]
+    fn test_platform_combined_with_python() {
+        // Test that platform marker works correctly with python version marker
+        let spec = DependencySpecification::Map {
+            version: Some("^1.0".to_string()),
+            platform: Some("darwin|linux".to_string()),
+            python: Some("^3.10".to_string()),
+            extras: None,
+            markers: None,
+            source: None,
+            git: None,
+            branch: None,
+            rev: None,
+            tag: None,
+            subdirectory: None,
+            path: None,
+            develop: None,
+            url: None,
+        };
+        let marker = spec.get_marker();
+        // Both markers should be combined with "and"
+        assert!(marker.is_some());
+        let marker_str = marker.unwrap();
+        assert!(marker_str.contains("python_version"));
+        assert!(marker_str.contains("sys_platform == 'darwin' or sys_platform == 'linux'"));
+        assert!(marker_str.contains(" and "));
+    }
+
+    #[test]
+    fn test_full_pep508_conversion_with_pipe_platform() {
+        // Test the full to_pep_508 conversion with pipe-delimited platforms
+        let spec = DependencySpecification::Map {
+            version: Some("^1.2.1".to_string()),
+            platform: Some("darwin|linux".to_string()),
+            extras: None,
+            markers: None,
+            python: None,
+            source: None,
+            git: None,
+            branch: None,
+            rev: None,
+            tag: None,
+            subdirectory: None,
+            path: None,
+            develop: None,
+            url: None,
+        };
+        let pep508 = spec.to_pep_508();
+        // Should produce: ">=1.2.1,<2 ; sys_platform == 'darwin' or sys_platform == 'linux'"
+        assert!(pep508.contains(">=1.2.1,<2"));
+        assert!(pep508.contains(" ; sys_platform == 'darwin' or sys_platform == 'linux'"));
+    }
 }
