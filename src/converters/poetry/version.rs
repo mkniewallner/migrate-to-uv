@@ -65,7 +65,7 @@ impl FromStr for PoetryPep440 {
         // Poetry accepts space-separated version clauses (e.g., ">=3.10 <4.0"), but PEP 440
         // requires comma-separated clauses. Try normalizing spaces to commas.
         // See: https://python-poetry.org/docs/dependency-specification/#version-constraints
-        let normalized = s.replace(" ", ",");
+        let normalized = s.replace(' ', ",");
         if normalized != s && VersionSpecifiers::from_str(&normalized).is_ok() {
             return Ok(Self::String(normalized));
         }
