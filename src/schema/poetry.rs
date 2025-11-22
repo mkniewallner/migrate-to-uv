@@ -127,7 +127,7 @@ impl DependencySpecification {
                 }
 
                 if let Some(marker) = self.get_marker() {
-                    pep_508_version.push_str(format!(" ; {marker}").as_str());
+                    pep_508_version.push_str(format!("; {marker}").as_str());
                 }
 
                 pep_508_version
@@ -159,10 +159,10 @@ impl DependencySpecification {
                 // Must convert to PEP 508: sys_platform == 'darwin' or sys_platform == 'linux'
                 // See: https://python-poetry.org/docs/dependency-specification/#python-restricted-dependencies
                 if platform.contains('|') {
-                    let platforms: Vec<&str> = platform.split('|').map(|s| s.trim()).collect();
+                    let platforms: Vec<&str> = platform.split('|').map(str::trim).collect();
                     let marker = platforms
                         .iter()
-                        .map(|p| format!("sys_platform == '{}'", p))
+                        .map(|p| format!("sys_platform == '{p}'"))
                         .collect::<Vec<String>>()
                         .join(" or ");
                     combined_markers.push(marker);
@@ -294,7 +294,10 @@ mod tests {
         let marker = spec.get_marker();
         assert_eq!(
             marker,
-            Some("sys_platform == 'linux' or sys_platform == 'darwin' or sys_platform == 'freebsd'".to_string())
+            Some(
+                "sys_platform == 'linux' or sys_platform == 'darwin' or sys_platform == 'freebsd'"
+                    .to_string()
+            )
         );
     }
 
@@ -398,8 +401,8 @@ mod tests {
             url: None,
         };
         let pep508 = spec.to_pep_508();
-        // Should produce: ">=1.2.1,<2 ; sys_platform == 'darwin' or sys_platform == 'linux'"
+        // Should produce: ">=1.2.1,<2; sys_platform == 'darwin' or sys_platform == 'linux'"
         assert!(pep508.contains(">=1.2.1,<2"));
-        assert!(pep508.contains(" ; sys_platform == 'darwin' or sys_platform == 'linux'"));
+        assert!(pep508.contains("; sys_platform == 'darwin' or sys_platform == 'linux'"));
     }
 }

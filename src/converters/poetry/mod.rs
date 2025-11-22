@@ -10,7 +10,7 @@ use crate::converters::poetry::build_backend::get_hatch;
 use crate::converters::pyproject_updater::PyprojectUpdater;
 use crate::errors::{MIGRATION_ERRORS, MigrationError};
 use crate::schema::pep_621::{License, Project};
-use crate::schema::poetry::PoetryLock;
+use crate::schema::poetry::{DependencySpecification, PoetryLock};
 use crate::schema::pyproject::PyProject;
 use crate::schema::uv::{SourceContainer, Uv};
 use crate::toml::PyprojectPrettyFormatter;
@@ -25,6 +25,43 @@ pub struct Poetry {
     pub converter_options: ConverterOptions,
 }
 
+/// Returns the current platform in PEP 508 marker format
+fn get_current_platform() -> String {
+    match std::env::consts::OS {
+        "macos" => "sys_platform == 'darwin'".to_string(),
+        "linux" => "sys_platform == 'linux'".to_string(),
+        "windows" => "sys_platform == 'win32'".to_string(),
+        other => format!("sys_platform == '{other}'"),
+    }
+}
+
+/// Checks if any dependencies have platform markers
+fn has_platform_specific_dependencies(
+    dependencies: Option<&IndexMap<String, DependencySpecification>>,
+) -> bool {
+    let Some(dependencies) = dependencies else {
+        return false;
+    };
+
+    for spec in dependencies.values() {
+        match spec {
+            DependencySpecification::Map { platform, .. } if platform.is_some() => return true,
+            DependencySpecification::Vec(specs) => {
+                for s in specs {
+                    if let DependencySpecification::Map { platform, .. } = s
+                        && platform.is_some()
+                    {
+                        return true;
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    false
+}
+
 impl Converter for Poetry {
     fn build_uv_pyproject(&self) -> String {
         let pyproject_toml_content =
@@ -34,6 +71,15 @@ impl Converter for Poetry {
         let poetry = pyproject.tool.unwrap().poetry.unwrap();
 
         let mut uv_source_index: IndexMap<String, SourceContainer> = IndexMap::new();
+        // Check for platform-specific dependencies before moving poetry.dependencies
+        let has_platform_deps = has_platform_specific_dependencies(poetry.dependencies.as_ref())
+            || has_platform_specific_dependencies(poetry.dev_dependencies.as_ref())
+            || poetry.group.as_ref().is_some_and(|groups| {
+                groups
+                    .values()
+                    .any(|g| has_platform_specific_dependencies(Some(&g.dependencies)))
+            });
+
         let (dependency_groups, uv_default_groups) =
             dependencies::get_dependency_groups_and_default_groups(
                 &poetry,
@@ -84,6 +130,14 @@ impl Converter for Poetry {
             ..Default::default()
         };
 
+        // Set environments to current platform if there are platform-specific dependencies
+        // to avoid uv trying to build packages for all platforms during lock
+        let environments = if has_platform_deps {
+            Some(vec![get_current_platform()])
+        } else {
+            None
+        };
+
         let uv = Uv {
             package: poetry.package_mode,
             index: sources::get_indexes(poetry.source),
@@ -94,6 +148,7 @@ impl Converter for Poetry {
             },
             default_groups: uv_default_groups,
             constraint_dependencies: self.get_constraint_dependencies(),
+            environments,
         };
 
         let hatch = get_hatch(
