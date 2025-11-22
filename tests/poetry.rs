@@ -802,6 +802,52 @@ fn test_skip_lock_full() {
 }
 
 #[test]
+fn test_pipe_delimited_platforms() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("pipe_delimited_platforms");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    fs::copy(
+        fixture_path.join("pyproject.toml"),
+        project_path.join("pyproject.toml"),
+    )
+    .unwrap();
+
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Successfully migrated project from Poetry to uv!
+    "#);
+
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [build-system]
+    requires = ["hatchling"]
+    build-backend = "hatchling.build"
+
+    [project]
+    name = "pipe-platform-test"
+    version = "0.1.0"
+    description = "Test pipe-delimited platform markers"
+    requires-python = ">=3.11,<4"
+    dependencies = ["unix-dep==1.0.0; sys_platform == 'darwin' or sys_platform == 'linux'"]
+
+    [project.optional-dependencies]
+    test = ["pytest-unix==7.0.0; sys_platform == 'darwin' or sys_platform == 'linux'"]
+
+    [tool.uv]
+    package = false
+    environments = ["sys_platform == 'darwin'"]
+    "#);
+
+    // Assert that `uv.lock` file was not generated.
+    assert!(!project_path.join("uv.lock").exists());
+}
+
+#[test]
 fn test_dry_run() {
     let project_path = Path::new(FIXTURES_PATH).join("with_lock_file");
     let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
