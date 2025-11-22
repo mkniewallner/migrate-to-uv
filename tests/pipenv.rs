@@ -1,7 +1,7 @@
 use crate::common::{LockedPackage, UvLock, apply_lock_filters, cli};
 use insta_cmd::assert_cmd_snapshot;
+use std::fs;
 use std::path::Path;
-use std::{env, fs};
 use tempfile::tempdir;
 
 mod common;
