@@ -8,7 +8,7 @@ use crate::converters::Converter;
 use crate::converters::ConverterOptions;
 use crate::converters::poetry::build_backend::get_hatch;
 use crate::converters::pyproject_updater::PyprojectUpdater;
-use crate::errors::{MIGRATION_ERRORS, MigrationError};
+use crate::errors::{MIGRATION_ERRORS, MigrationError, add_unrecoverable_error};
 use crate::schema::pep_621::{License, Project};
 use crate::schema::poetry::PoetryLock;
 use crate::schema::pyproject::PyProject;
@@ -64,7 +64,16 @@ impl Converter for Poetry {
             version: Some(poetry.version.unwrap_or_else(|| "0.0.1".to_string())),
             description: poetry.description,
             authors: project::get_authors(poetry.authors),
-            requires_python: python_specification.map(|p| p.to_pep_508()),
+            requires_python: match python_specification {
+                Some(p) => match p.to_pep_508() {
+                    Ok(v) => Some(v),
+                    Err(e) => {
+                        add_unrecoverable_error(e.format("python"));
+                        None
+                    }
+                },
+                None => None,
+            },
             readme: project::get_readme(poetry.readme),
             license: poetry.license.map(License::String),
             maintainers: project::get_authors(poetry.maintainers),

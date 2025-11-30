@@ -563,7 +563,7 @@ fn test_skip_lock_full() {
         "python-restricted-7==1.2.3 ; python_version > '3.11' and python_version < '3.13'",
         "python-restricted-with-source==1.2.3 ; python_version > '3.11' and python_version < '3.13'",
         "whitespaces>=3.2,<4",
-        "whitespaces-2>   3.11,     <=     3.13",
+        "whitespaces-2     >   3.11,     <=     3.13    ",
         "optional-not-in-extra==1.2.3",
         "local-package",
         "local-package-2",
@@ -1046,6 +1046,10 @@ fn test_manage_errors() {
     error: - "tilde-or-table-version" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "tilde-or-multiple-constraints" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "tilde-or-multiple-constraints" dependency with version "~1.0||~2.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
+    error: - "whitespace" dependency with version ">=7.0 <7.1" could not be transformed to PEP 440 format.
+    error: - "whitespace-multiple" dependency with version ">=7.0  <7.1" could not be transformed to PEP 440 format.
+    error: - "whitespace-caret" dependency with version "7.0 ^7.1" could not be transformed to PEP 440 format.
+    error: - "whitespace-caret-multiple" dependency with version "7.0  ^7.1" could not be transformed to PEP 440 format.
     "#);
 
     // Assert that `pyproject.toml` was not updated.
@@ -1200,6 +1204,10 @@ fn test_manage_errors_dry_run() {
     error: - "tilde-or-table-version" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "tilde-or-multiple-constraints" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
     error: - "tilde-or-multiple-constraints" dependency with version "~1.0||~2.0" contains "||", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on "||" before migrating.
+    error: - "whitespace" dependency with version ">=7.0 <7.1" could not be transformed to PEP 440 format.
+    error: - "whitespace-multiple" dependency with version ">=7.0  <7.1" could not be transformed to PEP 440 format.
+    error: - "whitespace-caret" dependency with version "7.0 ^7.1" could not be transformed to PEP 440 format.
+    error: - "whitespace-caret-multiple" dependency with version "7.0  ^7.1" could not be transformed to PEP 440 format.
     "#);
 
     // Assert that `pyproject.toml` was not updated.

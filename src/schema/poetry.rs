@@ -1,4 +1,4 @@
-use crate::converters::poetry::version::PoetryPep440;
+use crate::converters::poetry::version::{ParseVersionError, PoetryPep440};
 use crate::schema::utils::SingleOrVec;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
@@ -105,9 +105,9 @@ pub enum DependencySpecification {
 }
 
 impl DependencySpecification {
-    pub fn to_pep_508(&self) -> String {
+    pub fn to_pep_508(&self) -> Result<String, ParseVersionError> {
         match self {
-            Self::String(version) => PoetryPep440::from_str(version).unwrap().to_string(),
+            Self::String(version) => Ok(PoetryPep440::from_str(version)?.to_string()),
             Self::Map {
                 version, extras, ..
             } => {
@@ -118,21 +118,16 @@ impl DependencySpecification {
                 }
 
                 if let Some(version) = version {
-                    pep_508_version.push_str(
-                        PoetryPep440::from_str(version)
-                            .unwrap()
-                            .to_string()
-                            .as_str(),
-                    );
+                    pep_508_version.push_str(PoetryPep440::from_str(version)?.to_string().as_str());
                 }
 
                 if let Some(marker) = self.get_marker() {
                     pep_508_version.push_str(format!(" ; {marker}").as_str());
                 }
 
-                pep_508_version
+                Ok(pep_508_version)
             }
-            Self::Vec(_) => String::new(),
+            Self::Vec(_) => Ok(String::new()),
         }
     }
 
