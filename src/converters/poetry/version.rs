@@ -73,16 +73,15 @@ impl ParseVersionError {
         match self.kind {
             ParseVersionErrorKind::OrOperator(operator) => {
                 format!(
-                    "\"{}\" dependency with version \"{}\" contains \"{}\", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on \"{}\" before migrating.",
+                    "\"{}\" dependency with version \"{}\" contains \"{}\", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.",
                     dependency.bold(),
                     self.version.bold(),
-                    operator.bold(),
                     operator.bold(),
                 )
             }
             ParseVersionErrorKind::Other => {
                 format!(
-                    "\"{}\" dependency with version \"{}\" could not be transformed to PEP 440 format.",
+                    "\"{}\" dependency with version \"{}\" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.",
                     dependency.bold(),
                     self.version.bold(),
                 )
