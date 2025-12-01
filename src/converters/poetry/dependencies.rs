@@ -18,20 +18,11 @@ pub fn get(
 
     for (name, specification) in poetry_dependencies {
         match specification {
-            DependencySpecification::String(version) => {
-                if add_error_on_or_operator(name, version) {
-                    continue;
-                }
-
-                dependencies.push(format!("{}{}", name, specification.to_pep_508()));
-            }
-            DependencySpecification::Map { version, .. } => {
-                if let Some(version) = version
-                    && add_error_on_or_operator(name, version)
-                {
-                    continue;
-                }
-
+            DependencySpecification::String(_) => match specification.to_pep_508() {
+                Ok(v) => dependencies.push(format!("{name}{v}")),
+                Err(e) => add_unrecoverable_error(e.format(name)),
+            },
+            DependencySpecification::Map { .. } => {
                 let source_index = sources::get_source_index(specification);
 
                 if let Some(source_index) = source_index {
@@ -39,28 +30,16 @@ pub fn get(
                         .insert(name.clone(), SourceContainer::SourceIndex(source_index));
                 }
 
-                dependencies.push(format!("{}{}", name, specification.to_pep_508()));
+                match specification.to_pep_508() {
+                    Ok(v) => dependencies.push(format!("{name}{v}")),
+                    Err(e) => add_unrecoverable_error(e.format(name)),
+                }
             }
             // Multiple constraints dependencies: https://python-poetry.org/docs/dependency-specification#multiple-constraints-dependencies
             DependencySpecification::Vec(specs) => {
                 let mut source_indexes: Vec<SourceIndex> = Vec::new();
-                let mut had_invalid_dependency = false;
 
                 for spec in specs {
-                    match spec {
-                        DependencySpecification::String(version)
-                        | DependencySpecification::Map {
-                            version: Some(version),
-                            ..
-                        } => {
-                            if add_error_on_or_operator(name, version) {
-                                had_invalid_dependency = true;
-                                continue;
-                            }
-                        }
-                        _ => (),
-                    }
-
                     let source_index = sources::get_source_index(spec);
 
                     // When using multiple constraints and a source is set, markers apply to the
@@ -82,16 +61,15 @@ pub fn get(
                     }
                 }
 
-                if had_invalid_dependency {
-                    continue;
-                }
-
                 // If no source was found on any of the dependency specification, we add the
                 // different variants of the dependencies with their respective markers. Otherwise,
                 // we add the different variants of the sources with their respective markers.
                 if source_indexes.is_empty() {
                     for spec in specs {
-                        dependencies.push(format!("{name}{}", spec.to_pep_508()));
+                        match spec.to_pep_508() {
+                            Ok(v) => dependencies.push(format!("{name}{v}")),
+                            Err(e) => add_unrecoverable_error(e.format(name)),
+                        }
                     }
                 } else {
                     uv_source_index
@@ -108,25 +86,6 @@ pub fn get(
     }
 
     Some(dependencies)
-}
-
-/// Add an unrecoverable error on the usage of `||` operator (or `|`, which is equivalent) in
-/// Poetry (e.g., "^1.0 || ^2.0 || ^3.0"), since this is not something that is supported by PEP 440.
-fn add_error_on_or_operator(name: &String, version: &String) -> bool {
-    for operator in ["||", "|"] {
-        if version.contains(operator) {
-            add_unrecoverable_error(format!(
-                "\"{}\" dependency with version \"{}\" contains \"{}\", which is specific to Poetry and not supported by PEP 440. Make sure to manually adapt the version to not depend on \"{}\" before migrating.",
-                name.bold(),
-                version.bold(),
-                operator.bold(),
-                operator.bold(),
-            ));
-            return true;
-        }
-    }
-
-    false
 }
 
 pub fn get_optional(
@@ -161,7 +120,7 @@ pub fn get_optional(
                                 Some(format!(
                                     "{}{}",
                                     dependency,
-                                    dependency_specification.to_pep_508()
+                                    dependency_specification.to_pep_508().unwrap(),
                                 ))
                             },
                         )

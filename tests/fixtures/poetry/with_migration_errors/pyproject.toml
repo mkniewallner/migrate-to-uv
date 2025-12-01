@@ -25,3 +25,7 @@ tilde-or-multiple-constraints = [
     { python = ">=3.11", version = "~1.0||~2.0||~3.0" },
     { python = "<3.11", version = "~1.0||~2.0" },
 ]
+whitespace = ">=7.0 <7.1"
+whitespace-multiple = ">=7.0  <7.1"
+whitespace-caret = "^7.0 ^7.1"
+whitespace-caret-multiple = "^7.0  ^7.1"

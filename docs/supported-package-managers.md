@@ -31,6 +31,77 @@ equivalent [PEP 440](https://peps.python.org/pep-0440/) format used by uv, even 
 specification (e.g., [caret](https://python-poetry.org/docs/dependency-specification/#caret-requirements) (`^`)
 and [tilde](https://python-poetry.org/docs/dependency-specification/#tilde-requirements) (`~`)).
 
+### Unsupported version specifiers
+
+Although `migrate-to-uv` is able to migrate most Poetry-specific version specifiers to
+[PEP 440](https://packaging.python.org/en/latest/specifications/version-specifiers/#id5) format, some specific features
+of Poetry versioning cannot be migrated, either because there are no equivalent in PEP 440, or because some cases are
+too complex to handle. In both cases, `migrate-to-uv` will fail the migration.
+
+This section lists the features that are known to not be supported, and helps you find what to do to actually be able to
+perform the migration. If a case that `migrate-to-uv` was not able to handle is not listed here, feel free to create an
+issue on the GitHub repository.
+
+#### "||" operator
+
+Poetry allows defining multiple versions constraints using a double-pipe ("||") (or the equivalent pipe ("|")), that
+acts as an "or" operator, like this:
+
+```toml
+[tool.poetry.dependencies]
+pytest = "^7.0||^8.0||^9.0"
+```
+
+Since [PEP 440](https://packaging.python.org/en/latest/specifications/version-specifiers/#id5) does not provide any way
+to define an "or" operator, usage of this operator in versions will lead to a migration failure. You will need to
+manually update the syntax to not rely on this operator before attempting the migration.
+
+In the simple example above, this one should be equivalent:
+
+```toml
+[tool.poetry.dependencies]
+pytest = ">=7.0,<10"
+```
+
+For cases where specifiers are non-contiguous, you might want to only keep the highest version, e.g.:
+
+```toml
+[tool.poetry.dependencies]
+pytest = "^7.0||^9.0"
+```
+
+could be transformed to:
+
+```toml
+[tool.poetry.dependencies]
+pytest = "^9.0"
+```
+
+Note that non-contiguous versions that use "or" operator only work on projects that are not distributed as packages
+(since packages need to follow PEP 440 versioning).
+
+#### Whitespace-separated specifiers
+
+Similarly to [PEP 440](https://packaging.python.org/en/latest/specifications/version-specifiers/#id5), Poetry allows
+defining multiple versions constraints using a comma (","), that acts as an "and" operator, like this:
+
+```toml
+[tool.poetry.dependencies]
+pytest = "^8.4,!=8.4.2"
+```
+
+While this one is supported by `migrate-to-uv`, Poetry also allows using a whitespace (" ") instead of a comma (which is
+equivalent), like this:
+
+```toml
+[tool.poetry.dependencies]
+pytest = "^8.4 !=8.4.2"
+```
+
+Using whitespaces in place of commas for delimiting specifiers is not supported by `migrate-to-uv`, and will lead to a
+migration failure. You will need to manually update the syntax to use comma-delimited specifiers before attempting the
+migration.
+
 ### Build backend
 
 As uv does not yet have a stable build backend (see [astral-sh/uv#8779](https://github.com/astral-sh/uv/issues/8779) for more details), when
