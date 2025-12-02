@@ -60,6 +60,7 @@ impl Converter for Pipenv {
             },
             default_groups: uv_default_groups,
             constraint_dependencies: self.get_constraint_dependencies(),
+            environments: None,
         };
 
         let pyproject_toml_content =
