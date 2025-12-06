@@ -9,6 +9,8 @@ env:
   PYTHON_VERSION: '3.14'
   # renovate: datasource=pypi depName=uv
   UV_VERSION: '0.9.14'
+  # renovate: datasource=pypi depName=pypi-attestations
+  PYPI_ATTESTATIONS_VERSION: '0.0.28'
 
 permissions: {}
 
@@ -107,29 +109,30 @@ jobs:
     environment: pypi
     permissions:
       id-token: write
-      contents: write
-      attestations: write
-    if: ${{ github.event_name == 'release' }}
     steps:
       - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
 
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3
+      - name: Install uv
+        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244 # v7
         with:
-          subject-path: 'wheels-*/*'
+          version: ${{ env.UV_VERSION }}
+
+      - name: Generate PyPI attestations
+        run: uvx pypi-attestations@${{ env.PYPI_ATTESTATIONS_VERSION }} sign wheels-*/*
 
       - name: Publish to PyPI
-        uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1
-        with:
-          command: upload
-          args: --non-interactive --skip-existing wheels-*/*
+        if: ${{ github.event_name == 'release' }}
+        run: uv publish --trusted-publishing always wheels-*/*
+
+      - name: '[dry-run] Publish to PyPI'
+        if: ${{ github.event_name != 'release' }}
+        run: uv publish --trusted-publishing always --dry-run wheels-*/*
 
   publish-docs:
     runs-on: ubuntu-24.04
     needs: publish
     permissions:
       contents: write
-    if: ${{ github.event_name == 'release' }}
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6  # zizmor: ignore[artipacked] Required for publishing documentation to `gh-pages` branch.
 
@@ -144,4 +147,9 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Deploy documentation
+        if: ${{ github.event_name == 'release' }}
         run: uv run --only-group docs mkdocs gh-deploy --force
+
+      - name: '[dry-run] Deploy documentation'
+        if: ${{ github.event_name != 'release' }}
+        run: uv run --only-group docs mkdocs gh-deploy --help
