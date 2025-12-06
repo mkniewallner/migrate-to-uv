@@ -82,8 +82,7 @@ You can then accept the changes, if they look correct according to the changed c
 
 ## Documentation
 
-Documentation is built using [mkdocs](https://www.mkdocs.org/)
-and [mkdocs-material](https://squidfunk.github.io/mkdocs-material/).
+Documentation is built using [zensical](https://zensical.org).
 
 It can be run locally with [uv](https://docs.astral.sh/uv/) by using:
 
