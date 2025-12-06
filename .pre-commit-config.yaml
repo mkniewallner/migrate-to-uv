@@ -1,4 +1,20 @@
 repos:
+  # Switch to symlink once https://github.com/zensical/backlog/issues/55 is implemented.
+  - repo: local
+    hooks:
+      - id: copy-changelog-docs
+        name: copy changelog to docs
+        entry: cp CHANGELOG.md docs/CHANGELOG.md
+        language: system
+        pass_filenames: false
+        files: CHANGELOG\.md$
+      - id: copy-contributing-docs
+        name: copy contributing to docs
+        entry: cp CONTRIBUTING.md docs/CONTRIBUTING.md
+        language: system
+        pass_filenames: false
+        files: CONTRIBUTING\.md$
+
   - repo: local
     hooks:
       - id: cargo-check-lock
