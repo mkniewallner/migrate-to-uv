@@ -122,13 +122,15 @@ jobs:
         with:
           subject-path: 'wheels-*/*'
 
+      - run: ls wheels-*
+
       - name: Publish to PyPI
         if: ${{ github.event_name == 'release' }}
         run: uv publish --trusted-publishing always wheels-*/*
 
       - name: '[dry-run] Publish to PyPI'
         if: ${{ github.event_name != 'release' }}
-        run: uv publish --trusted-publishing always --dry-run -v wheels-*/*
+        run: uv publish --trusted-publishing always --dry-run wheels-*/*
 
   publish-docs:
     runs-on: ubuntu-24.04
