@@ -33,6 +33,6 @@ jobs:
           version: ${{ env.UV_VERSION }}
 
       - name: Run zizmor
-        run: uvx zizmor@${ZIZMOR_VERSION} .
+        run: uvx zizmor@${{ env.ZIZMOR_VERSION }} .
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
