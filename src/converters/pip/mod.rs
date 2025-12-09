@@ -54,10 +54,11 @@ impl Converter for Pip {
             ..Default::default()
         };
 
+        let base_uv = pyproject.tool.and_then(|tool| tool.uv).unwrap_or_default();
         let uv = Uv {
             package: Some(false),
             constraint_dependencies: self.get_constraint_dependencies(),
-            ..Default::default()
+            ..base_uv
         };
 
         let pyproject_toml_content =
