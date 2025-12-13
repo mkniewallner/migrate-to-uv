@@ -48,7 +48,7 @@ pub enum License {
     },
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Default)]
 pub struct Tool {
     pub poetry: Option<Poetry>,
     pub uv: Option<Uv>,

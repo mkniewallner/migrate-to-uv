@@ -81,11 +81,14 @@ impl PackageManager {
                 let pyproject_toml: PyProject =
                     toml::from_str(pyproject_toml_content.as_str()).unwrap();
 
-                if pyproject_toml.tool.is_none_or(|tool| tool.poetry.is_none()) {
+                if pyproject_toml.tool.is_none_or(|tool| tool.poetry.is_none())
+                    && !project_path.join("poetry.lock").exists()
+                {
                     return Err(format!(
-                        "{} does not contain a {} section.",
+                        "{} does not contain a {} section nor a {} file.",
                         project_file.bold(),
-                        "[tool.poetry]".bold()
+                        "[tool.poetry]".bold(),
+                        "poetry.lock".bold(),
                     ));
                 }
 
@@ -403,7 +406,7 @@ mod tests {
 
     #[rstest]
     #[case("tests/fixtures/poetry", format!("Directory does not contain a {} file.", "pyproject.toml".bold()))]
-    #[case("tests/fixtures/pipenv/full", format!("{} does not contain a {} section.", "pyproject.toml".bold(), "[tool.poetry]".bold()))]
+    #[case("tests/fixtures/pipenv/full", format!("{} does not contain a {} section nor a {} file.", "pyproject.toml".bold(), "[tool.poetry]".bold(), "poetry.lock".bold()))]
     fn test_poetry_err(#[case] project_path: &str, #[case] error: String) {
         let converter_options = get_converter_options(PathBuf::from(project_path));
 

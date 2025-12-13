@@ -4,7 +4,7 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Default)]
 pub struct Poetry {
     #[serde(rename = "package-mode")]
     pub package_mode: Option<bool>,
