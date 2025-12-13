@@ -647,18 +647,18 @@ fn test_skip_lock_full() {
         "pep440>=1.2.3",
         "with-version-only==1.2.3",
         "with-extras[asyncio, postgresql_asyncpg]==1.2.3",
-        "with-markers==1.2.3 ; python_version <= '3.11' or sys_platform == 'win32'",
-        "with-platform==1.2.3 ; sys_platform == 'darwin'",
-        "with-markers-python-platform==1.2.3 ; python_version >= '3.11' and python_version < '3.12' and platform_python_implementation == 'CPython' or platform_python_implementation == 'Jython' and sys_platform == 'darwin'",
+        "with-markers==1.2.3; python_version <= '3.11' or sys_platform == 'win32'",
+        "with-platform==1.2.3; sys_platform == 'darwin'",
+        "with-markers-python-platform==1.2.3; python_version >= '3.11' and python_version < '3.12' and platform_python_implementation == 'CPython' or platform_python_implementation == 'Jython' and sys_platform == 'darwin'",
         "with-source==1.2.3",
-        "python-restricted==1.2.3 ; python_version >= '3.11' and python_version < '4'",
-        "python-restricted-2==1.2.3 ; python_version >= '3.11' and python_version < '3.12'",
-        "python-restricted-3==1.2.3 ; python_version > '3.11'",
-        "python-restricted-4==1.2.3 ; python_version >= '3.11'",
-        "python-restricted-5==1.2.3 ; python_version < '3.11'",
-        "python-restricted-6==1.2.3 ; python_version <= '3.11'",
-        "python-restricted-7==1.2.3 ; python_version > '3.11' and python_version < '3.13'",
-        "python-restricted-with-source==1.2.3 ; python_version > '3.11' and python_version < '3.13'",
+        "python-restricted==1.2.3; python_version >= '3.11' and python_version < '4'",
+        "python-restricted-2==1.2.3; python_version >= '3.11' and python_version < '3.12'",
+        "python-restricted-3==1.2.3; python_version > '3.11'",
+        "python-restricted-4==1.2.3; python_version >= '3.11'",
+        "python-restricted-5==1.2.3; python_version < '3.11'",
+        "python-restricted-6==1.2.3; python_version <= '3.11'",
+        "python-restricted-7==1.2.3; python_version > '3.11' and python_version < '3.13'",
+        "python-restricted-with-source==1.2.3; python_version > '3.11' and python_version < '3.13'",
         "whitespaces>=3.2,<4",
         "whitespaces-2     >   3.11,     <=     3.13    ",
         "optional-not-in-extra==1.2.3",
@@ -671,14 +671,14 @@ fn test_skip_lock_full() {
         "git-rev",
         "git-tag",
         "git-subdirectory",
-        "multiple-constraints-python-version>=2 ; python_version >= '3.11'",
-        "multiple-constraints-python-version<2 ; python_version < '3.11'",
-        "multiple-constraints-platform-version>=2 ; sys_platform == 'darwin'",
-        "multiple-constraints-platform-version<2 ; sys_platform == 'linux'",
-        "multiple-constraints-markers-version>=2 ; platform_python_implementation == 'CPython'",
-        "multiple-constraints-markers-version<2 ; platform_python_implementation != 'CPython'",
-        "multiple-constraints-python-platform-markers-version>=2 ; python_version >= '3.11' and platform_python_implementation == 'CPython' and sys_platform == 'darwin'",
-        "multiple-constraints-python-platform-markers-version<2 ; python_version < '3.11' and platform_python_implementation != 'CPython' and sys_platform == 'linux'",
+        "multiple-constraints-python-version>=2; python_version >= '3.11'",
+        "multiple-constraints-python-version<2; python_version < '3.11'",
+        "multiple-constraints-platform-version>=2; sys_platform == 'darwin'",
+        "multiple-constraints-platform-version<2; sys_platform == 'linux'",
+        "multiple-constraints-markers-version>=2; platform_python_implementation == 'CPython'",
+        "multiple-constraints-markers-version<2; platform_python_implementation != 'CPython'",
+        "multiple-constraints-python-platform-markers-version>=2; python_version >= '3.11' and platform_python_implementation == 'CPython' and sys_platform == 'darwin'",
+        "multiple-constraints-python-platform-markers-version<2; python_version < '3.11' and platform_python_implementation != 'CPython' and sys_platform == 'linux'",
         "multiple-constraints-python-source",
         "multiple-constraints-platform-source",
         "multiple-constraints-markers-source",
@@ -731,6 +731,7 @@ fn test_skip_lock_full() {
         "dev",
         "typing",
     ]
+    environments = ["sys_platform == 'darwin'"]
 
     [[tool.uv.index]]
     name = "PyPI"
@@ -891,6 +892,52 @@ fn test_skip_lock_full() {
     [[tool.mypy.overrides]]
     module = ["foo"]
     warn_unused_ignores = true
+    "#);
+
+    // Assert that `uv.lock` file was not generated.
+    assert!(!project_path.join("uv.lock").exists());
+}
+
+#[test]
+fn test_pipe_delimited_platforms() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("pipe_delimited_platforms");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    fs::copy(
+        fixture_path.join("pyproject.toml"),
+        project_path.join("pyproject.toml"),
+    )
+    .unwrap();
+
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Successfully migrated project from Poetry to uv!
+    "#);
+
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [build-system]
+    requires = ["hatchling"]
+    build-backend = "hatchling.build"
+
+    [project]
+    name = "pipe-platform-test"
+    version = "0.1.0"
+    description = "Test pipe-delimited platform markers"
+    requires-python = ">=3.11,<4"
+    dependencies = ["unix-dep==1.0.0; sys_platform == 'darwin' or sys_platform == 'linux'"]
+
+    [project.optional-dependencies]
+    test = ["pytest-unix==7.0.0; sys_platform == 'darwin' or sys_platform == 'linux'"]
+
+    [tool.uv]
+    package = false
+    environments = ["sys_platform == 'darwin'"]
     "#);
 
     // Assert that `uv.lock` file was not generated.
