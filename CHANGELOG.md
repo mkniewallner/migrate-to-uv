@@ -5,6 +5,7 @@
 ### Bug fixes
 
 * [poetry] Fail on unhandled version specifications ([#514](https://github.com/mkniewallner/migrate-to-uv/pull/514))
+* [poetry] Also check if `poetry.lock` exists when checking if a project uses Poetry ([#528](https://github.com/mkniewallner/migrate-to-uv/pull/528))
 
 ## 0.8.0 - 2025-11-17
 

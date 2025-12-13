@@ -112,6 +112,103 @@ fn test_complete_workflow() {
 }
 
 #[test]
+fn test_complete_workflow_pep_621_no_poetry_section() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("pep_621_no_poetry_section_with_lock_file");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    for file in ["poetry.lock", "poetry.toml", "pyproject.toml"] {
+        fs::copy(fixture_path.join(file), project_path.join(file)).unwrap();
+    }
+
+    apply_lock_filters!();
+    assert_cmd_snapshot!(cli().arg(project_path), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Locking dependencies with "uv lock"...
+    Using [PYTHON_INTERPRETER]
+    Resolved [PACKAGES] packages in [TIME]
+    Locking dependencies with "uv lock" again to remove constraints...
+    Using [PYTHON_INTERPRETER]
+    Resolved [PACKAGES] packages in [TIME]
+    Successfully migrated project from Poetry to uv!
+    "#);
+
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [build-system]
+    requires = ["hatchling"]
+    build-backend = "hatchling.build"
+
+    [project]
+    name = "foo"
+    version = "0.1.0"
+    description = "A fabulous project."
+    requires-python = ">=3.11"
+    dependencies = ["arrow>=1.2.3,<2"]
+
+    [dependency-groups]
+    dev = ["factory-boy>=3.2.1,<4"]
+    typing = ["mypy>=1.13.0,<2"]
+    profiling = ["pyinstrument>=5.0.2,<6"]
+    "#);
+
+    let uv_lock = toml::from_str::<UvLock>(
+        fs::read_to_string(project_path.join("uv.lock"))
+            .unwrap()
+            .as_str(),
+    )
+    .unwrap();
+
+    // Assert that locked versions in `uv.lock` match what was in `poetry.lock`.
+    let uv_lock_packages = uv_lock.package.unwrap();
+    let expected_locked_packages = Vec::from([
+        LockedPackage {
+            name: "arrow".to_string(),
+            version: "1.2.3".to_string(),
+        },
+        LockedPackage {
+            name: "factory-boy".to_string(),
+            version: "3.2.1".to_string(),
+        },
+        LockedPackage {
+            name: "faker".to_string(),
+            version: "33.1.0".to_string(),
+        },
+        LockedPackage {
+            name: "mypy".to_string(),
+            version: "1.13.0".to_string(),
+        },
+        LockedPackage {
+            name: "mypy-extensions".to_string(),
+            version: "1.0.0".to_string(),
+        },
+        LockedPackage {
+            name: "python-dateutil".to_string(),
+            version: "2.7.0".to_string(),
+        },
+        LockedPackage {
+            name: "six".to_string(),
+            version: "1.15.0".to_string(),
+        },
+        LockedPackage {
+            name: "typing-extensions".to_string(),
+            version: "4.6.0".to_string(),
+        },
+    ]);
+    for package in expected_locked_packages {
+        assert!(uv_lock_packages.contains(&package));
+    }
+
+    // Assert that previous package manager files are correctly removed.
+    assert!(!project_path.join("poetry.lock").exists());
+    assert!(!project_path.join("poetry.toml").exists());
+}
+
+#[test]
 fn test_ignore_locked_versions() {
     let fixture_path = Path::new(FIXTURES_PATH).join("with_lock_file");
 

@@ -31,7 +31,11 @@ impl Converter for Poetry {
             fs::read_to_string(self.get_project_path().join("pyproject.toml")).unwrap_or_default();
         let pyproject: PyProject = toml::from_str(pyproject_toml_content.as_str()).unwrap();
 
-        let poetry = pyproject.tool.unwrap().poetry.unwrap();
+        let poetry = pyproject
+            .tool
+            .unwrap_or_default()
+            .poetry
+            .unwrap_or_default();
 
         let mut uv_source_index: IndexMap<String, SourceContainer> = IndexMap::new();
         let (dependency_groups, uv_default_groups) =
@@ -183,12 +187,11 @@ impl Converter for Poetry {
 }
 
 fn remove_pyproject_poetry_section(pyproject: &mut DocumentMut) {
-    pyproject
-        .get_mut("tool")
-        .unwrap()
-        .as_table_mut()
-        .unwrap()
-        .remove("poetry");
+    if let Some(tool) = pyproject.get_mut("tool")
+        && let Some(tool_table) = tool.as_table_mut()
+    {
+        tool_table.remove("poetry");
+    }
 }
 
 #[cfg(test)]

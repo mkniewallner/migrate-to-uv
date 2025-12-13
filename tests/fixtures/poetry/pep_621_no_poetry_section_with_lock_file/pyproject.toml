@@ -1,0 +1,15 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "foo"
+version = "0.1.0"
+description = "A fabulous project."
+requires-python = ">=3.11"
+dependencies = ["arrow>=1.2.3,<2"]
+
+[dependency-groups]
+dev = ["factory-boy>=3.2.1,<4"]
+typing = ["mypy>=1.13.0,<2"]
+profiling = ["pyinstrument>=5.0.2,<6"]
