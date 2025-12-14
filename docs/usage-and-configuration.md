@@ -132,6 +132,28 @@ package manager, this option could be used.
 migrate-to-uv --package-manager poetry
 ```
 
+#### `--build-backend`
+
+The build backend to choose when performing the migration. Possible options are `hatch` and `uv`. If none is specified,
+`hatch` is chosen by default.
+
+!!!info
+
+    Support for `uv` is considered experimental, but the default will likely change in the future, where the build
+    backend will be chosen based on the complexity of the package distribution metadata.
+
+!!!note
+
+    If you choose `uv` and the migration cannot be performed because the project uses package distribution metadata that
+    cannot be expressed with uv build backend, the migration will fail, suggesting to use hatch with
+    `--build-backend hatch`.
+
+**Example**:
+
+```bash
+migrate-to-uv --build-backend uv
+```
+
 #### `--dependency-groups-strategy`
 
 Most package managers that support dependency groups install dependencies from all groups when performing installation.

@@ -104,9 +104,18 @@ migration.
 
 ### Build backend
 
-As uv does not yet have a stable build backend (see [astral-sh/uv#8779](https://github.com/astral-sh/uv/issues/8779) for more details), when
-performing the migration for libraries, `migrate-to-uv` sets [Hatch](https://hatch.pypa.io/latest/) as a build
-backend, migrating:
+Although uv has [its own build backend](https://docs.astral.sh/uv/concepts/build-backend/), it cannot express everything
+that Poetry supports. Additionally, `migrate-to-uv` was created before uv build backend was stabilized, and
+chose [Hatch](https://hatch.pypa.io/latest/config/build/) in the meantime.
+
+!!! info
+
+    Support for uv build backend was recently added, but is still considered experimental, so Hatch is still used by
+    default. If you want to explicitly use uv as a build backend, you can
+    use [`--build-backend uv`](usage-and-configuration.md#-build-backend), but note that the migration can fail if you
+    use some package distribution options that cannot be expressed with uv build backend.
+
+When converting the build backend to Hatch, `migrate-to-uv` migrates the following things:
 
 - Poetry [`packages`](https://python-poetry.org/docs/pyproject/#packages) and [`include`](https://python-poetry.org/docs/pyproject/#exclude-and-include) to Hatch [`include`](https://hatch.pypa.io/latest/config/build/#patterns)
 - Poetry [`exclude`](https://python-poetry.org/docs/pyproject/#exclude-and-include) to Hatch [`exclude`](https://hatch.pypa.io/latest/config/build/#patterns)
@@ -115,9 +124,6 @@ backend, migrating:
 
     Path rewriting, defined with `to` in `packages` for Poetry, is also migrated to Hatch by defining
     [sources](https://hatch.pypa.io/latest/config/build/#rewriting-paths) in wheel target.
-
-
-Once uv build backend is out of preview and considered stable, it will be used for the migration.
 
 ## Pipenv
 
