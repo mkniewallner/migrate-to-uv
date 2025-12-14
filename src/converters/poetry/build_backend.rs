@@ -40,7 +40,9 @@ pub fn get_hatch(
     packages: Option<&Vec<Package>>,
     include: Option<&Vec<Include>>,
     exclude: Option<&Vec<String>>,
-) -> Option<Hatch> {
+) -> Result<Option<Hatch>, Vec<String>> {
+    let errors = Vec::new();
+
     let mut targets = IndexMap::new();
     let (sdist_include, wheel_include, sdist_force_include, wheel_force_include, wheel_sources) =
         get_hatch_include(packages, include);
@@ -65,15 +67,19 @@ pub fn get_hatch(
         targets.insert("wheel".to_string(), wheel_target);
     }
 
-    if targets.is_empty() {
-        return None;
+    if !errors.is_empty() {
+        return Err(errors);
     }
 
-    Some(Hatch {
+    if targets.is_empty() {
+        return Ok(None);
+    }
+
+    Ok(Some(Hatch {
         build: Some(Build {
             targets: Some(targets),
         }),
-    })
+    }))
 }
 
 /// Inclusion behavior: <https://hatch.pypa.io/latest/config/build/#patterns>

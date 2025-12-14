@@ -116,6 +116,12 @@ impl Converter for Poetry {
             poetry.exclude.as_ref(),
         );
 
+        if let Err(errors) = &hatch {
+            for error in errors {
+                add_unrecoverable_error(error.clone());
+            }
+        }
+
         let mut updated_pyproject = pyproject_toml_content.parse::<DocumentMut>().unwrap();
         let mut pyproject_updater = PyprojectUpdater {
             pyproject: &mut updated_pyproject,
@@ -127,7 +133,10 @@ impl Converter for Poetry {
         pyproject_updater.insert_pep_621(&self.build_project(pyproject.project, project));
         pyproject_updater.insert_dependency_groups(dependency_groups.as_ref());
         pyproject_updater.insert_uv(&uv);
-        pyproject_updater.insert_hatch(hatch.as_ref());
+
+        if let Ok(hatch) = hatch {
+            pyproject_updater.insert_hatch(hatch.as_ref());
+        }
 
         if !self.keep_old_metadata() {
             remove_pyproject_poetry_section(&mut updated_pyproject);
