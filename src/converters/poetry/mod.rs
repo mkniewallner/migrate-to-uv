@@ -107,6 +107,7 @@ impl Converter for Poetry {
             },
             default_groups: uv_default_groups,
             constraint_dependencies: self.get_constraint_dependencies(),
+            ..Default::default()
         };
 
         let hatch = get_hatch(

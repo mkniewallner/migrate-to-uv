@@ -55,7 +55,7 @@ impl VisitMut for PyprojectPrettyFormatter {
                     ]
                     | ["project", "entry-points", _]
                     | ["tool", "uv"]
-                    | ["tool", "uv", "sources"]
+                    | ["tool", "uv", "build-backend" | "sources"]
                     | ["tool", "hatch", ..]
             ) {
                 let position = match parent_keys.as_slice() {

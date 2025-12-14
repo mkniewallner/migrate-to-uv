@@ -1,3 +1,4 @@
+use crate::schema::utils::SingleOrVec;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
@@ -13,6 +14,8 @@ pub struct Uv {
     pub default_groups: Option<Vec<String>>,
     #[serde(rename = "constraint-dependencies")]
     pub constraint_dependencies: Option<Vec<String>>,
+    #[serde(rename = "build-backend")]
+    pub build_backend: Option<UvBuildBackend>,
 }
 
 #[derive(Default, Deserialize, Serialize, Eq, PartialEq)]
@@ -42,4 +45,31 @@ pub struct SourceIndex {
 pub enum SourceContainer {
     SourceIndex(SourceIndex),
     SourceIndexes(Vec<SourceIndex>),
+}
+
+#[derive(Default, Deserialize, Serialize, Eq, PartialEq)]
+pub struct UvBuildBackend {
+    #[serde(rename = "module-name")]
+    pub module_name: Option<SingleOrVec<String>>,
+    #[serde(rename = "module-root")]
+    pub module_root: Option<String>,
+    pub namespace: Option<bool>,
+    pub data: Option<UvBuildBackendData>,
+    #[serde(rename = "default-excludes")]
+    pub default_excludes: Option<bool>,
+    #[serde(rename = "source-exclude")]
+    pub source_exclude: Option<Vec<String>>,
+    #[serde(rename = "source-include")]
+    pub source_include: Option<Vec<String>>,
+    #[serde(rename = "wheel-exclude")]
+    pub wheel_exclude: Option<Vec<String>>,
+}
+
+#[derive(Default, Deserialize, Serialize, Eq, PartialEq)]
+pub struct UvBuildBackendData {
+    data: Option<String>,
+    headers: Option<String>,
+    platlib: Option<String>,
+    purelib: Option<String>,
+    scripts: Option<String>,
 }
