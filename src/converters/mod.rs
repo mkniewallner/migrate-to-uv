@@ -195,7 +195,6 @@ pub trait Converter: Any + Debug {
     }
 
     /// Build backend to use when migrating package distribution metadata.
-    #[allow(dead_code)]
     fn get_build_backend(&self) -> Option<BuildBackend> {
         self.get_converter_options().build_backend
     }

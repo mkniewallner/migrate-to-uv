@@ -1,7 +1,9 @@
+use crate::converters::BuildBackend;
 use crate::schema::hatch::{Build, BuildTarget, Hatch};
 use crate::schema::poetry::{Format, Include, Package};
 use crate::schema::pyproject::BuildSystem;
 use crate::schema::utils::SingleOrVec;
+use crate::schema::uv::UvBuildBackend;
 use indexmap::IndexMap;
 use std::path::{MAIN_SEPARATOR, Path, PathBuf};
 
@@ -13,12 +15,21 @@ type HatchTargetsIncludeAndSource = (
     Option<IndexMap<String, String>>,
 );
 
-pub fn get_new_build_system(build_system: Option<BuildSystem>) -> Option<BuildSystem> {
-    if build_system?.build_backend? == "poetry.core.masonry.api" {
-        return Some(BuildSystem {
-            requires: vec!["hatchling".to_string()],
-            build_backend: Some("hatchling.build".to_string()),
-        });
+pub fn get_new_build_system(
+    current_build_system: Option<BuildSystem>,
+    new_build_system: Option<BuildBackend>,
+) -> Option<BuildSystem> {
+    if current_build_system?.build_backend? == "poetry.core.masonry.api" {
+        return match new_build_system {
+            None | Some(BuildBackend::Hatch) => Some(BuildSystem {
+                requires: vec!["hatchling".to_string()],
+                build_backend: Some("hatchling.build".to_string()),
+            }),
+            Some(BuildBackend::Uv) => Some(BuildSystem {
+                requires: vec!["uv_build".to_string()],
+                build_backend: Some("uv_build".to_string()),
+            }),
+        };
     }
     None
 }
@@ -295,4 +306,41 @@ fn extract_parent_path_from_glob(s: &str) -> Option<String> {
         return None;
     }
     Some(parents.join("/"))
+}
+
+pub fn get_uv(
+    _packages: Option<&Vec<Package>>,
+    _include: Option<&Vec<Include>>,
+    _exclude: Option<&Vec<String>>,
+) -> Result<Option<UvBuildBackend>, Vec<String>> {
+    let errors = Vec::new();
+
+    let module_name = Vec::new();
+    let source_include = Vec::new();
+    let source_exclude = Vec::new();
+    let wheel_exclude = Vec::new();
+
+    if !errors.is_empty() {
+        return Err(errors);
+    }
+
+    if module_name.is_empty()
+        && source_include.is_empty()
+        && source_exclude.is_empty()
+        && wheel_exclude.is_empty()
+    {
+        return Ok(None);
+    }
+
+    Ok(Some(UvBuildBackend {
+        module_name: Some(SingleOrVec::Vec(module_name)),
+        // By default, uv expects the modules to be in a "src" directory. Since Poetry does not
+        // provide a similar option, we want to default to the same thing as Poetry, i.e. an empty
+        // string.
+        module_root: Some(String::new()),
+        source_include: Some(source_include),
+        source_exclude: Some(source_exclude),
+        wheel_exclude: Some(wheel_exclude),
+        ..UvBuildBackend::default()
+    }))
 }
