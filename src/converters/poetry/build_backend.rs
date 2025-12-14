@@ -1,8 +1,11 @@
+use crate::converters::BuildBackend;
 use crate::schema::hatch::{Build, BuildTarget, Hatch};
 use crate::schema::poetry::{Format, Include, Package};
 use crate::schema::pyproject::BuildSystem;
 use crate::schema::utils::SingleOrVec;
+use crate::schema::uv::UvBuildBackend;
 use indexmap::IndexMap;
+use owo_colors::OwoColorize;
 use std::path::{MAIN_SEPARATOR, Path, PathBuf};
 
 type HatchTargetsIncludeAndSource = (
@@ -13,12 +16,21 @@ type HatchTargetsIncludeAndSource = (
     Option<IndexMap<String, String>>,
 );
 
-pub fn get_new_build_system(build_system: Option<BuildSystem>) -> Option<BuildSystem> {
-    if build_system?.build_backend? == "poetry.core.masonry.api" {
-        return Some(BuildSystem {
-            requires: vec!["hatchling".to_string()],
-            build_backend: Some("hatchling.build".to_string()),
-        });
+pub fn get_new_build_system(
+    current_build_system: Option<BuildSystem>,
+    new_build_system: Option<BuildBackend>,
+) -> Option<BuildSystem> {
+    if current_build_system?.build_backend? == "poetry.core.masonry.api" {
+        return match new_build_system {
+            None | Some(BuildBackend::Hatch) => Some(BuildSystem {
+                requires: vec!["hatchling".to_string()],
+                build_backend: Some("hatchling.build".to_string()),
+            }),
+            Some(BuildBackend::Uv) => Some(BuildSystem {
+                requires: vec!["uv_build".to_string()],
+                build_backend: Some("uv_build".to_string()),
+            }),
+        };
     }
     None
 }
@@ -289,4 +301,165 @@ fn extract_parent_path_from_glob(s: &str) -> Option<String> {
         return None;
     }
     Some(parents.join("/"))
+}
+
+pub fn get_uv(
+    packages: Option<&Vec<Package>>,
+    _include: Option<&Vec<Include>>,
+    _exclude: Option<&Vec<String>>,
+) -> Result<Option<UvBuildBackend>, Vec<String>> {
+    // TODO: Warn that migration could not migrate "to" usages.
+    // TODO: Warn that migration could not migrate files that should only be included in wheels.
+    let mut module_name = Vec::new();
+    let mut source_include = Vec::new();
+    let mut source_exclude = Vec::new();
+    let mut wheel_exclude = Vec::new();
+
+    let mut errors = Vec::new();
+
+    // https://python-poetry.org/docs/pyproject/#packages
+    if let Some(packages) = packages {
+        for Package {
+            include,
+            format,
+            from,
+            ..
+        } in packages
+        {
+            let include_with_from = PathBuf::from(from.as_ref().map_or("", |from| from))
+                .join(include)
+                .display()
+                .to_string()
+                // Ensure that separator remains "/" (Windows uses "\").
+                .replace(MAIN_SEPARATOR, "/");
+
+            if include.contains('*') || Path::new(include).extension().is_some() {
+                match format {
+                    None => {
+                        source_include.push(include_with_from.clone());
+                    }
+                    Some(SingleOrVec::Single(Format::Wheel)) => {
+                        errors.push(
+                            format!(
+                                "\"{}\" from \"{}\" cannot be converted to uv, as it was configured to be added to wheels only, which is not something that uv supports for paths.",
+                                include.bold(),
+                                "poetry.packages.include".bold(),
+                            )
+                        );
+                    }
+                    Some(SingleOrVec::Single(Format::Sdist)) => {
+                        source_include.push(include_with_from.clone());
+                        wheel_exclude.push(include_with_from.clone());
+                    }
+                    Some(SingleOrVec::Vec(vec)) => {
+                        if vec.is_empty() {
+                            source_include.push(include_with_from.clone());
+                        } else {
+                            if !vec.contains(&Format::Wheel) {
+                                source_include.push(include_with_from.clone());
+                                wheel_exclude.push(include_with_from.clone());
+                            }
+
+                            if vec.contains(&Format::Wheel) && !vec.contains(&Format::Sdist) {
+                                errors.push(
+                                    format!(
+                                        "\"{}\" from \"{}\" cannot be converted to uv, as it was configured to be added to wheels only, which is not something that uv supports for paths.",
+                                        include.bold(),
+                                        "poetry.packages.include".bold(),
+                                    )
+                                );
+                            }
+                        }
+                    }
+                }
+            } else {
+                let name = include_with_from.replace('/', ".");
+
+                match format {
+                    None => {
+                        module_name.push(name.clone());
+                    }
+                    Some(SingleOrVec::Single(Format::Wheel)) => {
+                        module_name.push(name.clone());
+                        source_exclude.push(include_with_from.clone());
+                    }
+                    Some(SingleOrVec::Single(Format::Sdist)) => {
+                        wheel_exclude.push(include_with_from.clone());
+                    }
+
+                    Some(SingleOrVec::Vec(vec)) => {
+                        if vec.is_empty() {
+                            module_name.push(name.clone());
+                        } else {
+                            if !vec.contains(&Format::Wheel) {
+                                module_name.push(name.clone());
+                                wheel_exclude.push(include_with_from.clone());
+                            }
+
+                            if vec.contains(&Format::Wheel) && !vec.contains(&Format::Sdist) {
+                                module_name.push(name.clone());
+                                source_exclude.push(include_with_from.clone());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // // https://python-poetry.org/docs/pyproject/#exclude-and-include
+    // if let Some(include) = include {
+    //     for inc in include {
+    //         match inc {
+    //             Include::String(path) | Include::Map { path, format: None } => {
+    //                 sdist_include.push(path.clone());
+    //                 wheel_include.push(path.clone());
+    //             }
+    //             Include::Map {
+    //                 path,
+    //                 format: Some(SingleOrVec::Vec(format)),
+    //             } => match format[..] {
+    //                 [] | [Format::Sdist, Format::Wheel] => {
+    //                     sdist_include.push(path.clone());
+    //                     wheel_include.push(path.clone());
+    //                 }
+    //                 [Format::Sdist] => sdist_include.push(path.clone()),
+    //                 [Format::Wheel] => wheel_include.push(path.clone()),
+    //                 _ => (),
+    //             },
+    //             Include::Map {
+    //                 path,
+    //                 format: Some(SingleOrVec::Single(Format::Sdist)),
+    //             } => sdist_include.push(path.clone()),
+    //             Include::Map {
+    //                 path,
+    //                 format: Some(SingleOrVec::Single(Format::Wheel)),
+    //             } => wheel_include.push(path.clone()),
+    //         }
+    //     }
+    // }
+
+    if !errors.is_empty() {
+        return Err(errors);
+    }
+
+    if module_name.is_empty()
+        && source_include.is_empty()
+        && source_exclude.is_empty()
+        && wheel_exclude.is_empty()
+    {
+        return Ok(None);
+    }
+
+    Ok(Some(UvBuildBackend {
+        module_name: Some(SingleOrVec::Vec(module_name)),
+        // By default, uv expects the modules to be in a "src" directory. Since Poetry does not
+        // provide a similar option, we want to default to the same thing as Poetry, i.e. an empty
+        // string.
+        module_root: Some(String::new()),
+        source_include: Some(source_include),
+        source_exclude: Some(source_exclude),
+        wheel_exclude: Some(wheel_exclude),
+        ..UvBuildBackend::default()
+    }))
 }

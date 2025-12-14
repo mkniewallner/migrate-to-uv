@@ -4,10 +4,10 @@ mod project;
 mod sources;
 pub mod version;
 
-use crate::converters::Converter;
 use crate::converters::ConverterOptions;
-use crate::converters::poetry::build_backend::get_hatch;
+use crate::converters::poetry::build_backend::{get_hatch, get_uv};
 use crate::converters::pyproject_updater::PyprojectUpdater;
+use crate::converters::{BuildBackend, Converter};
 use crate::errors::{MIGRATION_ERRORS, MigrationError, add_unrecoverable_error};
 use crate::schema::pep_621::{License, Project};
 use crate::schema::poetry::PoetryLock;
@@ -97,6 +97,45 @@ impl Converter for Poetry {
             ..Default::default()
         };
 
+        let (uv_build_backend, hatch) = match self.get_build_backend() {
+            Some(BuildBackend::Uv) => (
+                get_uv(
+                    poetry.packages.as_ref(),
+                    poetry.include.as_ref(),
+                    poetry.exclude.as_ref(),
+                ),
+                None,
+            ),
+            Some(BuildBackend::Hatch) => (
+                Ok(None),
+                get_hatch(
+                    poetry.packages.as_ref(),
+                    poetry.include.as_ref(),
+                    poetry.exclude.as_ref(),
+                ),
+            ),
+            None => (
+                get_uv(
+                    poetry.packages.as_ref(),
+                    poetry.include.as_ref(),
+                    poetry.exclude.as_ref(),
+                ),
+                get_hatch(
+                    poetry.packages.as_ref(),
+                    poetry.include.as_ref(),
+                    poetry.exclude.as_ref(),
+                ),
+            ),
+        };
+
+        if self.get_build_backend() == Some(BuildBackend::Uv)
+            && let Err(errors) = &uv_build_backend
+        {
+            for error in errors {
+                add_unrecoverable_error(error.clone());
+            }
+        }
+
         let uv = Uv {
             package: poetry.package_mode,
             index: sources::get_indexes(poetry.source),
@@ -107,13 +146,8 @@ impl Converter for Poetry {
             },
             default_groups: uv_default_groups,
             constraint_dependencies: self.get_constraint_dependencies(),
+            build_backend: uv_build_backend.unwrap_or_default(),
         };
-
-        let hatch = get_hatch(
-            poetry.packages.as_ref(),
-            poetry.include.as_ref(),
-            poetry.exclude.as_ref(),
-        );
 
         let mut updated_pyproject = pyproject_toml_content.parse::<DocumentMut>().unwrap();
         let mut pyproject_updater = PyprojectUpdater {
@@ -121,7 +155,8 @@ impl Converter for Poetry {
         };
 
         pyproject_updater.insert_build_system(
-            build_backend::get_new_build_system(pyproject.build_system).as_ref(),
+            build_backend::get_new_build_system(pyproject.build_system, self.get_build_backend())
+                .as_ref(),
         );
         pyproject_updater.insert_pep_621(&self.build_project(pyproject.project, project));
         pyproject_updater.insert_dependency_groups(dependency_groups.as_ref());
