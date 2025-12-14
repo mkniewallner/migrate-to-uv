@@ -97,6 +97,7 @@ impl Converter for Poetry {
         };
 
         let uv_build_backend = build_backend::get_uv(
+            &self.converter_options.project_path,
             poetry.packages.as_ref(),
             poetry.include.as_ref(),
             poetry.exclude.as_ref(),
