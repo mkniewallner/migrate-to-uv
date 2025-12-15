@@ -133,11 +133,14 @@ fn get_hatch_include(
                         wheel_sources.insert(from, to);
                     }
                 }
+                // Note: An empty `format = []` in Poetry means that the files will not be added to
+                // any distribution at all.
                 Some(SingleOrVec::Vec(vec)) => {
-                    if vec.contains(&Format::Sdist) || vec.is_empty() {
+                    if vec.contains(&Format::Sdist) {
                         sdist_include.push(include_with_from.clone());
                     }
-                    if vec.contains(&Format::Wheel) || vec.is_empty() {
+
+                    if vec.contains(&Format::Wheel) {
                         wheel_include.push(include_with_from.clone());
 
                         if let Some((from, to)) = get_hatch_source(
@@ -165,13 +168,22 @@ fn get_hatch_include(
                 }
                 Include::Map {
                     path,
+                    format: Some(SingleOrVec::Single(Format::Sdist)),
+                } => {
+                    sdist_force_include.insert(path.clone(), path.clone());
+                }
+                Include::Map {
+                    path,
+                    format: Some(SingleOrVec::Single(Format::Wheel)),
+                } => {
+                    wheel_force_include.insert(path.clone(), path.clone());
+                }
+                // Note: An empty `format = []` in Poetry means that the files will not be added to
+                // any distribution at all.
+                Include::Map {
+                    path,
                     format: Some(SingleOrVec::Vec(format)),
                 } => match format[..] {
-                    [] => {
-                        // https://python-poetry.org/docs/1.8/pyproject/#include-and-exclude
-                        // If there is no format specified, files are only added to sdist.
-                        sdist_force_include.insert(path.clone(), path.clone());
-                    }
                     [Format::Sdist, Format::Wheel] => {
                         sdist_force_include.insert(path.clone(), path.clone());
                         wheel_force_include.insert(path.clone(), path.clone());
@@ -184,18 +196,6 @@ fn get_hatch_include(
                     }
                     _ => (),
                 },
-                Include::Map {
-                    path,
-                    format: Some(SingleOrVec::Single(Format::Sdist)),
-                } => {
-                    sdist_force_include.insert(path.clone(), path.clone());
-                }
-                Include::Map {
-                    path,
-                    format: Some(SingleOrVec::Single(Format::Wheel)),
-                } => {
-                    wheel_force_include.insert(path.clone(), path.clone());
-                }
             }
         }
     }
