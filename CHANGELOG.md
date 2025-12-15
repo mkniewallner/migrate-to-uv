@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Bug fixes
+
+* [poetry] Do not migrate `packages`/`include` with empty `format` array ([#538](https://github.com/mkniewallner/migrate-to-uv/pull/538))
+
 ## 0.8.1 - 2025-12-13
 
 ### Bug fixes
