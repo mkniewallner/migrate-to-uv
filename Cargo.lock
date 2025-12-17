@@ -873,6 +873,7 @@ dependencies = [
  "toml",
  "toml_edit",
  "url",
+ "walkdir",
  "zip",
 ]
 
