@@ -1,12 +1,39 @@
 use crate::common::{LockedPackage, UvLock, apply_lock_filters, cli};
+use dircpy::copy_dir;
+use flate2::read::GzDecoder;
 use insta_cmd::assert_cmd_snapshot;
 use std::fs;
-use std::path::Path;
+use std::fs::{File, remove_dir_all};
+use std::path::{Path, PathBuf};
+use std::process::{Command, Stdio};
+use tar::Archive;
 use tempfile::tempdir;
+use zip::ZipArchive;
 
 mod common;
 
 const FIXTURES_PATH: &str = "tests/fixtures/poetry";
+
+fn get_tar_gz_entries(path: PathBuf) -> Vec<String> {
+    let mut archive = Archive::new(GzDecoder::new(File::open(path).unwrap()));
+    let mut entries = archive
+        .entries()
+        .unwrap()
+        .filter_map(Result::ok)
+        .map(|e| e.path().unwrap().to_string_lossy().to_string())
+        .collect::<Vec<_>>();
+    entries.sort_unstable();
+
+    entries
+}
+
+fn get_zip_entries(path: PathBuf) -> Vec<String> {
+    let archive = ZipArchive::new(File::open(path).unwrap()).unwrap();
+    let mut entries: Vec<_> = archive.file_names().collect();
+    entries.sort_unstable();
+
+    entries.iter().map(ToString::to_string).collect()
+}
 
 #[test]
 fn test_complete_workflow() {
@@ -15,9 +42,7 @@ fn test_complete_workflow() {
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
-    for file in ["poetry.lock", "poetry.toml", "pyproject.toml"] {
-        fs::copy(fixture_path.join(file), project_path.join(file)).unwrap();
-    }
+    copy_dir(fixture_path, project_path).unwrap();
 
     apply_lock_filters!();
     assert_cmd_snapshot!(cli().arg(project_path), @r#"
@@ -118,9 +143,7 @@ fn test_complete_workflow_pep_621_no_poetry_section() {
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
-    for file in ["poetry.lock", "poetry.toml", "pyproject.toml"] {
-        fs::copy(fixture_path.join(file), project_path.join(file)).unwrap();
-    }
+    copy_dir(fixture_path, project_path).unwrap();
 
     apply_lock_filters!();
     assert_cmd_snapshot!(cli().arg(project_path), @r#"
@@ -215,9 +238,7 @@ fn test_ignore_locked_versions() {
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
-    for file in ["poetry.lock", "poetry.toml", "pyproject.toml"] {
-        fs::copy(fixture_path.join(file), project_path.join(file)).unwrap();
-    }
+    copy_dir(fixture_path, project_path).unwrap();
 
     apply_lock_filters!();
     assert_cmd_snapshot!(cli().arg(project_path).arg("--ignore-locked-versions"), @r#"
@@ -285,9 +306,7 @@ fn test_keep_current_data() {
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
-    for file in ["poetry.lock", "poetry.toml", "pyproject.toml"] {
-        fs::copy(fixture_path.join(file), project_path.join(file)).unwrap();
-    }
+    copy_dir(fixture_path, project_path).unwrap();
 
     apply_lock_filters!();
     assert_cmd_snapshot!(cli().arg(project_path).arg("--keep-current-data"), @r#"
@@ -357,9 +376,7 @@ fn test_dependency_groups_strategy_include_in_dev() {
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
-    for file in ["poetry.lock", "poetry.toml", "pyproject.toml"] {
-        fs::copy(fixture_path.join(file), project_path.join(file)).unwrap();
-    }
+    copy_dir(fixture_path, project_path).unwrap();
 
     apply_lock_filters!();
     assert_cmd_snapshot!(cli()
@@ -411,9 +428,7 @@ fn test_dependency_groups_strategy_keep_existing() {
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
-    for file in ["poetry.lock", "poetry.toml", "pyproject.toml"] {
-        fs::copy(fixture_path.join(file), project_path.join(file)).unwrap();
-    }
+    copy_dir(fixture_path, project_path).unwrap();
 
     apply_lock_filters!();
     assert_cmd_snapshot!(cli()
@@ -462,9 +477,7 @@ fn test_dependency_groups_strategy_merge_into_dev() {
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
-    for file in ["poetry.lock", "poetry.toml", "pyproject.toml"] {
-        fs::copy(fixture_path.join(file), project_path.join(file)).unwrap();
-    }
+    copy_dir(fixture_path, project_path).unwrap();
 
     apply_lock_filters!();
     assert_cmd_snapshot!(cli()
@@ -515,9 +528,7 @@ fn test_skip_lock() {
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
-    for file in ["poetry.lock", "poetry.toml", "pyproject.toml"] {
-        fs::copy(fixture_path.join(file), project_path.join(file)).unwrap();
-    }
+    copy_dir(fixture_path, project_path).unwrap();
 
     assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock"), @r###"
     success: true
@@ -563,11 +574,7 @@ fn test_skip_lock_full() {
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
-    fs::copy(
-        fixture_path.join("pyproject.toml"),
-        project_path.join("pyproject.toml"),
-    )
-    .unwrap();
+    copy_dir(fixture_path, project_path).unwrap();
 
     assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock"), @r#"
     success: true
@@ -1109,9 +1116,7 @@ fn test_manage_errors() {
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
-    for file in ["poetry.lock", "poetry.toml", "pyproject.toml"] {
-        fs::copy(fixture_path.join(file), project_path.join(file)).unwrap();
-    }
+    copy_dir(fixture_path, project_path).unwrap();
 
     apply_lock_filters!();
     assert_cmd_snapshot!(cli().arg(project_path), @r#"
@@ -1165,9 +1170,7 @@ fn test_manage_warnings() {
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
-    for file in ["poetry.lock", "poetry.toml", "pyproject.toml"] {
-        fs::copy(fixture_path.join(file), project_path.join(file)).unwrap();
-    }
+    copy_dir(fixture_path, project_path).unwrap();
 
     apply_lock_filters!();
     assert_cmd_snapshot!(cli().arg(project_path), @r#"
@@ -1357,4 +1360,134 @@ fn test_manage_warnings_dry_run() {
 
     // Assert that `uv.lock` file was not generated.
     assert!(!project_path.join("uv.lock").exists());
+}
+
+#[test]
+fn test_build_backend_hatch() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_compatible");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(&fixture_path, project_path).unwrap();
+
+    Command::new("uvx")
+        .arg("poetry")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    let sdist_files_before = get_tar_gz_entries(project_path.join("dist/foobar-0.1.0.tar.gz"));
+    let wheel_files_before =
+        get_zip_entries(project_path.join("dist/foobar-0.1.0-py3-none-any.whl"));
+
+    remove_dir_all(project_path.join("dist")).unwrap();
+
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock"), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Successfully migrated project from Poetry to uv!
+    "###);
+
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [build-system]
+    requires = ["hatchling"]
+    build-backend = "hatchling.build"
+
+    [project]
+    name = "foobar"
+    version = "0.1.0"
+    description = "A fabulous project."
+    authors = [{ name = "John Doe", email = "john.doe@example.com" }]
+    requires-python = ">=3.10"
+
+    [tool.hatch.build.targets.sdist]
+    include = [
+        "packages_sdist_wheel",
+        "packages_sdist_wheel_2",
+        "packages_sdist",
+        "packages_sdist_2",
+        "packages_glob_sdist_wheel/**/*.py",
+        "packages_glob_sdist_wheel_2/**/*.py",
+        "packages_glob_sdist/**/*.py",
+        "packages_glob_sdist_2/**/*.py",
+        "from/packages_from_sdist_wheel",
+        "packages_to_sdist_wheel",
+        "from/packages_from_to_sdist_wheel",
+        "packages_glob_to_sdist_wheel/**/*.py",
+        "from/packages_glob_from_to_sdist_wheel/**/*.py",
+        "packages_sdist_wheel_with_excluded_files",
+        "text_file_sdist_wheel.txt",
+        "text_file_sdist.txt",
+    ]
+    exclude = [
+        "packages_sdist_wheel_with_excluded_files/bar.py",
+        "packages_sdist_wheel_with_excluded_files/foobar",
+    ]
+
+    [tool.hatch.build.targets.sdist.force-include]
+    include_sdist = "include_sdist"
+    include_sdist_2 = "include_sdist_2"
+    include_sdist_3 = "include_sdist_3"
+    include_sdist_4 = "include_sdist_4"
+    include_sdist_wheel = "include_sdist_wheel"
+
+    [tool.hatch.build.targets.wheel]
+    include = [
+        "packages_sdist_wheel",
+        "packages_sdist_wheel_2",
+        "packages_wheel",
+        "packages_wheel_2",
+        "packages_glob_sdist_wheel/**/*.py",
+        "packages_glob_sdist_wheel_2/**/*.py",
+        "packages_glob_wheel/**/*.py",
+        "packages_glob_wheel_2/**/*.py",
+        "from/packages_from_sdist_wheel",
+        "packages_to_sdist_wheel",
+        "from/packages_from_to_sdist_wheel",
+        "packages_glob_to_sdist_wheel/**/*.py",
+        "from/packages_glob_from_to_sdist_wheel/**/*.py",
+        "packages_sdist_wheel_with_excluded_files",
+        "text_file_sdist_wheel.txt",
+        "text_file_wheel.txt",
+    ]
+    exclude = [
+        "packages_sdist_wheel_with_excluded_files/bar.py",
+        "packages_sdist_wheel_with_excluded_files/foobar",
+    ]
+
+    [tool.hatch.build.targets.wheel.force-include]
+    include_sdist_wheel = "include_sdist_wheel"
+    include_wheel = "include_wheel"
+    include_wheel_2 = "include_wheel_2"
+
+    [tool.hatch.build.targets.wheel.sources]
+    "from/packages_from_sdist_wheel" = "packages_from_sdist_wheel"
+    packages_to_sdist_wheel = "to/packages_to_sdist_wheel"
+    "from/packages_from_to_sdist_wheel" = "to/packages_from_to_sdist_wheel"
+    packages_glob_to_sdist_wheel = "to/packages_glob_to_sdist_wheel"
+    "from/packages_glob_from_to_sdist_wheel" = "to/packages_glob_from_to_sdist_wheel"
+    "#);
+
+    Command::new("uvx")
+        .arg("hatch")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    let sdist_files_after = get_tar_gz_entries(project_path.join("dist/foobar-0.1.0.tar.gz"));
+    let wheel_files_after =
+        get_zip_entries(project_path.join("dist/foobar-0.1.0-py3-none-any.whl"));
+
+    assert_eq!(sdist_files_before, sdist_files_after);
+    assert_eq!(wheel_files_before, wheel_files_after);
 }
