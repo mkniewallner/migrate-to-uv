@@ -46,7 +46,7 @@ repos:
         pass_filenames: false
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: "0.9.16"
+    rev: "0.9.17"
     hooks:
       - id: uv-lock
         name: check uv lock file consistency
