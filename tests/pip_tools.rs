@@ -1,4 +1,5 @@
 use crate::common::{LockedPackage, UvLock, apply_lock_filters, cli};
+use dircpy::copy_dir;
 use insta_cmd::assert_cmd_snapshot;
 use std::fs;
 use std::path::Path;
@@ -23,9 +24,7 @@ fn test_complete_workflow() {
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
-    for file in requirements_files {
-        fs::copy(fixture_path.join(file), project_path.join(file)).unwrap();
-    }
+    copy_dir(fixture_path, project_path).unwrap();
 
     apply_lock_filters!();
     assert_cmd_snapshot!(cli()
@@ -138,9 +137,7 @@ fn test_ignore_locked_versions() {
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
-    for file in requirements_files {
-        fs::copy(fixture_path.join(file), project_path.join(file)).unwrap();
-    }
+    copy_dir(fixture_path, project_path).unwrap();
 
     apply_lock_filters!();
     assert_cmd_snapshot!(cli()
@@ -220,9 +217,7 @@ fn test_keep_current_data() {
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
-    for file in requirements_files {
-        fs::copy(fixture_path.join(file), project_path.join(file)).unwrap();
-    }
+    copy_dir(fixture_path, project_path).unwrap();
 
     apply_lock_filters!();
     assert_cmd_snapshot!(cli()
@@ -285,9 +280,7 @@ fn test_skip_lock() {
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
-    for file in requirements_files {
-        fs::copy(fixture_path.join(file), project_path.join(file)).unwrap();
-    }
+    copy_dir(fixture_path, project_path).unwrap();
 
     assert_cmd_snapshot!(cli()
         .arg(project_path)
@@ -344,9 +337,7 @@ fn test_skip_lock_full() {
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
-    for file in requirements_files {
-        fs::copy(fixture_path.join(file), project_path.join(file)).unwrap();
-    }
+    copy_dir(fixture_path, project_path).unwrap();
 
     assert_cmd_snapshot!(cli()
         .arg(project_path)

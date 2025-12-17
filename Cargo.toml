@@ -24,10 +24,14 @@ toml_edit = { version = "=0.23.9", features = ["display", "serde"] }
 url = "=2.5.7"
 
 [dev-dependencies]
+dircpy = "=0.3.19"
+flate2 = "=1.1.5"
 insta = { version = "=1.44.3", features = ["filters"] }
 insta-cmd = "=0.6.0"
 rstest = "=0.26.1"
+tar = "=0.4.44"
 tempfile = "=3.23.0"
+zip = "=6.0.0"
 
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
