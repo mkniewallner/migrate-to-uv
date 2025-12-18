@@ -10,7 +10,7 @@ env:
   # renovate: datasource=pypi depName=uv
   UV_VERSION: '0.9.17'
   # renovate: datasource=pypi depName=pypi-attestations
-  PYPI_ATTESTATIONS_VERSION: '0.0.28'
+  PYPI_ATTESTATIONS_VERSION: '0.0.29'
 
 permissions: {}
 
