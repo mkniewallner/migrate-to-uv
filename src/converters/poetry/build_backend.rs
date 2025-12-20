@@ -334,7 +334,7 @@ pub fn get_uv(
             if from.is_some() {
                 errors.push(
                     format!(
-                        "\"{}\" from \"{}\" cannot be converted to uv, as it uses \"{}\", which is not something that uv allows expressing.",
+                        "\"{}\" from \"{}\" cannot be converted to uv, as it uses \"{}\", which cannot be expressed with uv.",
                         include.bold(),
                         "poetry.packages.include".bold(),
                         "from".bold(),
@@ -345,7 +345,7 @@ pub fn get_uv(
             if to.is_some() {
                 errors.push(
                     format!(
-                        "\"{}\" from \"{}\" cannot be converted to uv, as it uses \"{}\", which is not something that uv allows expressing.",
+                        "\"{}\" from \"{}\" cannot be converted to uv, as it uses \"{}\", which cannot be expressed with uv.",
                         include.bold(),
                         "poetry.packages.include".bold(),
                         "to".bold(),
@@ -353,23 +353,34 @@ pub fn get_uv(
                 );
             }
 
-            if include.contains('*') || project_path.join(include).is_file() {
+            let contains_glob = include.contains('*');
+            let is_file = project_path.join(include).is_file();
+
+            if contains_glob || is_file {
+                let reason = if contains_glob {
+                    "uses globs"
+                } else {
+                    "is a file"
+                };
+
                 match format {
                     None => {
                         errors.push(
                             format!(
-                                "\"{}\" from \"{}\" cannot be converted to uv, as it was configured to be added to both source distribution and wheels, which is not something that uv allows expressing.",
+                                "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and {}, which cannot be expressed with uv.",
                                 include.bold(),
                                 "poetry.packages.include".bold(),
+                                reason,
                             )
                         );
                     }
                     Some(SingleOrVec::Single(Format::Wheel)) => {
                         errors.push(
                             format!(
-                                "\"{}\" from \"{}\" cannot be converted to uv, as it was configured to be added to wheels only, which is not something that uv allows expressing.",
+                                "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to wheels only, and {}, which cannot be expressed with uv.",
                                 include.bold(),
                                 "poetry.packages.include".bold(),
+                                reason,
                             )
                         );
                     }
@@ -385,18 +396,20 @@ pub fn get_uv(
                             } else if vec.contains(&Format::Wheel) && vec.contains(&Format::Sdist) {
                                 errors.push(
                                     format!(
-                                        "\"{}\" from \"{}\" cannot be converted to uv, as it was configured to be added to both source distribution and wheels, which is not something that uv allows expressing.",
+                                        "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and {}, which cannot be expressed with uv.",
                                         include.bold(),
                                         "poetry.packages.include".bold(),
+                                        reason,
                                     )
                                 );
                             } else if vec.contains(&Format::Wheel) && !vec.contains(&Format::Sdist)
                             {
                                 errors.push(
                                     format!(
-                                        "\"{}\" from \"{}\" cannot be converted to uv, as it was configured to be added to wheels only, which is not something that uv allows expressing.",
+                                        "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to wheels only, and {}, which cannot be expressed with uv.",
                                         include.bold(),
                                         "poetry.packages.include".bold(),
+                                        reason,
                                     )
                                 );
                             }
@@ -413,7 +426,7 @@ pub fn get_uv(
                     Some(SingleOrVec::Single(Format::Wheel)) => {
                         errors.push(
                             format!(
-                                "\"{}\" from \"{}\" cannot be converted to uv, as it was configured to be added to wheels only, which is not something that uv allows expressing.",
+                                "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.",
                                 include.bold(),
                                 "poetry.packages.include".bold(),
                             )
@@ -469,7 +482,7 @@ pub fn get_uv(
                 } => {
                     errors.push(
                         format!(
-                            "\"{}\" from \"{}\" cannot be converted to uv, as it was configured to be added to wheels only, which is not something that uv allows expressing.",
+                            "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.",
                             path.bold(),
                             "poetry.include".bold(),
                         )
@@ -484,7 +497,7 @@ pub fn get_uv(
                     [Format::Sdist, Format::Wheel] => {
                         errors.push(
                             format!(
-                                "\"{}\" from \"{}\" cannot be converted to uv, as it was configured to be added to both source distribution and wheels, which is not something that uv allows expressing.",
+                                "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, which cannot be expressed with uv.",
                                 path.bold(),
                                 "poetry.include".bold(),
                             )
@@ -500,7 +513,7 @@ pub fn get_uv(
                     [Format::Wheel] => {
                         errors.push(
                             format!(
-                                "\"{}\" from \"{}\" cannot be converted to uv, as it was configured to be added to wheels only, which is not something that uv allows expressing.",
+                                "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.",
                                 path.bold(),
                                 "poetry.include".bold(),
                             )
