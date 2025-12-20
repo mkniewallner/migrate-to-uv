@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+* [poetry] Add experimental `--build-backend uv` argument to migrate package distribution metadata to uv build backend ([#533](https://github.com/mkniewallner/migrate-to-uv/pull/533))
+
 ### Bug fixes
 
 * [poetry] Do not migrate `packages`/`include` with empty `format` array ([#538](https://github.com/mkniewallner/migrate-to-uv/pull/538))
