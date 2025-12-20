@@ -612,6 +612,7 @@ fn test_skip_lock_full() {
 
     warning: The following warnings occurred during the migration:
     warning: - Could not find dependency "non-existing-dependency" listed in "extra-with-non-existing-dependencies" extra.
+    warning: - Build backend was migrated to hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
     "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
@@ -1412,14 +1413,17 @@ fn test_build_backend() {
 
     remove_dir_all(project_path.join("dist")).unwrap();
 
-    assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock"), @r###"
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock"), @r"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     Successfully migrated project from Poetry to uv!
-    "###);
+
+    warning: The following warnings occurred during the migration:
+    warning: - Build backend was migrated to hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    ");
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [build-system]
@@ -1542,14 +1546,17 @@ fn test_build_backend_hatch() {
 
     remove_dir_all(project_path.join("dist")).unwrap();
 
-    assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock").arg("--build-backend").arg("hatch"), @r###"
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock").arg("--build-backend").arg("hatch"), @r"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     Successfully migrated project from Poetry to uv!
-    "###);
+
+    warning: The following warnings occurred during the migration:
+    warning: - Build backend was migrated to hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    ");
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [build-system]
@@ -1679,6 +1686,9 @@ fn test_build_backend_uv() {
 
     ----- stderr -----
     Successfully migrated project from Poetry to uv!
+
+    warning: The following warnings occurred during the migration:
+    warning: - Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
     ");
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"

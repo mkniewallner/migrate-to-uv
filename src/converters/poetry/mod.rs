@@ -7,7 +7,9 @@ pub mod version;
 use crate::converters::ConverterOptions;
 use crate::converters::pyproject_updater::PyprojectUpdater;
 use crate::converters::{BuildBackend, Converter};
-use crate::errors::{MIGRATION_ERRORS, MigrationError, add_unrecoverable_error};
+use crate::errors::{
+    MIGRATION_ERRORS, MigrationError, add_recoverable_error, add_unrecoverable_error,
+};
 use crate::schema::pep_621::{License, Project};
 use crate::schema::poetry::PoetryLock;
 use crate::schema::pyproject::PyProject;
@@ -110,15 +112,22 @@ impl Converter for Poetry {
         );
 
         match self.get_build_backend() {
-            Some(BuildBackend::Hatch) | None => {
-                if let Err(errors) = &hatch {
+            Some(BuildBackend::Hatch) | None => match &hatch {
+                Ok(Some(_)) => {
+                    add_recoverable_error("Build backend was migrated to hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.".to_string());
+                }
+                Err(errors) => {
                     for error in errors {
                         add_unrecoverable_error(error.clone());
                     }
                 }
-            }
-            Some(BuildBackend::Uv) => {
-                if let Err(errors) = &uv_build_backend {
+                _ => (),
+            },
+            Some(BuildBackend::Uv) => match &uv_build_backend {
+                Ok(Some(_)) => {
+                    add_recoverable_error("Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.".to_string());
+                }
+                Err(errors) => {
                     for error in errors {
                         add_unrecoverable_error(error.clone());
                     }
@@ -128,7 +137,8 @@ impl Converter for Poetry {
                         "--build backend hatch".bold(),
                     ));
                 }
-            }
+                _ => (),
+            },
         }
 
         let uv = Uv {
