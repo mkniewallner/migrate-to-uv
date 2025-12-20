@@ -4,11 +4,12 @@ mod project;
 mod sources;
 pub mod version;
 
-use crate::converters::Converter;
 use crate::converters::ConverterOptions;
-use crate::converters::poetry::build_backend::get_hatch;
 use crate::converters::pyproject_updater::PyprojectUpdater;
-use crate::errors::{MIGRATION_ERRORS, MigrationError, add_unrecoverable_error};
+use crate::converters::{BuildBackend, Converter};
+use crate::errors::{
+    MIGRATION_ERRORS, MigrationError, add_recoverable_error, add_unrecoverable_error,
+};
 use crate::schema::pep_621::{License, Project};
 use crate::schema::poetry::PoetryLock;
 use crate::schema::pyproject::PyProject;
@@ -97,6 +98,49 @@ impl Converter for Poetry {
             ..Default::default()
         };
 
+        let uv_build_backend = build_backend::get_uv(
+            &self.converter_options.project_path,
+            poetry.packages.as_ref(),
+            poetry.include.as_ref(),
+            poetry.exclude.as_ref(),
+        );
+
+        let hatch = build_backend::get_hatch(
+            poetry.packages.as_ref(),
+            poetry.include.as_ref(),
+            poetry.exclude.as_ref(),
+        );
+
+        match self.get_build_backend() {
+            Some(BuildBackend::Hatch) | None => match &hatch {
+                Ok(Some(_)) => {
+                    add_recoverable_error("Build backend was migrated to hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.".to_string());
+                }
+                Err(errors) => {
+                    for error in errors {
+                        add_unrecoverable_error(error.clone());
+                    }
+                }
+                _ => (),
+            },
+            Some(BuildBackend::Uv) => match &uv_build_backend {
+                Ok(Some(_)) => {
+                    add_recoverable_error("Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.".to_string());
+                }
+                Err(errors) => {
+                    for error in errors {
+                        add_unrecoverable_error(error.clone());
+                    }
+
+                    add_unrecoverable_error(format!(
+                        "Package distribution cound not be migrated to uv build backend due to the issues above. Consider using hatch build backend with \"{}\".",
+                        "--build backend hatch".bold(),
+                    ));
+                }
+                _ => (),
+            },
+        }
+
         let uv = Uv {
             package: poetry.package_mode,
             index: sources::get_indexes(poetry.source),
@@ -107,13 +151,14 @@ impl Converter for Poetry {
             },
             default_groups: uv_default_groups,
             constraint_dependencies: self.get_constraint_dependencies(),
+            build_backend: if let Some(BuildBackend::Uv) = self.get_build_backend()
+                && let Ok(uv_build_backend) = uv_build_backend
+            {
+                uv_build_backend
+            } else {
+                None
+            },
         };
-
-        let hatch = get_hatch(
-            poetry.packages.as_ref(),
-            poetry.include.as_ref(),
-            poetry.exclude.as_ref(),
-        );
 
         let mut updated_pyproject = pyproject_toml_content.parse::<DocumentMut>().unwrap();
         let mut pyproject_updater = PyprojectUpdater {
@@ -121,12 +166,18 @@ impl Converter for Poetry {
         };
 
         pyproject_updater.insert_build_system(
-            build_backend::get_new_build_system(pyproject.build_system).as_ref(),
+            build_backend::get_new_build_system(pyproject.build_system, self.get_build_backend())
+                .as_ref(),
         );
         pyproject_updater.insert_pep_621(&self.build_project(pyproject.project, project));
         pyproject_updater.insert_dependency_groups(dependency_groups.as_ref());
         pyproject_updater.insert_uv(&uv);
-        pyproject_updater.insert_hatch(hatch.as_ref());
+
+        if let Some(BuildBackend::Hatch) | None = self.get_build_backend()
+            && let Ok(hatch) = hatch
+        {
+            pyproject_updater.insert_hatch(hatch.as_ref());
+        }
 
         if !self.keep_old_metadata() {
             remove_pyproject_poetry_section(&mut updated_pyproject);
@@ -228,6 +279,7 @@ mod tests {
                 replace_project_section: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
             },
         };
 
@@ -266,6 +318,7 @@ mod tests {
                 replace_project_section: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
             },
         };
 
@@ -306,6 +359,7 @@ mod tests {
                 replace_project_section: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
             },
         };
 

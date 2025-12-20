@@ -60,6 +60,7 @@ impl Converter for Pipenv {
             },
             default_groups: uv_default_groups,
             constraint_dependencies: self.get_constraint_dependencies(),
+            ..Uv::default()
         };
 
         let pyproject_toml_content =
@@ -156,6 +157,7 @@ mod tests {
                 replace_project_section: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
             },
         };
 
@@ -190,6 +192,7 @@ mod tests {
                 replace_project_section: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
             },
         };
 

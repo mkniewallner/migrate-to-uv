@@ -4,35 +4,61 @@ use flate2::read::GzDecoder;
 use insta_cmd::assert_cmd_snapshot;
 use std::fs;
 use std::fs::{File, remove_dir_all};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::{Command, Stdio};
 use tar::Archive;
 use tempfile::tempdir;
+use walkdir::WalkDir;
 use zip::ZipArchive;
 
 mod common;
 
 const FIXTURES_PATH: &str = "tests/fixtures/poetry";
 
-fn get_tar_gz_entries(path: PathBuf) -> Vec<String> {
-    let mut archive = Archive::new(GzDecoder::new(File::open(path).unwrap()));
-    let mut entries = archive
-        .entries()
-        .unwrap()
+fn get_tar_gz_entries(path: &Path, file_name: &str) -> Vec<String> {
+    let extract_path = path.join("tar_gz_content");
+    let mut archive = Archive::new(GzDecoder::new(File::open(path.join(file_name)).unwrap()));
+    archive.unpack(&extract_path).unwrap();
+
+    let mut entries: Vec<String> = WalkDir::new(&extract_path)
+        .into_iter()
         .filter_map(Result::ok)
-        .map(|e| e.path().unwrap().to_string_lossy().to_string())
-        .collect::<Vec<_>>();
+        .filter(|e| e.metadata().unwrap().is_file())
+        .map(|e| {
+            e.path()
+                .strip_prefix(&extract_path)
+                .unwrap()
+                .to_string_lossy()
+                .to_string()
+        })
+        .collect();
+
     entries.sort_unstable();
 
     entries
 }
 
-fn get_zip_entries(path: PathBuf) -> Vec<String> {
-    let archive = ZipArchive::new(File::open(path).unwrap()).unwrap();
-    let mut entries: Vec<_> = archive.file_names().collect();
+fn get_zip_entries(path: &Path, file_name: &str) -> Vec<String> {
+    let extract_path = path.join("zip_content");
+    let mut archive = ZipArchive::new(File::open(path.join(file_name)).unwrap()).unwrap();
+    archive.extract(&extract_path).unwrap();
+
+    let mut entries: Vec<String> = WalkDir::new(path.join("zip_content"))
+        .into_iter()
+        .filter_map(Result::ok)
+        .filter(|e| e.metadata().unwrap().is_file())
+        .map(|e| {
+            e.path()
+                .strip_prefix(&extract_path)
+                .unwrap()
+                .to_string_lossy()
+                .to_string()
+        })
+        .collect();
+
     entries.sort_unstable();
 
-    entries.iter().map(ToString::to_string).collect()
+    entries
 }
 
 #[test]
@@ -586,6 +612,7 @@ fn test_skip_lock_full() {
 
     warning: The following warnings occurred during the migration:
     warning: - Could not find dependency "non-existing-dependency" listed in "extra-with-non-existing-dependencies" extra.
+    warning: - Build backend was migrated to hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
     "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
@@ -1363,7 +1390,7 @@ fn test_manage_warnings_dry_run() {
 }
 
 #[test]
-fn test_build_backend_hatch() {
+fn test_build_backend() {
     let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_compatible");
 
     let tmp_dir = tempdir().unwrap();
@@ -1380,20 +1407,23 @@ fn test_build_backend_hatch() {
         .status()
         .unwrap();
 
-    let sdist_files_before = get_tar_gz_entries(project_path.join("dist/foobar-0.1.0.tar.gz"));
+    let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_before =
-        get_zip_entries(project_path.join("dist/foobar-0.1.0-py3-none-any.whl"));
+        get_zip_entries(&project_path.join("dist"), "foobar-0.1.0-py3-none-any.whl");
 
     remove_dir_all(project_path.join("dist")).unwrap();
 
-    assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock"), @r###"
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock"), @r"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     Successfully migrated project from Poetry to uv!
-    "###);
+
+    warning: The following warnings occurred during the migration:
+    warning: - Build backend was migrated to hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    ");
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [build-system]
@@ -1484,10 +1514,322 @@ fn test_build_backend_hatch() {
         .status()
         .unwrap();
 
-    let sdist_files_after = get_tar_gz_entries(project_path.join("dist/foobar-0.1.0.tar.gz"));
+    let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_after =
-        get_zip_entries(project_path.join("dist/foobar-0.1.0-py3-none-any.whl"));
+        get_zip_entries(&project_path.join("dist"), "foobar-0.1.0-py3-none-any.whl");
 
     assert_eq!(sdist_files_before, sdist_files_after);
     assert_eq!(wheel_files_before, wheel_files_after);
+}
+
+#[test]
+fn test_build_backend_hatch() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_compatible");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(&fixture_path, project_path).unwrap();
+
+    Command::new("uvx")
+        .arg("poetry")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
+    let wheel_files_before =
+        get_zip_entries(&project_path.join("dist"), "foobar-0.1.0-py3-none-any.whl");
+
+    remove_dir_all(project_path.join("dist")).unwrap();
+
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock").arg("--build-backend").arg("hatch"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Successfully migrated project from Poetry to uv!
+
+    warning: The following warnings occurred during the migration:
+    warning: - Build backend was migrated to hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    ");
+
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [build-system]
+    requires = ["hatchling"]
+    build-backend = "hatchling.build"
+
+    [project]
+    name = "foobar"
+    version = "0.1.0"
+    description = "A fabulous project."
+    authors = [{ name = "John Doe", email = "john.doe@example.com" }]
+    requires-python = ">=3.10"
+
+    [tool.hatch.build.targets.sdist]
+    include = [
+        "packages_sdist_wheel",
+        "packages_sdist_wheel_2",
+        "packages_sdist",
+        "packages_sdist_2",
+        "packages_glob_sdist_wheel/**/*.py",
+        "packages_glob_sdist_wheel_2/**/*.py",
+        "packages_glob_sdist/**/*.py",
+        "packages_glob_sdist_2/**/*.py",
+        "from/packages_from_sdist_wheel",
+        "packages_to_sdist_wheel",
+        "from/packages_from_to_sdist_wheel",
+        "packages_glob_to_sdist_wheel/**/*.py",
+        "from/packages_glob_from_to_sdist_wheel/**/*.py",
+        "packages_sdist_wheel_with_excluded_files",
+        "text_file_sdist_wheel.txt",
+        "text_file_sdist.txt",
+    ]
+    exclude = [
+        "packages_sdist_wheel_with_excluded_files/bar.py",
+        "packages_sdist_wheel_with_excluded_files/foobar",
+    ]
+
+    [tool.hatch.build.targets.sdist.force-include]
+    include_sdist = "include_sdist"
+    include_sdist_2 = "include_sdist_2"
+    include_sdist_3 = "include_sdist_3"
+    include_sdist_4 = "include_sdist_4"
+    include_sdist_wheel = "include_sdist_wheel"
+
+    [tool.hatch.build.targets.wheel]
+    include = [
+        "packages_sdist_wheel",
+        "packages_sdist_wheel_2",
+        "packages_wheel",
+        "packages_wheel_2",
+        "packages_glob_sdist_wheel/**/*.py",
+        "packages_glob_sdist_wheel_2/**/*.py",
+        "packages_glob_wheel/**/*.py",
+        "packages_glob_wheel_2/**/*.py",
+        "from/packages_from_sdist_wheel",
+        "packages_to_sdist_wheel",
+        "from/packages_from_to_sdist_wheel",
+        "packages_glob_to_sdist_wheel/**/*.py",
+        "from/packages_glob_from_to_sdist_wheel/**/*.py",
+        "packages_sdist_wheel_with_excluded_files",
+        "text_file_sdist_wheel.txt",
+        "text_file_wheel.txt",
+    ]
+    exclude = [
+        "packages_sdist_wheel_with_excluded_files/bar.py",
+        "packages_sdist_wheel_with_excluded_files/foobar",
+    ]
+
+    [tool.hatch.build.targets.wheel.force-include]
+    include_sdist_wheel = "include_sdist_wheel"
+    include_wheel = "include_wheel"
+    include_wheel_2 = "include_wheel_2"
+
+    [tool.hatch.build.targets.wheel.sources]
+    "from/packages_from_sdist_wheel" = "packages_from_sdist_wheel"
+    packages_to_sdist_wheel = "to/packages_to_sdist_wheel"
+    "from/packages_from_to_sdist_wheel" = "to/packages_from_to_sdist_wheel"
+    packages_glob_to_sdist_wheel = "to/packages_glob_to_sdist_wheel"
+    "from/packages_glob_from_to_sdist_wheel" = "to/packages_glob_from_to_sdist_wheel"
+    "#);
+
+    Command::new("uvx")
+        .arg("hatch")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
+    let wheel_files_after =
+        get_zip_entries(&project_path.join("dist"), "foobar-0.1.0-py3-none-any.whl");
+
+    assert_eq!(sdist_files_before, sdist_files_after);
+    assert_eq!(wheel_files_before, wheel_files_after);
+}
+
+#[test]
+fn test_build_backend_uv() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_uv_compatible");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(&fixture_path, project_path).unwrap();
+
+    Command::new("uvx")
+        .arg("poetry")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
+    let wheel_files_before =
+        get_zip_entries(&project_path.join("dist"), "foobar-0.1.0-py3-none-any.whl");
+
+    remove_dir_all(project_path.join("dist")).unwrap();
+
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock").arg("--build-backend").arg("uv"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Successfully migrated project from Poetry to uv!
+
+    warning: The following warnings occurred during the migration:
+    warning: - Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    ");
+
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [build-system]
+    requires = ["uv_build"]
+    build-backend = "uv_build"
+
+    [project]
+    name = "foobar"
+    version = "0.1.0"
+    description = "A fabulous project."
+    authors = [{ name = "John Doe", email = "john.doe@example.com" }]
+    requires-python = ">=3.10"
+
+    [tool.uv.build-backend]
+    module-name = [
+        "packages_sdist_wheel",
+        "packages_sdist_wheel_2",
+        "packages_sdist",
+        "packages_sdist_2",
+        "packages_sdist_wheel_with_excluded_files",
+    ]
+    module-root = ""
+    source-exclude = [
+        "packages_sdist_wheel_with_excluded_files/bar.py",
+        "packages_sdist_wheel_with_excluded_files/foobar",
+    ]
+    source-include = [
+        "packages_glob_sdist/**/*.py",
+        "packages_glob_sdist_2/**/*.py",
+        "text_file_sdist.txt",
+        "FILE_WITHOUT_EXTENSION_SDIST",
+        "include_sdist/**",
+        "include_sdist_2/**",
+        "include_sdist_3/**",
+        "include_sdist_4/**",
+        "INCLUDE_FILE_WITHOUT_EXTENSION_SDIST",
+    ]
+    wheel-exclude = [
+        "packages_sdist",
+        "packages_sdist_2",
+        "packages_sdist_wheel_with_excluded_files/bar.py",
+        "packages_sdist_wheel_with_excluded_files/foobar",
+    ]
+    "#);
+
+    Command::new("uv")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
+    let wheel_files_after =
+        get_zip_entries(&project_path.join("dist"), "foobar-0.1.0-py3-none-any.whl");
+
+    assert_eq!(sdist_files_before, sdist_files_after);
+    assert_eq!(wheel_files_before, wheel_files_after);
+}
+
+#[test]
+fn test_build_backend_uv_errors() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_compatible");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(&fixture_path, project_path).unwrap();
+
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--build-backend").arg("uv"), @r#"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    error: Could not automatically migrate the project to uv because of the following errors:
+    error: - "packages_wheel" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
+    error: - "packages_glob_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
+    error: - "packages_glob_sdist_wheel_2/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
+    error: - "packages_glob_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and uses globs, which cannot be expressed with uv.
+    error: - "packages_glob_wheel_2/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and uses globs, which cannot be expressed with uv.
+    error: - "packages_from_sdist_wheel" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_to_sdist_wheel" from "poetry.packages.include" cannot be converted to uv, as it uses "to", which cannot be expressed with uv.
+    error: - "packages_from_to_sdist_wheel" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_from_to_sdist_wheel" from "poetry.packages.include" cannot be converted to uv, as it uses "to", which cannot be expressed with uv.
+    error: - "packages_glob_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it uses "to", which cannot be expressed with uv.
+    error: - "packages_glob_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
+    error: - "packages_glob_from_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_glob_from_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it uses "to", which cannot be expressed with uv.
+    error: - "packages_glob_from_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
+    error: - "text_file_sdist_wheel.txt" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and is a file, which cannot be expressed with uv.
+    error: - "text_file_wheel.txt" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and is a file, which cannot be expressed with uv.
+    error: - "include_sdist_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, which cannot be expressed with uv.
+    error: - "include_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
+    error: - "include_wheel_2" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
+    error: - Package distribution cound not be migrated to uv build backend due to the issues above. Consider using hatch build backend with "--build backend hatch".
+    "#);
+}
+
+#[test]
+fn test_build_backend_uv_errors_dry_run() {
+    let project_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_compatible");
+    let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
+
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run").arg("--build-backend").arg("uv"), @r#"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    error: Could not automatically migrate the project to uv because of the following errors:
+    error: - "packages_wheel" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
+    error: - "packages_glob_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
+    error: - "packages_glob_sdist_wheel_2/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
+    error: - "packages_glob_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and uses globs, which cannot be expressed with uv.
+    error: - "packages_glob_wheel_2/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and uses globs, which cannot be expressed with uv.
+    error: - "packages_from_sdist_wheel" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_to_sdist_wheel" from "poetry.packages.include" cannot be converted to uv, as it uses "to", which cannot be expressed with uv.
+    error: - "packages_from_to_sdist_wheel" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_from_to_sdist_wheel" from "poetry.packages.include" cannot be converted to uv, as it uses "to", which cannot be expressed with uv.
+    error: - "packages_glob_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it uses "to", which cannot be expressed with uv.
+    error: - "packages_glob_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
+    error: - "packages_glob_from_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_glob_from_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it uses "to", which cannot be expressed with uv.
+    error: - "packages_glob_from_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
+    error: - "text_file_sdist_wheel.txt" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and is a file, which cannot be expressed with uv.
+    error: - "text_file_wheel.txt" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and is a file, which cannot be expressed with uv.
+    error: - "include_sdist_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, which cannot be expressed with uv.
+    error: - "include_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
+    error: - "include_wheel_2" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
+    error: - Package distribution cound not be migrated to uv build backend due to the issues above. Consider using hatch build backend with "--build backend hatch".
+    "#);
+
+    // Assert that `pyproject.toml` was not updated.
+    assert_eq!(
+        pyproject,
+        fs::read_to_string(project_path.join("pyproject.toml")).unwrap()
+    );
+
+    // Assert that `uv.lock` file was not generated.
+    assert!(!project_path.join("uv.lock").exists());
 }

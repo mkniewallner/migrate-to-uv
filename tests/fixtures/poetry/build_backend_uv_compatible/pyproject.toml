@@ -1,0 +1,41 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "foobar"
+version = "0.1.0"
+description = "A fabulous project."
+authors = ["John Doe <john.doe@example.com>"]
+packages = [
+    { include = "packages_sdist_wheel" },
+    { include = "packages_sdist_wheel_2", format = ["sdist", "wheel"] },
+    { include = "packages_sdist", format = "sdist" },
+    { include = "packages_sdist_2", format = ["sdist"] },
+    # An empty array for `format` means that files are not included anywhere.
+    { include = "packages_nowhere", format = [] },
+    { include = "packages_glob_sdist/**/*.py", format = "sdist" },
+    { include = "packages_glob_sdist_2/**/*.py", format = ["sdist"] },
+    # An empty array for `format` means that files are not included anywhere.
+    { include = "packages_glob_nowhere/**/*.py", format = [] },
+    { include = "packages_sdist_wheel_with_excluded_files" },
+    { include = "text_file_sdist.txt", format = "sdist" },
+    { include = "FILE_WITHOUT_EXTENSION_SDIST", format = "sdist" },
+]
+include = [
+    "include_sdist",
+    { path = "include_sdist_2" },
+    { path = "include_sdist_3", format = "sdist" },
+    { path = "include_sdist_4", format = ["sdist"] },
+    # An empty array for `format` means that files are not included anywhere.
+    { path = "include_nowhere", format = [] },
+    { path = "INCLUDE_FILE_WITHOUT_EXTENSION_SDIST", format = "sdist" },
+]
+exclude = [
+    "packages_sdist_wheel_with_excluded_files/bar.py",
+    "packages_sdist_wheel_with_excluded_files/foobar",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+
