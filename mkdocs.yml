@@ -9,8 +9,8 @@ site_author: Mathieu Kniewallner
 nav:
   - Introduction: index.md
   - Usage: usage.md
-  - Configuration: configuration.md
   - Supported package managers: supported-package-managers.md
+  - Configuration: configuration.md
   - Changelog: CHANGELOG.md
   - Contributing: CONTRIBUTING.md
 

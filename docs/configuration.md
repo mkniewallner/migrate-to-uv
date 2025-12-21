@@ -6,7 +6,9 @@ icon: lucide/wrench
 ## Project path
 
 By default, `migrate-to-uv` uses the current directory to search for the project to migrate. If the project is in a
-different path, you can set the path to a directory as a positional argument, like so:
+different path, you can set the path to a directory as a positional argument.
+
+**Example**:
 
 ```bash
 # Relative path
@@ -18,14 +20,11 @@ migrate-to-uv /home/foo/project
 
 ## Arguments
 
-While `migrate-to-uv` tries, as much as possible, to match what the original package manager defines for a project
-when migrating the metadata to uv, there are features that could be present in a package manager that does not exist in
-uv, or behave differently. Mainly for those reasons, `migrate-to-uv` offers a few options.
+`migrate-to-uv` provides a few arguments to let you customize how the migration is performed.
 
 ### `--dry-run`
 
-This runs the migration, but without modifying the files. Instead, it prints the changes that would have been made in
-the terminal.
+Run the migration without modifying the files, printing the changes that would have been made in the terminal instead.
 
 **Example**:
 
@@ -46,14 +45,13 @@ migrate-to-uv --skip-lock
 
 ### `--skip-uv-checks`
 
-By default, `migrate-to-uv` will exit early if it sees that a project is already using `uv`.
-This flag disables that behavior, allowing `migrate-to-uv` to run on a `pyproject.toml`
-which already has `uv` configured.
+By default, `migrate-to-uv` will exit early if a project already uses uv. This flag disables this behavior, allowing
+`migrate-to-uv` to run on a `pyproject.toml` that already has uv configured.
 
-Note that the project must also have a valid non-`uv` package manager configured,
-or else it will fail to generate the `uv` configuration.
+Note that the project must also have a valid non-uv package manager configured, otherwise it will fail to generate the
+uv configuration.
 
-**Example:**
+**Example**:
 
 ```bash
 migrate-to-uv --skip-uv-checks
@@ -87,7 +85,14 @@ migrate-to-uv --replace-project-section
 
 By default, `migrate-to-uv` tries to auto-detect the package manager based on the files (and their content) used by the
 package managers it supports. If auto-detection does not work in some cases, or if you prefer to explicitly specify the
-package manager, this option could be used.
+package manager, you can explicitly set it.
+
+**Available options**:
+
+- `pip`
+- `pip-tools`
+- `pipenv`
+- `poetry`
 
 **Example**:
 
@@ -97,8 +102,7 @@ migrate-to-uv --package-manager poetry
 
 ### `--build-backend`
 
-The build backend to choose when performing the migration. Possible options are `hatch` and `uv`. If none is specified,
-`hatch` is chosen by default.
+The build backend to choose when performing the migration. If the option is not provided, `hatch` is chosen by default.
 
 !!!info
 
@@ -111,6 +115,11 @@ The build backend to choose when performing the migration. Possible options are 
     cannot be expressed with uv build backend, the migration will fail, suggesting to use hatch with
     `--build-backend hatch`.
 
+**Available options**:
+
+- `hatch`
+- `uv`
+
 **Example**:
 
 ```bash
@@ -122,14 +131,15 @@ migrate-to-uv --build-backend uv
 Most package managers that support dependency groups install dependencies from all groups when performing installation.
 By default, uv will [only install `dev` one](https://docs.astral.sh/uv/concepts/projects/dependencies/#default-groups).
 
-In order to match the workflow in the current package manager as closely as possible, by default, `migrate-to-uv` will
-move each dependency group to its corresponding one in uv, and set all dependency groups (except the ones that could be
-optional, like [Poetry allows to do](https://python-poetry.org/docs/managing-dependencies#optional-groups)) in
-`default-groups` under `[tool.uv]` section (unless the only dependency group is `dev` one, as this is already uv's
-default).
+In order to match the current package manager as closely as possible, `migrate-to-uv` sets all dependency groups (except
+the ones that could be optional,
+like [Poetry allows to do](https://python-poetry.org/docs/managing-dependencies#optional-groups)) in `default-groups`
+under `[tool.uv]` section. If the only dependency group is `dev`, `default-groups` is not set, as uv already defaults to
+including only `dev` group.
 
-If this is not desirable, it is possible to change the strategy by using `--dependency-groups-strategy <VALUE>`, where
-`<VALUE>` can be one of the following:
+If the default behavior is not suitable, it is possible to change it.
+
+**Available options**:
 
 - `set-default-groups` (default): Move each dependency group to its corresponding uv dependency group, and add all
   non-optional dependency groups in `default-groups` under `[tool.uv]` section (unless the only dependency group is
@@ -172,3 +182,9 @@ migrate-to-uv --dev-requirements-file requirements-dev.txt --dev-requirements-fi
 
 Keep the current package manager data (lock file, sections in `pyproject.toml`, ...) after the migration, if you want to
 handle the cleaning yourself, or want to compare the differences first.
+
+**Example**:
+
+```bash
+migrate-to-uv --keep-current-data
+```
