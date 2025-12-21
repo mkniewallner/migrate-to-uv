@@ -1,3 +1,6 @@
+---
+icon: lucide/package
+---
 # Supported package managers
 
 `migrate-to-uv` supports multiple package managers. By default, it tries to auto-detect the package manager based on the

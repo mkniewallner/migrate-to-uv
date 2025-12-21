@@ -1,3 +1,6 @@
+---
+icon: lucide/wrench
+---
 # Usage and configuration
 
 ## Basic usage

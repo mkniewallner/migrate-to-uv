@@ -42,6 +42,7 @@ theme:
         icon: material/brightness-4
         name: Switch to system preferences
   icon:
+    logo: octicons/package-dependents-24
     repo: fontawesome/brands/github
 
 extra:
