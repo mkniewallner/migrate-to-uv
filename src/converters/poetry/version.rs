@@ -56,6 +56,8 @@ impl PoetryPep440 {
 pub enum ParseVersionErrorKind {
     OrOperator(String),
     Other,
+    PythonMarkerOrOperator(String),
+    PythonMarker,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -77,6 +79,21 @@ impl ParseVersionError {
                     dependency.bold(),
                     self.version.bold(),
                     operator.bold(),
+                )
+            }
+            ParseVersionErrorKind::PythonMarkerOrOperator(operator) => {
+                format!(
+                    "\"{}\" dependency with python marker \"{}\" contains \"{}\", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.",
+                    dependency.bold(),
+                    self.version.bold(),
+                    operator.bold(),
+                )
+            }
+            ParseVersionErrorKind::PythonMarker => {
+                format!(
+                    "\"{}\" dependency with python marker \"{}\" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.",
+                    dependency.bold(),
+                    self.version.bold(),
                 )
             }
             ParseVersionErrorKind::Other => {
