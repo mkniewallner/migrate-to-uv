@@ -5,7 +5,7 @@ icon: lucide/package
 
 `migrate-to-uv` supports multiple package managers. By default, it tries to auto-detect the package manager based on the
 files (and their content) used by the package managers it supports. If you need to enforce a specific package manager to
-be used, use [`--package-manager`](usage-and-configuration.md#-package-manager).
+be used, use [`--package-manager`](configuration.md#-package-manager).
 
 ## Poetry
 
@@ -115,8 +115,8 @@ chose [Hatch](https://hatch.pypa.io/latest/config/build/) in the meantime.
 
     Support for uv build backend was recently added, but is still considered experimental, so Hatch is still used by
     default. If you want to explicitly use uv as a build backend, you can
-    use [`--build-backend uv`](usage-and-configuration.md#-build-backend), but note that the migration can fail if you
-    use some package distribution options that cannot be expressed with uv build backend.
+    use [`--build-backend uv`](configuration.md#-build-backend), but note that the migration can fail if you use some
+    package distribution options that cannot be expressed with uv build backend.
 
 When converting the build backend to Hatch, `migrate-to-uv` migrates the following things:
 
@@ -150,9 +150,9 @@ By default, `migrate-to-uv` will search for:
 - development dependencies in `requirements-dev.in`
 
 If your project uses different file names, or defines production and/or development dependencies across multiple files,
-you can specify the names of the files using [`--requirements-file`](usage-and-configuration.md#-requirements-file) and
-[`--dev-requirements-file`](usage-and-configuration.md#-dev-requirements-file) (both can be specified multiple times),
-for instance:
+you can specify the names of the files using [`--requirements-file`](configuration.md#-requirements-file) and
+[`--dev-requirements-file`](configuration.md#-dev-requirements-file) (both can be specified multiple times), for
+instance:
 
 ```bash
 migrate-to-uv \
@@ -165,8 +165,8 @@ migrate-to-uv \
 
 - Dependencies that do not follow [PEP 508](https://peps.python.org/pep-0508/) specification are not yet handled
 - References to other requirement files (e.g., `-r other-requirements.in`) are not supported, but the requirements file
-  can manually be set with [`--requirements-file`](usage-and-configuration.md#-requirements-file) or
-  [`--dev-requirements-file`](usage-and-configuration.md#-dev-requirements-file)
+  can manually be set with [`--requirements-file`](configuration.md#-requirements-file) or
+  [`--dev-requirements-file`](configuration.md#-dev-requirements-file)
 - Index URLs are not yet migrated
 
 ## pip
@@ -179,8 +179,8 @@ By default, `migrate-to-uv` will search for:
 - development dependencies in `requirements-dev.txt`
 
 If your project uses different file names, or defines production and/or development dependencies across multiple files,
-you can specify the names of the files [`--requirements-file`](usage-and-configuration.md#-requirements-file) and
-[`--dev-requirements-file`](usage-and-configuration.md#-dev-requirements-file) (both can be specified multiple times),
+you can specify the names of the files [`--requirements-file`](configuration.md#-requirements-file) and
+[`--dev-requirements-file`](configuration.md#-dev-requirements-file) (both can be specified multiple times),
 for instance:
 
 ```bash
@@ -194,6 +194,6 @@ migrate-to-uv \
 
 - Dependencies that do not follow [PEP 508](https://peps.python.org/pep-0508/) specification are not yet handled
 - References to other requirement files (e.g., `-r other-requirements.txt`) are not supported, but the requirements file
-  can manually be set with [`--requirements-file`](usage-and-configuration.md#-requirements-file) or
-  [`--dev-requirements-file`](usage-and-configuration.md#-dev-requirements-file)
+  can manually be set with [`--requirements-file`](configuration.md#-requirements-file) or
+  [`--dev-requirements-file`](configuration.md#-dev-requirements-file)
 - Index URLs are not yet migrated
