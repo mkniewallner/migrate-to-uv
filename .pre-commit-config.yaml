@@ -4,13 +4,13 @@ repos:
     hooks:
       - id: copy-changelog-docs
         name: copy changelog to docs
-        entry: cp CHANGELOG.md docs/CHANGELOG.md
+        entry: ./scripts/copy-changelog.sh
         language: system
         pass_filenames: false
         files: CHANGELOG\.md$
       - id: copy-contributing-docs
         name: copy contributing to docs
-        entry: cp CONTRIBUTING.md docs/CONTRIBUTING.md
+        entry: ./scripts/copy-contributing.sh
         language: system
         pass_filenames: false
         files: CONTRIBUTING\.md$
