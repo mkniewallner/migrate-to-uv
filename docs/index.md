@@ -1,3 +1,6 @@
+---
+icon: lucide/house
+---
 # Introduction
 
 `migrate-to-uv` migrates a project to [uv](https://github.com/astral-sh/uv) from another package manager.

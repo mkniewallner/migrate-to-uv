@@ -8,8 +8,9 @@ site_author: Mathieu Kniewallner
 
 nav:
   - Introduction: index.md
-  - Usage and configuration: usage-and-configuration.md
+  - Usage: usage.md
   - Supported package managers: supported-package-managers.md
+  - Configuration: configuration.md
   - Changelog: CHANGELOG.md
   - Contributing: CONTRIBUTING.md
 
@@ -42,6 +43,7 @@ theme:
         icon: material/brightness-4
         name: Switch to system preferences
   icon:
+    logo: octicons/package-dependents-24
     repo: fontawesome/brands/github
 
 extra:

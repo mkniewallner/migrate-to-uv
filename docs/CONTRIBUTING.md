@@ -1,3 +1,6 @@
+---
+icon: lucide/heart-handshake
+---
 # Contributing
 
 ## Setup
