@@ -1,49 +1,9 @@
 ---
 icon: lucide/wrench
 ---
-# Usage and configuration
+# Configuration
 
-## Basic usage
-
-```bash
-# With uv
-uvx migrate-to-uv
-
-# With pipx
-pipx run migrate-to-uv
-```
-
-## Migration errors
-
-Although `migrate-to-uv` tries its best to match the current package manager definition when performing the migration,
-some package managers have features that have no equivalent in uv or
-in [PEP 621](https://packaging.python.org/en/latest/specifications/pyproject-toml/#pyproject-toml-spec) specification
-that is followed by uv.
-
-In case the current package manager definition uses features that cannot be translated to uv, `migrate-to-uv` will abort
-the migration, pointing at the errors, and suggesting what to do before attempting the migration again, e.g.:
-
-```console
-$ uvx migrate-to-uv
-error: Could not automatically migrate the project to uv because of the following errors:
-error: - Found multiple files ("README.md", "README2.md") in "tool.poetry.readme". PEP 621 only supports setting one. Make sure to manually edit the section before migrating.
-```
-
-For less problematic issues, `migrate-to-uv` will still perform the migration, but warn about what needs attention at
-the end of it, e.g.:
-
-```console
-$ uvx migrate-to-uv
-[...]
-Successfully migrated project from Poetry to uv!
-
-warning: The following warnings occurred during the migration:
-warning: - Could not find dependency "non-existing-dependency" listed in "extra-with-non-existing-dependencies" extra.
-```
-
-## Configuration
-
-### Project path
+## Project path
 
 By default, `migrate-to-uv` uses the current directory to search for the project to migrate. If the project is in a
 different path, you can set the path to a directory as a positional argument, like so:
@@ -56,13 +16,13 @@ migrate-to-uv subdirectory
 migrate-to-uv /home/foo/project
 ```
 
-### Arguments
+## Arguments
 
 While `migrate-to-uv` tries, as much as possible, to match what the original package manager defines for a project
 when migrating the metadata to uv, there are features that could be present in a package manager that does not exist in
 uv, or behave differently. Mainly for those reasons, `migrate-to-uv` offers a few options.
 
-#### `--dry-run`
+### `--dry-run`
 
 This runs the migration, but without modifying the files. Instead, it prints the changes that would have been made in
 the terminal.
@@ -73,7 +33,7 @@ the terminal.
 migrate-to-uv --dry-run
 ```
 
-#### `--skip-lock`
+### `--skip-lock`
 
 By default, `migrate-to-uv` locks dependencies with `uv lock` at the end of the migration. This flag disables this
 behavior.
@@ -84,7 +44,7 @@ behavior.
 migrate-to-uv --skip-lock
 ```
 
-#### `--skip-uv-checks`
+### `--skip-uv-checks`
 
 By default, `migrate-to-uv` will exit early if it sees that a project is already using `uv`.
 This flag disables that behavior, allowing `migrate-to-uv` to run on a `pyproject.toml`
@@ -99,7 +59,7 @@ or else it will fail to generate the `uv` configuration.
 migrate-to-uv --skip-uv-checks
 ```
 
-#### `--ignore-locked-versions`
+### `--ignore-locked-versions`
 
 By default, when locking dependencies with `uv lock`, `migrate-to-uv` keeps dependencies to the versions they were
 locked to with the previous package manager, if it supports lock files, and if a lock file is found. This behavior can
@@ -112,7 +72,7 @@ constraints.
 migrate-to-uv --ignore-locked-versions
 ```
 
-#### `--replace-project-section`
+### `--replace-project-section`
 
 By default, existing data in `[project]` section of `pyproject.toml` is preserved when migrating. This flag allows
 completely replacing existing content.
@@ -123,7 +83,7 @@ completely replacing existing content.
 migrate-to-uv --replace-project-section
 ```
 
-#### `--package-manager`
+### `--package-manager`
 
 By default, `migrate-to-uv` tries to auto-detect the package manager based on the files (and their content) used by the
 package managers it supports. If auto-detection does not work in some cases, or if you prefer to explicitly specify the
@@ -135,7 +95,7 @@ package manager, this option could be used.
 migrate-to-uv --package-manager poetry
 ```
 
-#### `--build-backend`
+### `--build-backend`
 
 The build backend to choose when performing the migration. Possible options are `hatch` and `uv`. If none is specified,
 `hatch` is chosen by default.
@@ -157,7 +117,7 @@ The build backend to choose when performing the migration. Possible options are 
 migrate-to-uv --build-backend uv
 ```
 
-#### `--dependency-groups-strategy`
+### `--dependency-groups-strategy`
 
 Most package managers that support dependency groups install dependencies from all groups when performing installation.
 By default, uv will [only install `dev` one](https://docs.astral.sh/uv/concepts/projects/dependencies/#default-groups).
@@ -186,7 +146,7 @@ If this is not desirable, it is possible to change the strategy by using `--depe
 migrate-to-uv --dependency-groups-strategy include-in-dev
 ```
 
-#### `--requirements-file`
+### `--requirements-file`
 
 Names of the production requirements files to look for, for projects using `pip` or `pip-tools`. The argument can be set
 multiple times, if there are multiple files.
@@ -197,7 +157,7 @@ multiple times, if there are multiple files.
 migrate-to-uv --requirements-file requirements.txt --requirements-file more-requirements.txt
 ```
 
-#### `--dev-requirements-file`
+### `--dev-requirements-file`
 
 Names of the development requirements files to look for, for projects using `pip` or `pip-tools`. The argument can be
 set multiple times, if there are multiple files.
@@ -208,50 +168,7 @@ set multiple times, if there are multiple files.
 migrate-to-uv --dev-requirements-file requirements-dev.txt --dev-requirements-file requirements-docs.txt
 ```
 
-#### `--keep-current-data`
+### `--keep-current-data`
 
 Keep the current package manager data (lock file, sections in `pyproject.toml`, ...) after the migration, if you want to
 handle the cleaning yourself, or want to compare the differences first.
-
-### Authentication for private indexes
-
-By default, `migrate-to-uv` generates `uv.lock` with `uv lock` to lock dependencies. If you currently use a package
-manager with private indexes, credentials will need to be set for locking to work properly. This can be done by setting
-the [same environment variables as uv expects for private indexes](https://docs.astral.sh/uv/concepts/indexes/#providing-credentials-directly).
-
-Since the names of the indexes in uv should be the same as the ones in the current package manager before the migration,
-you should be able to adapt the environment variables based on what you previously used.
-
-For instance, if you currently use Poetry and have:
-
-```toml
-[[tool.poetry.source]]
-name = "foo-bar"
-url = "https://private-index.example.com"
-priority = "supplementary"
-```
-
-Credentials would be set with the following environment variables:
-
-- `POETRY_HTTP_BASIC_FOO_BAR_USERNAME`
-- `POETRY_HTTP_BASIC_FOO_BAR_PASSWORD`
-
-For uv, this would translate to:
-
-- `UV_INDEX_FOO_BAR_USERNAME`
-- `UV_INDEX_FOO_BAR_PASSWORD`
-
-To forward those credentials to `migrate-to-uv`, you can either export them beforehand, or set the environment variables
-when invoking the command:
-
-```bash
-# Either
-export UV_INDEX_FOO_BAR_USERNAME=<username>
-export UV_INDEX_FOO_BAR_PASSWORD=<password>
-migrate-to-uv
-
-# Or
-UV_INDEX_FOO_BAR_USERNAME=<username> \
-  UV_INDEX_FOO_BAR_PASSWORD=<password> \
-  migrate-to-uv
-```
