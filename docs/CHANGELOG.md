@@ -9,6 +9,7 @@
 ### Bug fixes
 
 * [poetry] Do not migrate `packages`/`include` with empty `format` array ([#538](https://github.com/mkniewallner/migrate-to-uv/pull/538))
+* [poetry] Fail migration on unhandled python marker specification ([#544](https://github.com/mkniewallner/migrate-to-uv/pull/544))
 
 ## 0.8.1 - 2025-12-13
 

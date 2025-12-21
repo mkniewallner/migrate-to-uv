@@ -29,3 +29,6 @@ whitespace = ">=7.0 <7.1"
 whitespace-multiple = ">=7.0  <7.1"
 whitespace-caret = "^7.0 ^7.1"
 whitespace-caret-multiple = "^7.0  ^7.1"
+python-caret-or = { version = "1.2.3", python = "^3.11 || ^3.12" }
+python-caret-or-single = { version = "1.2.3", python = "^3.11 | ^3.12" }
+python-whitespace = { version = "1.2.3", python = "^3.11 <=3.14"}

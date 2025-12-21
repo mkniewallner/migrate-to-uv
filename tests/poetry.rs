@@ -1174,6 +1174,9 @@ fn test_manage_errors() {
     error: - "whitespace-multiple" dependency with version ">=7.0  <7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
     error: - "whitespace-caret" dependency with version "7.0 ^7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
     error: - "whitespace-caret-multiple" dependency with version "7.0  ^7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "python-caret-or" dependency with python marker "^3.11 || ^3.12" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "python-caret-or-single" dependency with python marker "^3.11 | ^3.12" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "python-whitespace" dependency with python marker "3.11 <=3.14" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
     "#);
 
     // Assert that `pyproject.toml` was not updated.
@@ -1330,6 +1333,9 @@ fn test_manage_errors_dry_run() {
     error: - "whitespace-multiple" dependency with version ">=7.0  <7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
     error: - "whitespace-caret" dependency with version "7.0 ^7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
     error: - "whitespace-caret-multiple" dependency with version "7.0  ^7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "python-caret-or" dependency with python marker "^3.11 || ^3.12" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "python-caret-or-single" dependency with python marker "^3.11 | ^3.12" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "python-whitespace" dependency with python marker "3.11 <=3.14" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
     "#);
 
     // Assert that `pyproject.toml` was not updated.

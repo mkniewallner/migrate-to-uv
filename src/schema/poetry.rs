@@ -1,4 +1,4 @@
-use crate::converters::poetry::version::{ParseVersionError, PoetryPep440};
+use crate::converters::poetry::version::{ParseVersionError, ParseVersionErrorKind, PoetryPep440};
 use crate::schema::utils::SingleOrVec;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
@@ -121,7 +121,7 @@ impl DependencySpecification {
                     pep_508_version.push_str(PoetryPep440::from_str(version)?.to_string().as_str());
                 }
 
-                if let Some(marker) = self.get_marker() {
+                if let Some(marker) = self.get_marker()? {
                     pep_508_version.push_str(format!(" ; {marker}").as_str());
                 }
 
@@ -131,7 +131,7 @@ impl DependencySpecification {
         }
     }
 
-    pub fn get_marker(&self) -> Option<String> {
+    pub fn get_marker(&self) -> Result<Option<String>, ParseVersionError> {
         let mut combined_markers: Vec<String> = Vec::new();
 
         if let Self::Map {
@@ -142,7 +142,28 @@ impl DependencySpecification {
         } = self
         {
             if let Some(python) = python {
-                combined_markers.push(PoetryPep440::from_str(python).unwrap().to_python_marker());
+                match PoetryPep440::from_str(python) {
+                    Ok(version) => combined_markers.push(version.to_python_marker()),
+                    Err(ParseVersionError {
+                        kind: ParseVersionErrorKind::OrOperator(operator),
+                        version,
+                    }) => {
+                        return Err(ParseVersionError::new(
+                            ParseVersionErrorKind::PythonMarkerOrOperator(operator),
+                            version,
+                        ));
+                    }
+                    Err(ParseVersionError {
+                        kind: ParseVersionErrorKind::Other,
+                        version,
+                    }) => {
+                        return Err(ParseVersionError::new(
+                            ParseVersionErrorKind::PythonMarker,
+                            version,
+                        ));
+                    }
+                    Err(e) => return Err(e),
+                }
             }
 
             if let Some(markers) = markers {
@@ -155,9 +176,9 @@ impl DependencySpecification {
         }
 
         if combined_markers.is_empty() {
-            return None;
+            return Ok(None);
         }
-        Some(combined_markers.join(" and "))
+        Ok(Some(combined_markers.join(" and ")))
     }
 }
 
