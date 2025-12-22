@@ -3,7 +3,15 @@ icon: lucide/scroll-text
 ---
 # Changelog
 
-## Unreleased
+## 0.9.0 - 2025-12-22
+
+### New features
+
+#### Experimental support for uv build backend
+
+When migrating Poetry package distribution metadata, `migrate-to-uv` uses [Hatch](https://hatch.pypa.io/latest/config/build/) build backend. Experimental support for migrating to uv build backend has been added behind `--build backend uv` argument.
+
+Note that uv build backend offers less flexibility than Poetry and Hatch, so the migration might be aborted if some options used by Poetry cannot be expressed with uv build backend. If you try `--build-backend uv` and encounter any issue, feel free to report it.
 
 ### Features
 
@@ -27,11 +35,11 @@ icon: lucide/scroll-text
 
 #### Abort on unrecoverable errors and warn about recoverable ones
 
-Although `migrate-to-uv` tries its best to migrate a project to uv without changing the behaviour, some things that are accepted by package managers do not have any equivalent in uv. Previously, `migrate-to-uv` would warn about the issue, but still perform the migration. It now aborts the migration in case it is not able to perform the migration that would result in behaviour changes when migrating to uv.
+Although `migrate-to-uv` tries its best to migrate a project to uv without changing the behavior, some things that are accepted by package managers do not have any equivalent in uv. Previously, `migrate-to-uv` would warn about the issue, but still perform the migration. It now aborts the migration in case it is not able to perform the migration that would result in behavior changes when migrating to uv.
 
 If errors occur and lead to aborting the migration, you are expected to manually update your setup and retry the migration.
 
-Warnings that occurred during the migration (which did not break the behaviour) are now also grouped and displayed at the very end of the migration.
+Warnings that occurred during the migration (which did not break the behavior) are now also grouped and displayed at the very end of the migration.
 
 ### Features
 
