@@ -9,7 +9,7 @@ icon: lucide/scroll-text
 
 #### Experimental support for uv build backend
 
-When migrating Poetry package distribution metadata, `migrate-to-uv` uses [Hatch](https://hatch.pypa.io/latest/config/build/) build backend. Experimental support for migrating to uv build backend has been added behind `--build backend uv` argument.
+When migrating Poetry package distribution metadata, `migrate-to-uv` uses [Hatch](https://hatch.pypa.io/latest/config/build/) build backend. Experimental support for migrating to uv build backend has been added behind `--build backend-uv` argument.
 
 Note that uv build backend offers less flexibility than Poetry and Hatch, so the migration might be aborted if some options used by Poetry cannot be expressed with uv build backend. If you try `--build-backend uv` and encounter any issue, feel free to report it.
 
