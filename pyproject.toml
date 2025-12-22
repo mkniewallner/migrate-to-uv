@@ -47,3 +47,6 @@ docs = ["zensical==0.0.11; python_version >= '3.10'"]
 [tool.maturin]
 bindings = "bin"
 module-name = "migrate_to_uv"
+
+[tool.uv]
+exclude-newer = "1 week"

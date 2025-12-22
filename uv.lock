@@ -6,6 +6,10 @@ resolution-markers = [
     "python_full_version < '3.10'",
 ]
 
+[options]
+exclude-newer = "2025-12-15T20:13:48.26921Z"
+exclude-newer-span = "P1W"
+
 [[package]]
 name = "click"
 version = "8.3.1"
