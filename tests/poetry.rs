@@ -1766,6 +1766,16 @@ fn test_build_backend_uv_errors() {
 
     copy_dir(&fixture_path, project_path).unwrap();
 
+    // Ensure that the project is valid for Poetry, even if we cannot convert it to uv.
+    Command::new("uvx")
+        .arg("poetry")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
     assert_cmd_snapshot!(cli().arg(project_path).arg("--build-backend").arg("uv"), @r#"
     success: false
     exit_code: 1
