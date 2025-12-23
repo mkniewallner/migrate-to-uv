@@ -1397,7 +1397,7 @@ fn test_manage_warnings_dry_run() {
 
 #[test]
 fn test_build_backend() {
-    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_compatible");
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch");
 
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
@@ -1530,7 +1530,7 @@ fn test_build_backend() {
 
 #[test]
 fn test_build_backend_hatch() {
-    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_compatible");
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch");
 
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
@@ -1663,7 +1663,7 @@ fn test_build_backend_hatch() {
 
 #[test]
 fn test_build_backend_uv() {
-    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_uv_compatible");
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_uv");
 
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
@@ -1759,7 +1759,7 @@ fn test_build_backend_uv() {
 
 #[test]
 fn test_build_backend_uv_errors() {
-    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_compatible");
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_uv_incompatible");
 
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
@@ -1798,7 +1798,7 @@ fn test_build_backend_uv_errors() {
 
 #[test]
 fn test_build_backend_uv_errors_dry_run() {
-    let project_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_compatible");
+    let project_path = Path::new(FIXTURES_PATH).join("build_backend_uv_incompatible");
     let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
 
     assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run").arg("--build-backend").arg("uv"), @r#"
