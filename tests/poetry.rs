@@ -1799,6 +1799,12 @@ fn test_build_backend_uv_errors() {
     error: - "packages_glob_from_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
     error: - "text_file_sdist_wheel.txt" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and is a file, which cannot be expressed with uv.
     error: - "text_file_wheel.txt" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and is a file, which cannot be expressed with uv.
+    error: - "packages_without_init" from "poetry.packages.include" cannot be converted to uv, as it does not contain an "__init__.py" file, which is required by uv for packages.
+    error: - "packages_without_init_root" from "poetry.packages.include" cannot be converted to uv, as it does not contain an "__init__.py" file, which is required by uv for packages.
+    error: - "packages_from_without_init" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_from_without_init" from "poetry.packages.include" cannot be converted to uv, as it does not contain an "__init__.py" file, which is required by uv for packages.
+    error: - "packages_from_without_init_root" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_from_without_init_root" from "poetry.packages.include" cannot be converted to uv, as it does not contain an "__init__.py" file, which is required by uv for packages.
     error: - "include_sdist_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, which cannot be expressed with uv.
     error: - "include_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
     error: - "include_wheel_2" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
@@ -1834,6 +1840,12 @@ fn test_build_backend_uv_errors_dry_run() {
     error: - "packages_glob_from_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
     error: - "text_file_sdist_wheel.txt" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and is a file, which cannot be expressed with uv.
     error: - "text_file_wheel.txt" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and is a file, which cannot be expressed with uv.
+    error: - "packages_without_init" from "poetry.packages.include" cannot be converted to uv, as it does not contain an "__init__.py" file, which is required by uv for packages.
+    error: - "packages_without_init_root" from "poetry.packages.include" cannot be converted to uv, as it does not contain an "__init__.py" file, which is required by uv for packages.
+    error: - "packages_from_without_init" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_from_without_init" from "poetry.packages.include" cannot be converted to uv, as it does not contain an "__init__.py" file, which is required by uv for packages.
+    error: - "packages_from_without_init_root" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_from_without_init_root" from "poetry.packages.include" cannot be converted to uv, as it does not contain an "__init__.py" file, which is required by uv for packages.
     error: - "include_sdist_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, which cannot be expressed with uv.
     error: - "include_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
     error: - "include_wheel_2" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
