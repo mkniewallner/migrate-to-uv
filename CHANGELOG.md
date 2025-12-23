@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Bug fixes
+
+* [poetry] Fail migration on missing `__init__.py` for uv build backend ([#553](https://github.com/mkniewallner/migrate-to-uv/pull/553))
+
 ## 0.9.0 - 2025-12-22
 
 ### New features

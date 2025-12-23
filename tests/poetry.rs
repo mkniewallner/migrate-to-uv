@@ -1397,7 +1397,7 @@ fn test_manage_warnings_dry_run() {
 
 #[test]
 fn test_build_backend() {
-    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_compatible");
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch");
 
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
@@ -1530,7 +1530,7 @@ fn test_build_backend() {
 
 #[test]
 fn test_build_backend_hatch() {
-    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_compatible");
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch");
 
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
@@ -1663,7 +1663,7 @@ fn test_build_backend_hatch() {
 
 #[test]
 fn test_build_backend_uv() {
-    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_uv_compatible");
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_uv");
 
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
@@ -1759,12 +1759,22 @@ fn test_build_backend_uv() {
 
 #[test]
 fn test_build_backend_uv_errors() {
-    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_compatible");
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_uv_incompatible");
 
     let tmp_dir = tempdir().unwrap();
     let project_path = tmp_dir.path();
 
     copy_dir(&fixture_path, project_path).unwrap();
+
+    // Ensure that the project is valid for Poetry, even if we cannot convert it to uv.
+    Command::new("uvx")
+        .arg("poetry")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
 
     assert_cmd_snapshot!(cli().arg(project_path).arg("--build-backend").arg("uv"), @r#"
     success: false
@@ -1789,6 +1799,12 @@ fn test_build_backend_uv_errors() {
     error: - "packages_glob_from_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
     error: - "text_file_sdist_wheel.txt" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and is a file, which cannot be expressed with uv.
     error: - "text_file_wheel.txt" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and is a file, which cannot be expressed with uv.
+    error: - "packages_without_init" from "poetry.packages.include" cannot be converted to uv, as it does not contain an "__init__.py" file, which is required by uv for packages.
+    error: - "packages_without_init_root" from "poetry.packages.include" cannot be converted to uv, as it does not contain an "__init__.py" file, which is required by uv for packages.
+    error: - "packages_from_without_init" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_from_without_init" from "poetry.packages.include" cannot be converted to uv, as it does not contain an "__init__.py" file, which is required by uv for packages.
+    error: - "packages_from_without_init_root" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_from_without_init_root" from "poetry.packages.include" cannot be converted to uv, as it does not contain an "__init__.py" file, which is required by uv for packages.
     error: - "include_sdist_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, which cannot be expressed with uv.
     error: - "include_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
     error: - "include_wheel_2" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
@@ -1798,7 +1814,7 @@ fn test_build_backend_uv_errors() {
 
 #[test]
 fn test_build_backend_uv_errors_dry_run() {
-    let project_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_compatible");
+    let project_path = Path::new(FIXTURES_PATH).join("build_backend_uv_incompatible");
     let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
 
     assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run").arg("--build-backend").arg("uv"), @r#"
@@ -1824,6 +1840,12 @@ fn test_build_backend_uv_errors_dry_run() {
     error: - "packages_glob_from_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
     error: - "text_file_sdist_wheel.txt" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and is a file, which cannot be expressed with uv.
     error: - "text_file_wheel.txt" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and is a file, which cannot be expressed with uv.
+    error: - "packages_without_init" from "poetry.packages.include" cannot be converted to uv, as it does not contain an "__init__.py" file, which is required by uv for packages.
+    error: - "packages_without_init_root" from "poetry.packages.include" cannot be converted to uv, as it does not contain an "__init__.py" file, which is required by uv for packages.
+    error: - "packages_from_without_init" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_from_without_init" from "poetry.packages.include" cannot be converted to uv, as it does not contain an "__init__.py" file, which is required by uv for packages.
+    error: - "packages_from_without_init_root" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_from_without_init_root" from "poetry.packages.include" cannot be converted to uv, as it does not contain an "__init__.py" file, which is required by uv for packages.
     error: - "include_sdist_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, which cannot be expressed with uv.
     error: - "include_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
     error: - "include_wheel_2" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.

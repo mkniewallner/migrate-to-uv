@@ -421,7 +421,9 @@ pub fn get_uv(
 
                 match format {
                     None => {
-                        module_name.push(name.clone());
+                        if has_init_file(project_path, include, from.as_ref(), &mut errors) {
+                            module_name.push(name.clone());
+                        }
                     }
                     Some(SingleOrVec::Single(Format::Wheel)) => {
                         errors.push(
@@ -433,8 +435,10 @@ pub fn get_uv(
                         );
                     }
                     Some(SingleOrVec::Single(Format::Sdist)) => {
-                        module_name.push(name.clone());
-                        wheel_exclude.push(include.clone());
+                        if has_init_file(project_path, include, from.as_ref(), &mut errors) {
+                            module_name.push(name.clone());
+                            wheel_exclude.push(include.clone());
+                        }
                     }
 
                     Some(SingleOrVec::Vec(vec)) => {
@@ -442,12 +446,20 @@ pub fn get_uv(
                         // any distribution at all.
                         if !vec.is_empty() {
                             if vec.contains(&Format::Sdist) && vec.contains(&Format::Wheel) {
-                                module_name.push(name.clone());
+                                if has_init_file(project_path, include, from.as_ref(), &mut errors)
+                                {
+                                    module_name.push(name.clone());
+                                }
                             } else if vec.contains(&Format::Sdist) && !vec.contains(&Format::Wheel)
                             {
-                                module_name.push(name.clone());
-                                wheel_exclude.push(include.clone());
-                            } else if vec.contains(&Format::Wheel) && !vec.contains(&Format::Sdist)
+                                if has_init_file(project_path, include, from.as_ref(), &mut errors)
+                                {
+                                    module_name.push(name.clone());
+                                    wheel_exclude.push(include.clone());
+                                }
+                            } else if vec.contains(&Format::Wheel)
+                                && !vec.contains(&Format::Sdist)
+                                && has_init_file(project_path, include, from.as_ref(), &mut errors)
                             {
                                 module_name.push(name.clone());
                                 source_exclude.push(include.clone());
@@ -556,4 +568,31 @@ pub fn get_uv(
         wheel_exclude: Some(wheel_exclude),
         ..UvBuildBackend::default()
     }))
+}
+
+fn has_init_file(
+    project_path: &Path,
+    include: &String,
+    from: Option<&String>,
+    errors: &mut Vec<String>,
+) -> bool {
+    let path = if let Some(from) = from {
+        project_path.join(from).join(include).join("__init__.py")
+    } else {
+        project_path.join(include).join("__init__.py")
+    };
+
+    if path.exists() {
+        true
+    } else {
+        errors.push(
+            format!(
+                "\"{}\" from \"{}\" cannot be converted to uv, as it does not contain an \"{}\" file, which is required by uv for packages.",
+                include.bold(),
+                "poetry.packages.include".bold(),
+                "__init__.py".bold(),
+            )
+        );
+        false
+    }
 }
