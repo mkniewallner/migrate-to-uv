@@ -227,8 +227,8 @@ pub trait Converter: Any + Debug {
             && uv::lock_dependencies(self.get_project_path().as_ref(), false).is_err()
         {
             warn!(
-                "An error occurred when locking dependencies, so \"{}\" was not created.",
-                "uv.lock".bold()
+                "An error occurred while locking dependencies, so \"{}\" was likely not created.",
+                "uv.lock".bold(),
             );
         }
     }
@@ -262,7 +262,7 @@ pub trait Converter: Any + Debug {
             if !self.skip_lock()
                 && uv::lock_dependencies(self.get_project_path().as_ref(), true).is_err()
             {
-                warn!("An error occurred when locking dependencies after removing constraints.");
+                warn!("An error occurred while locking dependencies after removing constraints.");
             }
         }
     }
