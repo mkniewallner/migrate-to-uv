@@ -3,6 +3,12 @@ icon: lucide/scroll-text
 ---
 # Changelog
 
+## Unreleased
+
+### New features
+
+* Abort migration early if uv executable is not found ([#558](https://github.com/mkniewallner/migrate-to-uv/pull/558))
+
 ## 0.9.1 - 2025-12-24
 
 ### Bug fixes

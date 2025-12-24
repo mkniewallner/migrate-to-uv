@@ -1,6 +1,6 @@
 use crate::converters::{BuildBackend, ConverterOptions, DependencyGroupsStrategy};
 use crate::detector::{PackageManager, get_converter};
-use crate::logger;
+use crate::{logger, uv};
 use clap::Parser;
 use clap::builder::Styles;
 use clap::builder::styling::{AnsiColor, Effects};
@@ -98,6 +98,12 @@ pub fn cli() {
         cli.package_manager,
     ) {
         Ok(converter) => {
+            // Both `--dry-run` and `--skip-lock` skip dependencies locking, so no need to look for
+            // uv in those cases.
+            if !cli.dry_run && !cli.skip_lock {
+                uv::ensure_executable_exists();
+            }
+
             converter.convert_to_uv();
         }
         Err(error) => {

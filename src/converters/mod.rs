@@ -2,6 +2,7 @@ use crate::converters::pyproject_updater::PyprojectUpdater;
 use crate::errors::{MIGRATION_ERRORS, MigrationError};
 use crate::schema::pep_621::Project;
 use crate::schema::pyproject::DependencyGroupSpecification;
+use crate::uv;
 use indexmap::IndexMap;
 use log::{error, info, warn};
 use owo_colors::OwoColorize;
@@ -9,9 +10,9 @@ use std::any::Any;
 use std::fmt::Debug;
 use std::format;
 use std::fs::{File, remove_file};
-use std::io::{ErrorKind, Write};
-use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio, exit};
+use std::io::Write;
+use std::path::PathBuf;
+use std::process::exit;
 use toml_edit::DocumentMut;
 
 pub mod pip;
@@ -222,11 +223,12 @@ pub trait Converter: Any + Debug {
 
     /// Lock dependencies with uv, unless user has explicitly opted out of locking dependencies.
     fn lock_dependencies(&self) {
-        if !self.skip_lock() && lock_dependencies(self.get_project_path().as_ref(), false).is_err()
+        if !self.skip_lock()
+            && uv::lock_dependencies(self.get_project_path().as_ref(), false).is_err()
         {
             warn!(
-                "An error occurred when locking dependencies, so \"{}\" was not created.",
-                "uv.lock".bold()
+                "An error occurred while locking dependencies, so \"{}\" was likely not created.",
+                "uv.lock".bold(),
             );
         }
     }
@@ -258,71 +260,10 @@ pub trait Converter: Any + Debug {
 
             // Lock dependencies a second time, to remove constraints from lock file.
             if !self.skip_lock()
-                && lock_dependencies(self.get_project_path().as_ref(), true).is_err()
+                && uv::lock_dependencies(self.get_project_path().as_ref(), true).is_err()
             {
-                warn!("An error occurred when locking dependencies after removing constraints.");
+                warn!("An error occurred while locking dependencies after removing constraints.");
             }
-        }
-    }
-}
-
-/// Lock dependencies with uv by running `uv lock` command.
-pub fn lock_dependencies(project_path: &Path, is_removing_constraints: bool) -> Result<(), ()> {
-    const UV_EXECUTABLE: &str = "uv";
-
-    match Command::new(UV_EXECUTABLE)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .spawn()
-    {
-        Ok(_) => {
-            info!(
-                "Locking dependencies with \"{}\"{}...",
-                format!("{UV_EXECUTABLE} lock").bold(),
-                if is_removing_constraints {
-                    " again to remove constraints"
-                } else {
-                    ""
-                }
-            );
-
-            Command::new(UV_EXECUTABLE)
-                .arg("lock")
-                .current_dir(project_path)
-                .spawn()
-                .map_or_else(
-                    |_| {
-                        error!(
-                            "Could not invoke \"{}\" command.",
-                            format!("{UV_EXECUTABLE} lock").bold()
-                        );
-                        Err(())
-                    },
-                    |lock| match lock.wait_with_output() {
-                        Ok(output) => {
-                            if output.status.success() {
-                                Ok(())
-                            } else {
-                                Err(())
-                            }
-                        }
-                        Err(e) => {
-                            error!("{e}");
-                            Err(())
-                        }
-                    },
-                )
-        }
-        Err(e) if e.kind() == ErrorKind::NotFound => {
-            warn!(
-                "Could not find \"{}\" executable, skipping locking dependencies.",
-                UV_EXECUTABLE.bold()
-            );
-            Ok(())
-        }
-        Err(e) => {
-            error!("{e}");
-            Err(())
         }
     }
 }

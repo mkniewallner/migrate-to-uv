@@ -22,6 +22,7 @@ serde_json = "=1.0.145"
 toml = { version = "=0.9.9", features = ["preserve_order"] }
 toml_edit = { version = "=0.23.10", features = ["display", "serde"] }
 url = "=2.5.7"
+which = "=8.0.0"
 
 [dev-dependencies]
 dircpy = "=0.3.19"
