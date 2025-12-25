@@ -7,7 +7,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2025-12-18T17:33:01.478603978Z"
+exclude-newer = "2025-12-18T21:09:17.306107324Z"
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -62,7 +62,7 @@ docs = [
 [package.metadata]
 
 [package.metadata.requires-dev]
-docs = [{ name = "zensical", marker = "python_full_version >= '3.10'", specifier = "==0.0.12" }]
+docs = [{ name = "zensical", marker = "python_full_version >= '3.10'", specifier = "==0.0.13" }]
 
 [[package]]
 name = "pygments"
@@ -217,7 +217,7 @@ wheels = [
 
 [[package]]
 name = "zensical"
-version = "0.0.12"
+version = "0.0.13"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click", marker = "python_full_version >= '3.10'" },
@@ -228,18 +228,18 @@ dependencies = [
     { name = "pyyaml", marker = "python_full_version >= '3.10'" },
     { name = "tomli", marker = "python_full_version == '3.10.*'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f2/79/96c1e5c68736542b5028a1afc242558148f255a5e402cda4371badd08c8a/zensical-0.0.12.tar.gz", hash = "sha256:bac84c3494f75a37de2fc773ffdb6c5b2c88a39c840bf512bd7579b5dfd89dd2", size = 3808110, upload-time = "2025-12-18T13:19:37.309Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/89/d6/c6910d9920c909fb344cba5736d1d453017161e19e9161f44044736552e3/zensical-0.0.13.tar.gz", hash = "sha256:32c02827dc398cf0c860a8555de15a6d5c9a86e2c5761420e2e01967abd13b2f", size = 3815431, upload-time = "2025-12-18T20:02:17.779Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a3/70/440fa89b2e65b73c29f97a90d5fe8ec808e60dbd5b1cde6a9355d1061503/zensical-0.0.12-cp310-abi3-macosx_10_12_x86_64.whl", hash = "sha256:eebfdbe2a947e6c5db988c2bc8fbb7403f3e2637908f845246106e300b56e8d8", size = 11857883, upload-time = "2025-12-18T13:19:03.861Z" },
-    { url = "https://files.pythonhosted.org/packages/44/7a/ad4aa582469c44c5fd5a6c116686acb554db1b2696acdb52d3956d7af248/zensical-0.0.12-cp310-abi3-macosx_11_0_arm64.whl", hash = "sha256:1b73bc5fb4badd80d2433d0cf40c2263b8d06d1823e82e38a863c99e2e33f8ea", size = 11740728, upload-time = "2025-12-18T13:19:06.967Z" },
-    { url = "https://files.pythonhosted.org/packages/cd/40/2374e6cff594527996c7a2cba17e3f51afe29c333334378d6edc53b7c020/zensical-0.0.12-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:46a895ca32415a842923f56177e267a9c7d5d72a3ddd87a6a4747cc7d379a8e5", size = 12051641, upload-time = "2025-12-18T13:19:09.783Z" },
-    { url = "https://files.pythonhosted.org/packages/86/47/5e429b2600656fbafb142e444adb7726e3294b4ebe07d343eb796c30321b/zensical-0.0.12-cp310-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:cbee7c79d9591a592f21ff0519d49792837c8270ab3af2eed0c958b592f23d10", size = 12010966, upload-time = "2025-12-18T13:19:12.658Z" },
-    { url = "https://files.pythonhosted.org/packages/bc/24/6d06746bfcb1896d445e5885c50a327de3caf34a4a7000e88dcc94f48fed/zensical-0.0.12-cp310-abi3-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:163df5ee62fa33d32093c3f6a95bf03582a00e2e86667dfabfb12215b45a4455", size = 12325999, upload-time = "2025-12-18T13:19:15.768Z" },
-    { url = "https://files.pythonhosted.org/packages/00/c2/403e3bafdd3a5c08f80c69aadb4f9e79484e724676f28f1338f99e1643b4/zensical-0.0.12-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9d633acf3ef7e5c5c8bc2dab466bc73e2d7f03fad8296bc3dff6fd8eeb047c29", size = 12108560, upload-time = "2025-12-18T13:19:17.991Z" },
-    { url = "https://files.pythonhosted.org/packages/68/ab/6b30139ff7fa7e77995fcdb7a1d894089b519749bd71fe8e4280bcc6b439/zensical-0.0.12-cp310-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:f0dfe146ff4bd17f44a5c4b394abb93baa601b042d79430b2ee4c1fe213d90d0", size = 12231761, upload-time = "2025-12-18T13:19:20.66Z" },
-    { url = "https://files.pythonhosted.org/packages/b0/ef/2ea964f4a92d6abecadf13d3154fa6f537090c3509885f3e57cf8c45337e/zensical-0.0.12-cp310-abi3-musllinux_1_2_armv7l.whl", hash = "sha256:1d3be05f8ab1d9c116306d082624cf8965922118c35c99735c152b6351583f7c", size = 12277369, upload-time = "2025-12-18T13:19:23.528Z" },
-    { url = "https://files.pythonhosted.org/packages/a1/f7/859e53f9f92177c8d815ff00460ac95765512bc16fd89ccf1a5c6ed669e1/zensical-0.0.12-cp310-abi3-musllinux_1_2_i686.whl", hash = "sha256:1b6935ae7dfdd5c00c1993753da01cd1566f57b69e685500aa5d06c51e760687", size = 12404536, upload-time = "2025-12-18T13:19:26.692Z" },
-    { url = "https://files.pythonhosted.org/packages/04/6d/8f5b54978f1fecb998caffc415c82f5382b7717f4efd27687c69a7db511c/zensical-0.0.12-cp310-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:d8b2cf14b34634a913176680be12cb0cce8216ec71abb71841b5ebf887830f07", size = 12342068, upload-time = "2025-12-18T13:19:29.257Z" },
-    { url = "https://files.pythonhosted.org/packages/d3/75/2ca7d5d3e545261c51b1fba2f201ce7e42e2bcf59393ca160166d2c9769f/zensical-0.0.12-cp310-abi3-win32.whl", hash = "sha256:8b66953f9ce1cf62d08772e098ed99c682d706b979aca514f3d76b05bdeb5085", size = 11474414, upload-time = "2025-12-18T13:19:31.814Z" },
-    { url = "https://files.pythonhosted.org/packages/b2/02/d3afb897f8df58a64eb561a3a6e3b1941835f1f3a95b48176bb31c578962/zensical-0.0.12-cp310-abi3-win_amd64.whl", hash = "sha256:1a8d85058df27f335540fcc2ba24a4c2f1e40d49bbbb1ee4842f665988c091d9", size = 11661224, upload-time = "2025-12-18T13:19:34.631Z" },
+    { url = "https://files.pythonhosted.org/packages/b8/00/e88a11ccc18426ce1b95cbc5a5b443639b8aaa747523df622bfb1982f1e1/zensical-0.0.13-cp310-abi3-macosx_10_12_x86_64.whl", hash = "sha256:12a6ff27b89ce70ee760ce72d498c515040f2fc5bb087515e2e1b5765289bcbb", size = 11896898, upload-time = "2025-12-18T20:01:46.083Z" },
+    { url = "https://files.pythonhosted.org/packages/a5/cc/a203bbcb01b689c08ff865017cad3682f161cd9ba0bcb2714fb7f4c82171/zensical-0.0.13-cp310-abi3-macosx_11_0_arm64.whl", hash = "sha256:63e92f1b015080249c0cec183eb02c5e64a0499ec5a704b76f8c4955d4fbf116", size = 11781884, upload-time = "2025-12-18T20:01:49.385Z" },
+    { url = "https://files.pythonhosted.org/packages/2a/4e/055598d7f0d3ae9458fd9ab26d79ad76d89556b3540ce75befb45c9b9191/zensical-0.0.13-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2a37141dc2db9919eac01345df35dc68494662cd22de7d6bcd5e0248d1cee2fa", size = 12091856, upload-time = "2025-12-18T20:01:51.909Z" },
+    { url = "https://files.pythonhosted.org/packages/e8/f3/4e58c96516c998a2d70e55dfca0a63f4a67718892659ba48eec670eaf9f8/zensical-0.0.13-cp310-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:ba399f910485375d6ae9455f5e2b661d6082e0afdec4036de199fb57200539f0", size = 12052075, upload-time = "2025-12-18T20:01:54.3Z" },
+    { url = "https://files.pythonhosted.org/packages/7f/92/b6ca920b2b1b05c920c3657ad90ce792bc509e056b0b5b1d77bdfba104e4/zensical-0.0.13-cp310-abi3-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:b6df2b21ea1d79d02de838b2192af6900defd2eeca229c0dc65c35c1f3301735", size = 12366747, upload-time = "2025-12-18T20:01:57.068Z" },
+    { url = "https://files.pythonhosted.org/packages/dd/53/c088dcf9e2a82b868cd11c05975807f1f8a2159e2139894c9763aee9681d/zensical-0.0.13-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:99d3685cfadfcaa22f89c830f1c75e244c5a10f3b3d7b83e7c1fb743a8b293ad", size = 12151383, upload-time = "2025-12-18T20:01:59.601Z" },
+    { url = "https://files.pythonhosted.org/packages/82/7e/50a76d3806d379edefa6ef7d83a5d748980f7b78074d89b104dfad736f1f/zensical-0.0.13-cp310-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:1ba1b33e23c07288248cae387a008b65c614e3dc267e1bb3534f8f8a14a80732", size = 12272581, upload-time = "2025-12-18T20:02:01.973Z" },
+    { url = "https://files.pythonhosted.org/packages/ca/b7/99155b2a6f15443f36a2e9ba5ee12f3cc818d7fb479bb72df802a0ab1b15/zensical-0.0.13-cp310-abi3-musllinux_1_2_armv7l.whl", hash = "sha256:8aafb3edb601313904829a10d084c074f2381bb1f36a5edaef3ca6fbaa769577", size = 12318381, upload-time = "2025-12-18T20:02:04.62Z" },
+    { url = "https://files.pythonhosted.org/packages/39/0f/08326228c9a7fd8a8338c2351318a5f2603809971ca68b792d289afd84d8/zensical-0.0.13-cp310-abi3-musllinux_1_2_i686.whl", hash = "sha256:5eb4f95f1cf005356ee8eccd6d50cfb4e03009104579f64f022578fbce282c4d", size = 12444830, upload-time = "2025-12-18T20:02:07.208Z" },
+    { url = "https://files.pythonhosted.org/packages/1b/76/9cd34f7cf18dfb9bd9fad97f6c6f3231f5d5703a783f2a4e20535bbf86c3/zensical-0.0.13-cp310-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:a07c8983beb6b703e0b81117059ff7d14990df5cad286665050a92913899bf8d", size = 12383261, upload-time = "2025-12-18T20:02:09.894Z" },
+    { url = "https://files.pythonhosted.org/packages/10/16/23b1cde98cf808c177802dd4e7241221c8206051c3245d5631141e620616/zensical-0.0.13-cp310-abi3-win32.whl", hash = "sha256:eb272ad72eed82980ed697953c6b3d9dd5d84d0bb728ba2cbc4094bf129afbec", size = 11515377, upload-time = "2025-12-18T20:02:12.131Z" },
+    { url = "https://files.pythonhosted.org/packages/d4/50/c763d0f1ee8f16626d11160f5f5104a105d845b6fe4b334367b91fae0b90/zensical-0.0.13-cp310-abi3-win_amd64.whl", hash = "sha256:8355900f07f1f79d9157dc17eb8abce4156e00c1b71c858ea3700b8b22354e89", size = 11702374, upload-time = "2025-12-18T20:02:14.974Z" },
 ]
