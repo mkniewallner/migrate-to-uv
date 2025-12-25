@@ -692,6 +692,7 @@ fn test_skip_lock_full() {
         "python-restricted-5==1.2.3 ; python_version < '3.11'",
         "python-restricted-6==1.2.3 ; python_version <= '3.11'",
         "python-restricted-7==1.2.3 ; python_version > '3.11' and python_version < '3.13'",
+        "python-restricted-full-version==1.2.3 ; python_full_version >= '3.11.2' and python_version < '4'",
         "python-restricted-with-source==1.2.3 ; python_version > '3.11' and python_version < '3.13'",
         "whitespaces>=3.2,<4",
         "whitespaces-2     >   3.11,     <=     3.13    ",
