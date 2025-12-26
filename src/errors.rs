@@ -6,7 +6,7 @@ pub struct MigrationError {
 }
 
 impl MigrationError {
-    pub fn new(error: String, recoverable: bool) -> MigrationError {
+    pub const fn new(error: String, recoverable: bool) -> Self {
         Self { error, recoverable }
     }
 }
