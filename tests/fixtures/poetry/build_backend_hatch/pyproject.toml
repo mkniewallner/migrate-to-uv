@@ -33,6 +33,9 @@ packages = [
     { include = "text_file_sdist_wheel.txt" },
     { include = "text_file_sdist.txt", format = "sdist" },
     { include = "text_file_wheel.txt", format = "wheel" },
+    { include = "foo.txt", from = "from_multi_level", to = "parent_directory/sub_directory" },
+    { include = "a_directory/foo.txt", from = "from_multi_level_2", to = "parent_directory/sub_directory" },
+    { include = "a_directory/another_directory/foo.txt", from = "from_multi_level_3", to = "parent_directory/sub_directory" },
 ]
 include = [
     "include_sdist",

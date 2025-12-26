@@ -203,7 +203,7 @@ fn get_include(
 /// Get hatch source, to rewrite path from a directory to another directory in the built artifact.
 /// <https://hatch.pypa.io/latest/config/build/#rewriting-paths>
 fn get_source(
-    _project_path: &Path,
+    project_path: &Path,
     include: String,
     include_with_from: String,
     to: Option<&String>,
@@ -227,14 +227,31 @@ fn get_source(
                     .replace(MAIN_SEPARATOR, "/"),
             ))
         } else {
+            let project_include_with_from = project_path.join(&include_with_from);
+
+            // For files, we want to take the direct parent directory.
+            let (from, to) = if project_include_with_from.is_file() {
+                (
+                    PathBuf::from(include_with_from)
+                        .parent()
+                        .unwrap()
+                        .to_path_buf(),
+                    PathBuf::from(to)
+                        .join(&include)
+                        .parent()
+                        .unwrap()
+                        .to_path_buf(),
+                )
+            } else {
+                (
+                    PathBuf::from(include_with_from),
+                    PathBuf::from(to).join(&include),
+                )
+            };
+
             Some((
-                include_with_from,
-                Path::new(to)
-                    .join(include)
-                    .display()
-                    .to_string()
-                    // Ensure that separator remains "/" (Windows uses "\").
-                    .replace(MAIN_SEPARATOR, "/"),
+                from.display().to_string().replace(MAIN_SEPARATOR, "/"),
+                to.display().to_string().replace(MAIN_SEPARATOR, "/"),
             ))
         };
     }
