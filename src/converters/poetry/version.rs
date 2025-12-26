@@ -67,7 +67,7 @@ pub struct ParseVersionError {
 }
 
 impl ParseVersionError {
-    pub fn new(kind: ParseVersionErrorKind, version: String) -> Self {
+    pub const fn new(kind: ParseVersionErrorKind, version: String) -> Self {
         Self { kind, version }
     }
 

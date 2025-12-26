@@ -1,9 +1,16 @@
-use crate::converters::poetry::build_backend::HatchTargetsIncludeAndSource;
 use crate::schema::hatch::{Build, BuildTarget, Hatch};
 use crate::schema::poetry::{Format, Include, Package};
 use crate::schema::utils::SingleOrVec;
 use indexmap::IndexMap;
 use std::path::{MAIN_SEPARATOR, Path, PathBuf};
+
+type HatchTargetsIncludeAndSource = (
+    Option<Vec<String>>,
+    Option<Vec<String>>,
+    Option<IndexMap<String, String>>,
+    Option<IndexMap<String, String>>,
+    Option<IndexMap<String, String>>,
+);
 
 /// Construct hatch package metadata (<https://hatch.pypa.io/latest/config/build/>) from Poetry
 /// `packages` (<https://python-poetry.org/docs/pyproject/#packages>) and `include`/`exclude`
@@ -17,7 +24,6 @@ use std::path::{MAIN_SEPARATOR, Path, PathBuf};
 /// apply path rewriting in `wheel` target.
 ///
 /// Poetry `exclude` is converted as is to hatch `exclude`.
-///
 pub fn get_build_backend(
     project_path: &Path,
     packages: Option<&Vec<Package>>,

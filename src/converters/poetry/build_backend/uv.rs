@@ -271,11 +271,10 @@ fn has_init_file(
     from: Option<&String>,
     errors: &mut Vec<String>,
 ) -> bool {
-    let path = if let Some(from) = from {
-        project_path.join(from).join(include).join("__init__.py")
-    } else {
-        project_path.join(include).join("__init__.py")
-    };
+    let path = from.map_or_else(
+        || project_path.join(include).join("__init__.py"),
+        |from| project_path.join(from).join(include).join("__init__.py"),
+    );
 
     if path.exists() {
         true

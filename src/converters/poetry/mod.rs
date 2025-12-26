@@ -70,16 +70,13 @@ impl Converter for Poetry {
             version: Some(poetry.version.unwrap_or_else(|| "0.0.1".to_string())),
             description: poetry.description,
             authors: project::get_authors(poetry.authors),
-            requires_python: match python_specification {
-                Some(p) => match p.to_pep_508() {
-                    Ok(v) => Some(v),
-                    Err(e) => {
-                        add_unrecoverable_error(e.format("python"));
-                        None
-                    }
-                },
-                None => None,
-            },
+            requires_python: python_specification.and_then(|p| match p.to_pep_508() {
+                Ok(v) => Some(v),
+                Err(e) => {
+                    add_unrecoverable_error(e.format("python"));
+                    None
+                }
+            }),
             readme: project::get_readme(poetry.readme),
             license: poetry.license.map(License::String),
             maintainers: project::get_authors(poetry.maintainers),
@@ -153,7 +150,7 @@ impl Converter for Poetry {
             },
             default_groups: uv_default_groups,
             constraint_dependencies: self.get_constraint_dependencies(),
-            build_backend: if let Some(BuildBackend::Uv) = self.get_build_backend()
+            build_backend: if self.get_build_backend() == Some(BuildBackend::Uv)
                 && let Ok(uv_build_backend) = uv_build_backend
             {
                 uv_build_backend

@@ -1,16 +1,7 @@
 use crate::converters::BuildBackend;
 use crate::schema::pyproject::BuildSystem;
-use indexmap::IndexMap;
 pub mod hatch;
 pub mod uv;
-
-type HatchTargetsIncludeAndSource = (
-    Option<Vec<String>>,
-    Option<Vec<String>>,
-    Option<IndexMap<String, String>>,
-    Option<IndexMap<String, String>>,
-    Option<IndexMap<String, String>>,
-);
 
 pub fn get_new_build_system(
     current_build_system: Option<BuildSystem>,

@@ -28,57 +28,60 @@ pub fn ensure_executable_exists() {
 
 /// Lock dependencies with uv by running `uv lock` command.
 pub fn lock_dependencies(project_path: &Path, is_removing_constraints: bool) -> Result<(), ()> {
-    if let Some(uv) = get_executable() {
-        info!(
-            "Locking dependencies with \"{}\"{}...",
-            format!("{UV_EXECUTABLE} lock").bold(),
-            if is_removing_constraints {
-                " again to remove constraints"
-            } else {
-                ""
-            }
-        );
+    get_executable().map_or_else(
+        || {
+            warn!(
+                "Could not find \"{}\" executable, skipping \"{}\".",
+                UV_EXECUTABLE.bold(),
+                format!("{UV_EXECUTABLE} lock").bold(),
+            );
+            Err(())
+        },
+        |uv| {
+            info!(
+                "Locking dependencies with \"{}\"{}...",
+                format!("{UV_EXECUTABLE} lock").bold(),
+                if is_removing_constraints {
+                    " again to remove constraints"
+                } else {
+                    ""
+                }
+            );
 
-        Command::new(uv)
-            .arg("lock")
-            .current_dir(project_path)
-            .spawn()
-            .map_or_else(
-                |_| {
-                    warn!(
-                        "Could not invoke \"{}\" command, skipping dependencies locking.",
-                        format!("{UV_EXECUTABLE} lock").bold()
-                    );
-                    Err(())
-                },
-                |lock| match lock.wait_with_output() {
-                    Ok(output) => {
-                        if output.status.success() {
-                            Ok(())
-                        } else {
+            Command::new(uv)
+                .arg("lock")
+                .current_dir(project_path)
+                .spawn()
+                .map_or_else(
+                    |_| {
+                        warn!(
+                            "Could not invoke \"{}\" command, skipping dependencies locking.",
+                            format!("{UV_EXECUTABLE} lock").bold()
+                        );
+                        Err(())
+                    },
+                    |lock| match lock.wait_with_output() {
+                        Ok(output) => {
+                            if output.status.success() {
+                                Ok(())
+                            } else {
+                                error!(
+                                    "Error while invoking \"{}\" command.",
+                                    format!("{UV_EXECUTABLE} lock").bold(),
+                                );
+                                Err(())
+                            }
+                        }
+                        Err(e) => {
                             error!(
-                                "Error while invoking \"{}\" command.",
+                                "The following error occurred while invoking \"{}\" command:",
                                 format!("{UV_EXECUTABLE} lock").bold(),
                             );
+                            error!("{e}");
                             Err(())
                         }
-                    }
-                    Err(e) => {
-                        error!(
-                            "The following error occurred while invoking \"{}\" command:",
-                            format!("{UV_EXECUTABLE} lock").bold(),
-                        );
-                        error!("{e}");
-                        Err(())
-                    }
-                },
-            )
-    } else {
-        warn!(
-            "Could not find \"{}\" executable, skipping \"{}\".",
-            UV_EXECUTABLE.bold(),
-            format!("{UV_EXECUTABLE} lock").bold(),
-        );
-        Err(())
-    }
+                    },
+                )
+        },
+    )
 }
