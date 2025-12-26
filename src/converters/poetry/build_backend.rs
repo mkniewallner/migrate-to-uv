@@ -49,6 +49,7 @@ pub fn get_new_build_system(
 /// Poetry `exclude` is converted as is to hatch `exclude`.
 ///
 pub fn get_hatch(
+    project_path: &Path,
     packages: Option<&Vec<Package>>,
     include: Option<&Vec<Include>>,
     exclude: Option<&Vec<String>>,
@@ -57,7 +58,7 @@ pub fn get_hatch(
 
     let mut targets = IndexMap::new();
     let (sdist_include, wheel_include, sdist_force_include, wheel_force_include, wheel_sources) =
-        get_hatch_include(packages, include);
+        get_hatch_include(project_path, packages, include);
 
     let sdist_target = BuildTarget {
         include: sdist_include,
@@ -97,6 +98,7 @@ pub fn get_hatch(
 /// Inclusion behavior: <https://hatch.pypa.io/latest/config/build/#patterns>
 /// Path rewriting behavior: <https://hatch.pypa.io/latest/config/build/#rewriting-paths>
 fn get_hatch_include(
+    project_path: &Path,
     packages: Option<&Vec<Package>>,
     include: Option<&Vec<Include>>,
 ) -> HatchTargetsIncludeAndSource {
@@ -141,6 +143,7 @@ fn get_hatch_include(
                 wheel_include.push(include_with_from.clone());
 
                 if let Some((from, to)) = get_hatch_source(
+                    project_path,
                     include.clone(),
                     include_with_from,
                     to.as_ref(),
@@ -224,6 +227,7 @@ fn get_hatch_include(
 /// Get hatch source, to rewrite path from a directory to another directory in the built artifact.
 /// <https://hatch.pypa.io/latest/config/build/#rewriting-paths>
 fn get_hatch_source(
+    _project_path: &Path,
     include: String,
     include_with_from: String,
     to: Option<&String>,

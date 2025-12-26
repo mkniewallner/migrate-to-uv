@@ -106,6 +106,7 @@ impl Converter for Poetry {
         );
 
         let hatch = build_backend::get_hatch(
+            &self.converter_options.project_path,
             poetry.packages.as_ref(),
             poetry.include.as_ref(),
             poetry.exclude.as_ref(),
