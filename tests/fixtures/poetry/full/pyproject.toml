@@ -131,6 +131,7 @@ python-restricted-4 = { version = "1.2.3", python = ">=3.11" }
 python-restricted-5 = { version = "1.2.3", python = "<3.11" }
 python-restricted-6 = { version = "1.2.3", python = "<=3.11" }
 python-restricted-7 = { version = "1.2.3", python = ">3.11,<3.13" }
+python-restricted-full-version = { version = "1.2.3", python = "^3.11.2" }
 python-restricted-with-source = { version = "1.2.3", python = ">3.11,<3.13", source = "supplemental" }
 
 # Going wild

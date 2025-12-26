@@ -6,6 +6,10 @@
 
 * Abort migration early if uv executable is not found ([#558](https://github.com/mkniewallner/migrate-to-uv/pull/558))
 
+### Bug fixes
+
+* [poetry] Use `python_full_version` for 3-components Python markers ([#559](https://github.com/mkniewallner/migrate-to-uv/pull/559))
+
 ## 0.9.1 - 2025-12-24
 
 ### Bug fixes
