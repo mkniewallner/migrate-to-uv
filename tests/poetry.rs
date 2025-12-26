@@ -1461,6 +1461,9 @@ fn test_build_backend() {
         "packages_sdist_wheel_with_excluded_files",
         "text_file_sdist_wheel.txt",
         "text_file_sdist.txt",
+        "from_multi_level/foo.txt",
+        "from_multi_level_2/a_directory/foo.txt",
+        "from_multi_level_3/a_directory/another_directory/foo.txt",
     ]
     exclude = [
         "packages_sdist_wheel_with_excluded_files/bar.py",
@@ -1492,6 +1495,9 @@ fn test_build_backend() {
         "packages_sdist_wheel_with_excluded_files",
         "text_file_sdist_wheel.txt",
         "text_file_wheel.txt",
+        "from_multi_level/foo.txt",
+        "from_multi_level_2/a_directory/foo.txt",
+        "from_multi_level_3/a_directory/another_directory/foo.txt",
     ]
     exclude = [
         "packages_sdist_wheel_with_excluded_files/bar.py",
@@ -1509,6 +1515,9 @@ fn test_build_backend() {
     "from/packages_from_to_sdist_wheel" = "to/packages_from_to_sdist_wheel"
     packages_glob_to_sdist_wheel = "to/packages_glob_to_sdist_wheel"
     "from/packages_glob_from_to_sdist_wheel" = "to/packages_glob_from_to_sdist_wheel"
+    from_multi_level = "parent_directory/sub_directory"
+    "from_multi_level_2/a_directory" = "parent_directory/sub_directory/a_directory"
+    "from_multi_level_3/a_directory/another_directory" = "parent_directory/sub_directory/a_directory/another_directory"
     "#);
 
     Command::new("uvx")
@@ -1594,6 +1603,9 @@ fn test_build_backend_hatch() {
         "packages_sdist_wheel_with_excluded_files",
         "text_file_sdist_wheel.txt",
         "text_file_sdist.txt",
+        "from_multi_level/foo.txt",
+        "from_multi_level_2/a_directory/foo.txt",
+        "from_multi_level_3/a_directory/another_directory/foo.txt",
     ]
     exclude = [
         "packages_sdist_wheel_with_excluded_files/bar.py",
@@ -1625,6 +1637,9 @@ fn test_build_backend_hatch() {
         "packages_sdist_wheel_with_excluded_files",
         "text_file_sdist_wheel.txt",
         "text_file_wheel.txt",
+        "from_multi_level/foo.txt",
+        "from_multi_level_2/a_directory/foo.txt",
+        "from_multi_level_3/a_directory/another_directory/foo.txt",
     ]
     exclude = [
         "packages_sdist_wheel_with_excluded_files/bar.py",
@@ -1642,6 +1657,9 @@ fn test_build_backend_hatch() {
     "from/packages_from_to_sdist_wheel" = "to/packages_from_to_sdist_wheel"
     packages_glob_to_sdist_wheel = "to/packages_glob_to_sdist_wheel"
     "from/packages_glob_from_to_sdist_wheel" = "to/packages_glob_from_to_sdist_wheel"
+    from_multi_level = "parent_directory/sub_directory"
+    "from_multi_level_2/a_directory" = "parent_directory/sub_directory/a_directory"
+    "from_multi_level_3/a_directory/another_directory" = "parent_directory/sub_directory/a_directory/another_directory"
     "#);
 
     Command::new("uvx")
