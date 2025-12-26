@@ -15,6 +15,7 @@ use crate::schema::poetry::PoetryLock;
 use crate::schema::pyproject::PyProject;
 use crate::schema::uv::{SourceContainer, Uv};
 use crate::toml::PyprojectPrettyFormatter;
+use build_backend::{hatch, uv};
 use indexmap::IndexMap;
 use owo_colors::OwoColorize;
 use std::fs;
@@ -98,14 +99,15 @@ impl Converter for Poetry {
             ..Default::default()
         };
 
-        let uv_build_backend = build_backend::get_uv(
+        let uv_build_backend = uv::get_build_backend(
             &self.converter_options.project_path,
             poetry.packages.as_ref(),
             poetry.include.as_ref(),
             poetry.exclude.as_ref(),
         );
 
-        let hatch = build_backend::get_hatch(
+        let hatch = hatch::get_build_backend(
+            &self.converter_options.project_path,
             poetry.packages.as_ref(),
             poetry.include.as_ref(),
             poetry.exclude.as_ref(),
