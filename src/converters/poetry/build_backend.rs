@@ -122,54 +122,31 @@ fn get_hatch_include(
                 // Ensure that separator remains "/" (Windows uses "\").
                 .replace(MAIN_SEPARATOR, "/");
 
-            match format {
-                None => {
-                    sdist_include.push(include_with_from.clone());
-                    wheel_include.push(include_with_from.clone());
-
-                    if let Some((from, to)) = get_hatch_source(
-                        include.clone(),
-                        include_with_from.clone(),
-                        to.as_ref(),
-                        from.as_ref(),
-                    ) {
-                        wheel_sources.insert(from, to);
-                    }
-                }
-                Some(SingleOrVec::Single(Format::Sdist)) => {
-                    sdist_include.push(include_with_from.clone());
-                }
-                Some(SingleOrVec::Single(Format::Wheel)) => {
-                    wheel_include.push(include_with_from.clone());
-
-                    if let Some((from, to)) = get_hatch_source(
-                        include.clone(),
-                        include_with_from.clone(),
-                        to.as_ref(),
-                        from.as_ref(),
-                    ) {
-                        wheel_sources.insert(from, to);
-                    }
-                }
+            let (add_to_sdist, add_to_wheel) = match format {
+                None => (true, true),
+                Some(SingleOrVec::Single(Format::Sdist)) => (true, false),
+                Some(SingleOrVec::Single(Format::Wheel)) => (false, true),
                 // Note: An empty `format = []` in Poetry means that the files will not be added to
                 // any distribution at all.
                 Some(SingleOrVec::Vec(vec)) => {
-                    if vec.contains(&Format::Sdist) {
-                        sdist_include.push(include_with_from.clone());
-                    }
+                    (vec.contains(&Format::Sdist), vec.contains(&Format::Wheel))
+                }
+            };
 
-                    if vec.contains(&Format::Wheel) {
-                        wheel_include.push(include_with_from.clone());
+            if add_to_sdist {
+                sdist_include.push(include_with_from.clone());
+            }
 
-                        if let Some((from, to)) = get_hatch_source(
-                            include.clone(),
-                            include_with_from,
-                            to.as_ref(),
-                            from.as_ref(),
-                        ) {
-                            wheel_sources.insert(from, to);
-                        }
-                    }
+            if add_to_wheel {
+                wheel_include.push(include_with_from.clone());
+
+                if let Some((from, to)) = get_hatch_source(
+                    include.clone(),
+                    include_with_from,
+                    to.as_ref(),
+                    from.as_ref(),
+                ) {
+                    wheel_sources.insert(from, to);
                 }
             }
         }
@@ -178,42 +155,39 @@ fn get_hatch_include(
     // https://python-poetry.org/docs/pyproject/#exclude-and-include
     if let Some(include) = include {
         for inc in include {
-            match inc {
-                Include::String(path) | Include::Map { path, format: None } => {
+            let (add_to_sdist, add_to_wheel, path) = match inc {
+                Include::String(path)
+                | Include::Map {
+                    path,
+                    format: None | Some(SingleOrVec::Single(Format::Sdist)),
+                } => {
                     // https://python-poetry.org/docs/1.8/pyproject/#include-and-exclude
                     // If there is no format specified, files are only added to sdist.
-                    sdist_force_include.insert(path.clone(), path.clone());
-                }
-                Include::Map {
-                    path,
-                    format: Some(SingleOrVec::Single(Format::Sdist)),
-                } => {
-                    sdist_force_include.insert(path.clone(), path.clone());
+                    (true, false, path)
                 }
                 Include::Map {
                     path,
                     format: Some(SingleOrVec::Single(Format::Wheel)),
-                } => {
-                    wheel_force_include.insert(path.clone(), path.clone());
-                }
+                } => (false, true, path),
                 // Note: An empty `format = []` in Poetry means that the files will not be added to
                 // any distribution at all.
                 Include::Map {
                     path,
                     format: Some(SingleOrVec::Vec(format)),
                 } => match format[..] {
-                    [Format::Sdist, Format::Wheel] => {
-                        sdist_force_include.insert(path.clone(), path.clone());
-                        wheel_force_include.insert(path.clone(), path.clone());
-                    }
-                    [Format::Sdist] => {
-                        sdist_force_include.insert(path.clone(), path.clone());
-                    }
-                    [Format::Wheel] => {
-                        wheel_force_include.insert(path.clone(), path.clone());
-                    }
-                    _ => (),
+                    [Format::Sdist, Format::Wheel] => (true, true, path),
+                    [Format::Sdist] => (true, false, path),
+                    [Format::Wheel] => (false, true, path),
+                    _ => (false, false, path),
                 },
+            };
+
+            if add_to_sdist {
+                sdist_force_include.insert(path.clone(), path.clone());
+            }
+
+            if add_to_wheel {
+                wheel_force_include.insert(path.clone(), path.clone());
             }
         }
     }
