@@ -70,7 +70,7 @@ impl VisitMut for PyprojectPrettyFormatter {
                 let mut table = inline_table.into_table();
 
                 if let Some(position) = position {
-                    table.set_position(position);
+                    table.set_position(Some(position));
                 }
 
                 key.fmt();
