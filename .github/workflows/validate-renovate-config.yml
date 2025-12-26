@@ -25,7 +25,7 @@ jobs:
       - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4
         with:
           # renovate: datasource=npm depName=pnpm
-          version: '10.26.0'
+          version: '10.26.1'
 
       - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
