@@ -1,5 +1,5 @@
 use crate::converters::poetry::build_backend::{
-    get_include_distribution_format, get_packages_distribution_format,
+    get_include_distribution_format, get_packages_distribution_format, non_empty_vec,
 };
 use crate::schema::poetry::{Include, Package};
 use crate::schema::utils::SingleOrVec;
@@ -180,21 +180,9 @@ pub fn get_build_backend(
         // provide a similar option, we want to default to the same thing as Poetry, i.e. an empty
         // string.
         module_root: Some(String::new()),
-        source_include: if source_include.is_empty() {
-            None
-        } else {
-            Some(source_include)
-        },
-        source_exclude: if source_exclude.is_empty() {
-            None
-        } else {
-            Some(source_exclude)
-        },
-        wheel_exclude: if wheel_exclude.is_empty() {
-            None
-        } else {
-            Some(wheel_exclude)
-        },
+        source_include: non_empty_vec(source_include),
+        source_exclude: non_empty_vec(source_exclude),
+        wheel_exclude: non_empty_vec(wheel_exclude),
         ..UvBuildBackend::default()
     }))
 }

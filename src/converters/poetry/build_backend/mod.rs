@@ -5,6 +5,7 @@ use crate::schema::poetry::{Format, Poetry};
 use crate::schema::pyproject::BuildSystem;
 use crate::schema::utils::SingleOrVec;
 use crate::schema::uv::UvBuildBackend;
+use indexmap::IndexMap;
 use owo_colors::OwoColorize;
 use std::fmt::Display;
 
@@ -159,4 +160,18 @@ fn get_include_distribution_format(format: Option<&SingleOrVec<Format>>) -> (boo
         // any distribution at all.
         Some(SingleOrVec::Vec(vec)) => (vec.contains(&Format::Sdist), vec.contains(&Format::Wheel)),
     }
+}
+
+fn non_empty_vec<T>(vec: Vec<T>) -> Option<Vec<T>> {
+    if vec.is_empty() {
+        return None;
+    }
+    Some(vec)
+}
+
+fn non_empty_index_map<T, U>(map: IndexMap<T, U>) -> Option<IndexMap<T, U>> {
+    if map.is_empty() {
+        return None;
+    }
+    Some(map)
 }

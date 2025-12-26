@@ -1,0 +1,18 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "foobar"
+version = "0.1.0"
+description = "A fabulous project."
+authors = ["John Doe <john.doe@example.com>"]
+packages = [
+    { include = "foo.txt", from = "from" },
+    { include = "foo.txt", from = "from", to = "parent_directory/sub_directory" },
+    { include = "a_directory/foo.txt", from = "from_multi_level", to = "parent_directory/sub_directory" },
+    { include = "a_directory/another_directory/foo.txt", from = "from_multi_level_2", to = "parent_directory/sub_directory" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.10"
