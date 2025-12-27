@@ -47,7 +47,7 @@ pub enum SourceContainer {
     SourceIndexes(Vec<SourceIndex>),
 }
 
-#[derive(Default, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(Default, Deserialize, Serialize, Clone, Eq, PartialEq)]
 pub struct UvBuildBackend {
     #[serde(rename = "module-name")]
     pub module_name: Option<SingleOrVec<String>>,
@@ -65,7 +65,7 @@ pub struct UvBuildBackend {
     pub wheel_exclude: Option<Vec<String>>,
 }
 
-#[derive(Default, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(Default, Deserialize, Serialize, Clone, Eq, PartialEq)]
 pub struct UvBuildBackendData {
     data: Option<String>,
     headers: Option<String>,

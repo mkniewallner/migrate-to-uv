@@ -1,7 +1,18 @@
-use crate::converters::BuildBackend;
+use crate::converters::{BuildBackend, ConverterOptions};
+use crate::errors::{add_recoverable_error, add_unrecoverable_error};
+use crate::schema::hatch::Hatch;
+use crate::schema::poetry::Poetry;
 use crate::schema::pyproject::BuildSystem;
+use crate::schema::uv::UvBuildBackend;
+use owo_colors::OwoColorize;
+
 pub mod hatch;
 pub mod uv;
+
+pub enum BuildBackendObject {
+    Uv(UvBuildBackend),
+    Hatch(Hatch),
+}
 
 pub fn get_new_build_system(
     current_build_system: Option<BuildSystem>,
@@ -20,4 +31,70 @@ pub fn get_new_build_system(
         };
     }
     None
+}
+
+/// Get build backend based on converter options. If `--build-backend` is not set or set to `hatch`,
+/// Hatch is selected. If `--build-backend` is set to `uv`, Uv is selected.
+pub fn get_build_backend(
+    converter_options: &ConverterOptions,
+    poetry: &Poetry,
+) -> Option<BuildBackendObject> {
+    match &converter_options.build_backend {
+        Some(BuildBackend::Hatch) | None => {
+            let hatch = hatch::get_build_backend(
+                &converter_options.project_path,
+                poetry.packages.as_ref(),
+                poetry.include.as_ref(),
+                poetry.exclude.as_ref(),
+            );
+
+            match hatch {
+                Ok(Some(hatch)) => {
+                    add_recoverable_error("Build backend was migrated to hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.".to_string());
+                    Some(BuildBackendObject::Hatch(hatch))
+                }
+                Err(errors) => {
+                    for error in errors {
+                        add_unrecoverable_error(error.clone());
+                    }
+
+                    add_unrecoverable_error(format!(
+                        "Package distribution cound not be migrated to uv build backend due to the issues above. Consider using hatch build backend with \"{}\".",
+                        "--build backend hatch".bold(),
+                    ));
+
+                    None
+                }
+                Ok(None) => None,
+            }
+        }
+        Some(BuildBackend::Uv) => {
+            let uv = uv::get_build_backend(
+                &converter_options.project_path,
+                poetry.packages.as_ref(),
+                poetry.include.as_ref(),
+                poetry.exclude.as_ref(),
+            );
+
+            match uv {
+                Ok(Some(uv)) => {
+                    add_recoverable_error("Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.".to_string());
+                    Some(BuildBackendObject::Uv(uv))
+                }
+                Err(errors) => {
+                    for error in errors {
+                        add_unrecoverable_error(error.clone());
+                    }
+
+                    add_unrecoverable_error(format!(
+                        "Package distribution cound not be migrated to uv build backend due to the issues above. Consider using hatch build backend with \"{}\".",
+                        "--build-backend hatch".bold(),
+                    ));
+
+                    None
+                }
+                Ok(None) => None,
+            }
+        }
+    }
 }
