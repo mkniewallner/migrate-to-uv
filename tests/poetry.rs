@@ -1808,7 +1808,7 @@ fn test_build_backend_uv_errors() {
     error: - "include_sdist_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, which cannot be expressed with uv.
     error: - "include_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
     error: - "include_wheel_2" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
-    error: - Package distribution cound not be migrated to uv build backend due to the issues above. Consider using hatch build backend with "--build backend hatch".
+    error: - Package distribution cound not be migrated to uv build backend due to the issues above. Consider using hatch build backend with "--build-backend hatch".
     "#);
 }
 
@@ -1849,7 +1849,7 @@ fn test_build_backend_uv_errors_dry_run() {
     error: - "include_sdist_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, which cannot be expressed with uv.
     error: - "include_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
     error: - "include_wheel_2" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
-    error: - Package distribution cound not be migrated to uv build backend due to the issues above. Consider using hatch build backend with "--build backend hatch".
+    error: - Package distribution cound not be migrated to uv build backend due to the issues above. Consider using hatch build backend with "--build-backend hatch".
     "#);
 
     // Assert that `pyproject.toml` was not updated.

@@ -9,6 +9,10 @@ icon: lucide/scroll-text
 
 * Abort migration early if uv executable is not found ([#558](https://github.com/mkniewallner/migrate-to-uv/pull/558))
 
+### Bug fixes
+
+* [poetry] Fix typo on `--build-backend` error message ([#571](https://github.com/mkniewallner/migrate-to-uv/pull/571))
+
 ## 0.9.1 - 2025-12-24
 
 ### Bug fixes
