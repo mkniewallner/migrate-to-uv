@@ -4,9 +4,10 @@ mod project;
 mod sources;
 pub mod version;
 
+use crate::converters::Converter;
 use crate::converters::ConverterOptions;
+use crate::converters::poetry::build_backend::{BuildBackendObject, get_build_backend};
 use crate::converters::pyproject_updater::PyprojectUpdater;
-use crate::converters::{BuildBackend, Converter};
 use crate::errors::{
     MIGRATION_ERRORS, MigrationError, add_recoverable_error, add_unrecoverable_error,
 };
@@ -15,7 +16,6 @@ use crate::schema::poetry::PoetryLock;
 use crate::schema::pyproject::PyProject;
 use crate::schema::uv::{SourceContainer, Uv};
 use crate::toml::PyprojectPrettyFormatter;
-use build_backend::{hatch, uv};
 use indexmap::IndexMap;
 use owo_colors::OwoColorize;
 use std::fs;
@@ -38,6 +38,8 @@ impl Converter for Poetry {
             .unwrap_or_default()
             .poetry
             .unwrap_or_default();
+
+        let build_backend = get_build_backend(&self.converter_options, &poetry);
 
         let mut uv_source_index: IndexMap<String, SourceContainer> = IndexMap::new();
         let (dependency_groups, uv_default_groups) =
@@ -96,50 +98,6 @@ impl Converter for Poetry {
             ..Default::default()
         };
 
-        let uv_build_backend = uv::get_build_backend(
-            &self.converter_options.project_path,
-            poetry.packages.as_ref(),
-            poetry.include.as_ref(),
-            poetry.exclude.as_ref(),
-        );
-
-        let hatch = hatch::get_build_backend(
-            &self.converter_options.project_path,
-            poetry.packages.as_ref(),
-            poetry.include.as_ref(),
-            poetry.exclude.as_ref(),
-        );
-
-        match self.get_build_backend() {
-            Some(BuildBackend::Hatch) | None => match &hatch {
-                Ok(Some(_)) => {
-                    add_recoverable_error("Build backend was migrated to hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.".to_string());
-                }
-                Err(errors) => {
-                    for error in errors {
-                        add_unrecoverable_error(error.clone());
-                    }
-                }
-                _ => (),
-            },
-            Some(BuildBackend::Uv) => match &uv_build_backend {
-                Ok(Some(_)) => {
-                    add_recoverable_error("Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.".to_string());
-                }
-                Err(errors) => {
-                    for error in errors {
-                        add_unrecoverable_error(error.clone());
-                    }
-
-                    add_unrecoverable_error(format!(
-                        "Package distribution cound not be migrated to uv build backend due to the issues above. Consider using hatch build backend with \"{}\".",
-                        "--build-backend hatch".bold(),
-                    ));
-                }
-                _ => (),
-            },
-        }
-
         let uv = Uv {
             package: poetry.package_mode,
             index: sources::get_indexes(poetry.source),
@@ -150,10 +108,8 @@ impl Converter for Poetry {
             },
             default_groups: uv_default_groups,
             constraint_dependencies: self.get_constraint_dependencies(),
-            build_backend: if self.get_build_backend() == Some(BuildBackend::Uv)
-                && let Ok(uv_build_backend) = uv_build_backend
-            {
-                uv_build_backend
+            build_backend: if let Some(BuildBackendObject::Uv(ref uv)) = build_backend {
+                Some(uv.clone())
             } else {
                 None
             },
@@ -172,14 +128,18 @@ impl Converter for Poetry {
         pyproject_updater.insert_dependency_groups(dependency_groups.as_ref());
         pyproject_updater.insert_uv(&uv);
 
-        if let Some(BuildBackend::Hatch) | None = self.get_build_backend()
-            && let Ok(hatch) = hatch
-        {
-            pyproject_updater.insert_hatch(hatch.as_ref());
+        if let Some(BuildBackendObject::Hatch(ref hatch)) = build_backend {
+            pyproject_updater.insert_hatch(Some(hatch));
         }
 
         if !self.keep_old_metadata() {
             remove_pyproject_poetry_section(&mut updated_pyproject);
+        }
+
+        if let Some(build_backend) = build_backend {
+            add_recoverable_error(format!(
+                "Build backend was migrated to {build_backend}. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration."
+            ));
         }
 
         let mut visitor = PyprojectPrettyFormatter::default();
