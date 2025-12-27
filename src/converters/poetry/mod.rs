@@ -133,7 +133,7 @@ impl Converter for Poetry {
 
                     add_unrecoverable_error(format!(
                         "Package distribution cound not be migrated to uv build backend due to the issues above. Consider using hatch build backend with \"{}\".",
-                        "--build backend hatch".bold(),
+                        "--build-backend hatch".bold(),
                     ));
                 }
                 _ => (),
