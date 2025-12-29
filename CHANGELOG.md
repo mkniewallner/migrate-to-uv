@@ -9,6 +9,7 @@
 ### Bug fixes
 
 * [poetry] Fix typo on `--build-backend` error message ([#571](https://github.com/mkniewallner/migrate-to-uv/pull/571))
+* [poetry] Use `python_full_version` for 3-components Python markers ([#559](https://github.com/mkniewallner/migrate-to-uv/pull/559))
 
 ## 0.9.1 - 2025-12-24
 

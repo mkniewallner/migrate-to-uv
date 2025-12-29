@@ -14,7 +14,13 @@ impl PoetryPep440 {
 
         pep_440_python
             .iter()
-            .map(|spec| format!("python_version {} '{}'", spec.operator(), spec.version()))
+            .map(|spec| {
+                let marker = match spec.version().release().len() {
+                    3.. => "python_full_version",
+                    _ => "python_version",
+                };
+                format!("{marker} {} '{}'", spec.operator(), spec.version())
+            })
             .collect::<Vec<String>>()
             .join(" and ")
     }
