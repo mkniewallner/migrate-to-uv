@@ -121,6 +121,9 @@ with-version-only = { version = "1.2.3" }
 with-extras = { version = "1.2.3", extras = ["asyncio", "postgresql_asyncpg"] }
 with-markers = { version = "1.2.3", markers = "python_version <= '3.11' or sys_platform == 'win32'" }
 with-platform = { version = "1.2.3", platform = "darwin" }
+with-pipe-delimited-platform = { version = "1.2.3", platform = "darwin|linux" }
+with-double-pipe-delimited-platform = { version = "1.2.3", platform = "darwin||linux|windows" }
+with-double-pipe-delimited-platform-and-spaces = { version = "1.2.3", platform = "darwin  || linux |  windows" }
 with-markers-python-platform = { version = "1.2.3", python = "~3.11", platform = "darwin", markers = "platform_python_implementation == 'CPython' or platform_python_implementation == 'Jython'", additional_key = "foobar" }
 with-source = { version = "1.2.3", source = "supplemental" }
 

@@ -171,7 +171,28 @@ impl DependencySpecification {
             }
 
             if let Some(platform) = platform {
-                combined_markers.push(format!("sys_platform == '{platform}'"));
+                // Poetry allows defining platforms delimited by a single or double pipe, like:
+                // - platform = "darwin|linux"
+                // - platform = "darwin||linux||windows"
+                // Those should get converted to:
+                // - sys_platform == 'darwin' or sys_platform == 'linux'
+                // - sys_platform == 'darwin' or sys_platform == 'linux' or sys_platform == 'windows'
+                if platform.contains('|') {
+                    let platforms: Vec<&str> = platform
+                        .split("||")
+                        .flat_map(|s| s.split('|'))
+                        .map(str::trim)
+                        .collect();
+
+                    let marker = platforms
+                        .iter()
+                        .map(|p| format!("sys_platform == '{p}'"))
+                        .collect::<Vec<String>>()
+                        .join(" or ");
+                    combined_markers.push(marker);
+                } else {
+                    combined_markers.push(format!("sys_platform == '{platform}'"));
+                }
             }
         }
 
