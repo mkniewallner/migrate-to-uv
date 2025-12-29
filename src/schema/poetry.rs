@@ -171,14 +171,22 @@ impl DependencySpecification {
             }
 
             if let Some(platform) = platform {
-                // Poetry allows pipe-delimited alternatives (darwin|linux)
-                // Must convert to PEP 508: sys_platform == 'darwin' or sys_platform == 'linux'
-                // See: https://python-poetry.org/docs/dependency-specification/#python-restricted-dependencies
+                // Poetry allows defining platforms delimited by a single or double pipe, like:
+                // - platform = "darwin|linux"
+                // - platform = "darwin||linux||windows"
+                // Those should get converted to:
+                // - sys_platform == 'darwin' or sys_platform == 'linux'
+                // - sys_platform == 'darwin' or sys_platform == 'linux' or sys_platform == 'windows'
                 if platform.contains('|') {
-                    let platforms: Vec<&str> = platform.split('|').map(|s| s.trim()).collect();
+                    let platforms: Vec<&str> = platform
+                        .split("||")
+                        .flat_map(|s| s.split('|'))
+                        .map(str::trim)
+                        .collect();
+
                     let marker = platforms
                         .iter()
-                        .map(|p| format!("sys_platform == '{}'", p))
+                        .map(|p| format!("sys_platform == '{p}'"))
                         .collect::<Vec<String>>()
                         .join(" or ");
                     combined_markers.push(marker);
@@ -310,7 +318,10 @@ mod tests {
         let marker = spec.get_marker();
         assert_eq!(
             marker,
-            Some("sys_platform == 'linux' or sys_platform == 'darwin' or sys_platform == 'freebsd'".to_string())
+            Some(
+                "sys_platform == 'linux' or sys_platform == 'darwin' or sys_platform == 'freebsd'"
+                    .to_string()
+            )
         );
     }
 
