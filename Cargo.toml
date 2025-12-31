@@ -31,7 +31,7 @@ insta = { version = "=1.45.0", features = ["filters"] }
 insta-cmd = "=0.6.0"
 rstest = "=0.26.1"
 tar = "=0.4.44"
-tempfile = "=3.23.0"
+tempfile = "=3.24.0"
 walkdir = "=2.5.0"
 zip = "=7.0.0"
 
