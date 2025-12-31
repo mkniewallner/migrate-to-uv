@@ -258,9 +258,21 @@ pub fn get_build_backend(
         // provide a similar option, we want to default to the same thing as Poetry, i.e. an empty
         // string.
         module_root: Some(String::new()),
-        source_include: Some(source_include),
-        source_exclude: Some(source_exclude),
-        wheel_exclude: Some(wheel_exclude),
+        source_include: if source_include.is_empty() {
+            None
+        } else {
+            Some(source_include)
+        },
+        source_exclude: if source_exclude.is_empty() {
+            None
+        } else {
+            Some(source_exclude)
+        },
+        wheel_exclude: if wheel_exclude.is_empty() {
+            None
+        } else {
+            Some(wheel_exclude)
+        },
         ..UvBuildBackend::default()
     }))
 }
