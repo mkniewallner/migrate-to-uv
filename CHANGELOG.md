@@ -12,6 +12,7 @@
 * [poetry] Use `python_full_version` for 3-components Python markers ([#559](https://github.com/mkniewallner/migrate-to-uv/pull/559))
 * [poetry] Handle platform markers delimited by pipe ([#576](https://github.com/mkniewallner/migrate-to-uv/pull/576))
 * [poetry] Avoid empty arrays in uv build backend ([#582](https://github.com/mkniewallner/migrate-to-uv/pull/582))
+* [poetry] Consistently use `python_full_version` for Python markers to match uv behavior ([#583](https://github.com/mkniewallner/migrate-to-uv/pull/583))
 
 ## 0.9.1 - 2025-12-24
 
