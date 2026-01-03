@@ -7,7 +7,7 @@ icon: lucide/scroll-text
 
 ### New features
 
-* Abort migration early if uv executable is not found ([#558](https://github.com/mkniewallner/migrate-to-uv/pull/558))
+* Abort migration early if uv executable is required but not found ([#558](https://github.com/mkniewallner/migrate-to-uv/pull/558))
 
 ### Bug fixes
 
