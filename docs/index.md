@@ -30,7 +30,7 @@ future.
 
     Although `migrate-to-uv` matches current package manager definition as closely as possible when performing the migration, it is still heavily recommended to double check the end result, especially if you are migrating a package that is meant to be publicly distributed.
     
-    If you notice a behaviour that does not match the previous package manager when migrating, please [raise an issue](https://github.com/mkniewallner/migrate-to-uv/issues), if not already reported.
+    If you notice a behavior that does not match the previous package manager when migrating, please [raise an issue](https://github.com/mkniewallner/migrate-to-uv/issues), if not already reported.
 
 ## Features
 
