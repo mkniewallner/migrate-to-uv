@@ -1,5 +1,5 @@
 use owo_colors::OwoColorize;
-use pep440_rs::{Version, VersionSpecifiers};
+use pep440_rs::{Operator, Version, VersionSpecifiers};
 use std::str::FromStr;
 
 pub enum PoetryPep440 {
@@ -9,17 +9,26 @@ pub enum PoetryPep440 {
 }
 
 impl PoetryPep440 {
+    /// Convert PEP 440 version specifier to Python marker syntax. `python_full_version` is
+    /// consistently used over `python_version` to match what uv does.
     pub fn to_python_marker(&self) -> String {
         let pep_440_python = VersionSpecifiers::from_str(self.to_string().as_str()).unwrap();
 
         pep_440_python
             .iter()
             .map(|spec| {
-                let marker = match spec.version().release().len() {
-                    3.. => "python_full_version",
-                    _ => "python_version",
+                let version = match spec.operator() {
+                    // For Equal operator, we follow what uv does when running
+                    // `uv add <package> --marker "python_version == '<version>'"`.
+                    Operator::Equal => match spec.version().release().len() {
+                        1 => format!("{}.0.*", spec.version()),
+                        2 => format!("{}.*", spec.version()),
+                        _ => spec.version().to_string(),
+                    },
+                    _ => spec.version().to_string(),
                 };
-                format!("{marker} {} '{}'", spec.operator(), spec.version())
+
+                format!("python_full_version {} '{version}'", spec.operator())
             })
             .collect::<Vec<String>>()
             .join(" and ")
