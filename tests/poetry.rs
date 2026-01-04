@@ -189,8 +189,8 @@ fn test_complete_workflow_pep_621_no_poetry_section() {
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [build-system]
-    requires = ["hatchling"]
-    build-backend = "hatchling.build"
+    requires = ["uv_build"]
+    build-backend = "uv_build"
 
     [project]
     name = "foo"
@@ -611,8 +611,9 @@ fn test_skip_lock_full() {
     Successfully migrated project from Poetry to uv!
 
     warning: The following warnings occurred during the migration:
+    warning: - Migrating build backend to Hatch because package distribution metadata is too complex for uv.
     warning: - Could not find dependency "non-existing-dependency" listed in "extra-with-non-existing-dependencies" extra.
-    warning: - Build backend was migrated to hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    warning: - Build backend was migrated to Hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
     "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
@@ -1081,7 +1082,7 @@ fn test_replaces_existing_project() {
 fn test_pep_621() {
     let project_path = Path::new(FIXTURES_PATH).join("pep_621");
 
-    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r###"
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -1089,8 +1090,8 @@ fn test_pep_621() {
     ----- stderr -----
     Migrated pyproject.toml:
     [build-system]
-    requires = ["hatchling"]
-    build-backend = "hatchling.build"
+    requires = ["uv_build"]
+    build-backend = "uv_build"
 
     [project]
     name = "foobar"
@@ -1142,7 +1143,7 @@ fn test_pep_621() {
 
     [tool.ruff.format]
     preview = true
-    "###);
+    "#);
 }
 
 #[test]
@@ -1406,7 +1407,7 @@ fn test_manage_warnings_dry_run() {
 }
 
 #[test]
-fn test_build_backend() {
+fn test_build_backend_auto_hatch() {
     let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch");
 
     let tmp_dir = tempdir().unwrap();
@@ -1438,7 +1439,8 @@ fn test_build_backend() {
     Successfully migrated project from Poetry to uv!
 
     warning: The following warnings occurred during the migration:
-    warning: - Build backend was migrated to hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    warning: - Migrating build backend to Hatch because package distribution metadata is too complex for uv.
+    warning: - Build backend was migrated to Hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
     ");
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
@@ -1539,6 +1541,102 @@ fn test_build_backend() {
 }
 
 #[test]
+fn test_build_backend_auto_uv() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_uv");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(&fixture_path, project_path).unwrap();
+
+    Command::new("uvx")
+        .arg("poetry")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
+    let wheel_files_before =
+        get_zip_entries(&project_path.join("dist"), "foobar-0.1.0-py3-none-any.whl");
+
+    remove_dir_all(project_path.join("dist")).unwrap();
+
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Successfully migrated project from Poetry to uv!
+
+    warning: The following warnings occurred during the migration:
+    warning: - Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    ");
+
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [build-system]
+    requires = ["uv_build"]
+    build-backend = "uv_build"
+
+    [project]
+    name = "foobar"
+    version = "0.1.0"
+    description = "A fabulous project."
+    authors = [{ name = "John Doe", email = "john.doe@example.com" }]
+    requires-python = ">=3.10"
+
+    [tool.uv.build-backend]
+    module-name = [
+        "packages_sdist_wheel",
+        "packages_sdist_wheel_2",
+        "packages_sdist",
+        "packages_sdist_2",
+        "packages_sdist_wheel_with_excluded_files",
+    ]
+    module-root = ""
+    source-exclude = [
+        "packages_sdist_wheel_with_excluded_files/bar.py",
+        "packages_sdist_wheel_with_excluded_files/foobar",
+    ]
+    source-include = [
+        "packages_glob_sdist/**/*.py",
+        "packages_glob_sdist_2/**/*.py",
+        "text_file_sdist.txt",
+        "FILE_WITHOUT_EXTENSION_SDIST",
+        "include_sdist/**",
+        "include_sdist_2/**",
+        "include_sdist_3/**",
+        "include_sdist_4/**",
+        "INCLUDE_FILE_WITHOUT_EXTENSION_SDIST",
+    ]
+    wheel-exclude = [
+        "packages_sdist",
+        "packages_sdist_2",
+        "packages_sdist_wheel_with_excluded_files/bar.py",
+        "packages_sdist_wheel_with_excluded_files/foobar",
+    ]
+    "#);
+
+    Command::new("uv")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
+    let wheel_files_after =
+        get_zip_entries(&project_path.join("dist"), "foobar-0.1.0-py3-none-any.whl");
+
+    assert_eq!(sdist_files_before, sdist_files_after);
+    assert_eq!(wheel_files_before, wheel_files_after);
+}
+
+#[test]
 fn test_build_backend_hatch() {
     let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch");
 
@@ -1571,7 +1669,7 @@ fn test_build_backend_hatch() {
     Successfully migrated project from Poetry to uv!
 
     warning: The following warnings occurred during the migration:
-    warning: - Build backend was migrated to hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    warning: - Build backend was migrated to Hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
     ");
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
@@ -1819,7 +1917,7 @@ fn test_build_backend_uv_errors() {
     error: - "include_sdist_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, which cannot be expressed with uv.
     error: - "include_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
     error: - "include_wheel_2" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
-    error: - Package distribution cound not be migrated to uv build backend due to the issues above. Consider using hatch build backend with "--build-backend hatch".
+    error: - Package distribution cound not be migrated to uv build backend due to the issues above. Consider using Hatch build backend with "--build-backend hatch".
     "#);
 }
 
@@ -1861,7 +1959,7 @@ fn test_build_backend_uv_errors_dry_run() {
     error: - "include_sdist_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, which cannot be expressed with uv.
     error: - "include_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
     error: - "include_wheel_2" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
-    error: - Package distribution cound not be migrated to uv build backend due to the issues above. Consider using hatch build backend with "--build-backend hatch".
+    error: - Package distribution cound not be migrated to uv build backend due to the issues above. Consider using Hatch build backend with "--build-backend hatch".
     "#);
 
     // Assert that `pyproject.toml` was not updated.

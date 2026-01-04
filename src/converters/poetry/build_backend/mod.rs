@@ -1,5 +1,5 @@
 use crate::converters::{BuildBackend, ConverterOptions};
-use crate::errors::add_unrecoverable_error;
+use crate::errors::{add_recoverable_error, add_unrecoverable_error};
 use crate::schema::hatch::Hatch;
 use crate::schema::poetry::{Format, Poetry};
 use crate::schema::pyproject::BuildSystem;
@@ -20,24 +20,24 @@ impl Display for BuildBackendObject {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Uv(_) => write!(f, "uv"),
-            Self::Hatch(_) => write!(f, "hatch"),
+            Self::Hatch(_) => write!(f, "Hatch"),
         }
     }
 }
 
 pub fn get_new_build_system(
     current_build_system: Option<BuildSystem>,
-    new_build_system: Option<BuildBackend>,
+    new_build_system: Option<&BuildBackendObject>,
 ) -> Option<BuildSystem> {
     if current_build_system?.build_backend? == "poetry.core.masonry.api" {
         return match new_build_system {
-            None | Some(BuildBackend::Hatch) => Some(BuildSystem {
-                requires: vec!["hatchling".to_string()],
-                build_backend: Some("hatchling.build".to_string()),
-            }),
-            Some(BuildBackend::Uv) => Some(BuildSystem {
+            None | Some(BuildBackendObject::Uv(_)) => Some(BuildSystem {
                 requires: vec!["uv_build".to_string()],
                 build_backend: Some("uv_build".to_string()),
+            }),
+            Some(BuildBackendObject::Hatch(_)) => Some(BuildSystem {
+                requires: vec!["hatchling".to_string()],
+                build_backend: Some("hatchling.build".to_string()),
             }),
         };
     }
@@ -51,22 +51,38 @@ pub fn get_build_backend(
     poetry: &Poetry,
 ) -> Option<BuildBackendObject> {
     match &converter_options.build_backend {
-        Some(BuildBackend::Hatch) | None => {
-            let hatch = hatch::get_build_backend(
+        None => {
+            let uv = uv::get_build_backend(
                 &converter_options.project_path,
                 poetry.packages.as_ref(),
                 poetry.include.as_ref(),
                 poetry.exclude.as_ref(),
             );
 
-            match hatch {
-                Ok(Some(hatch)) => Some(BuildBackendObject::Hatch(hatch)),
-                Err(errors) => {
-                    for error in errors {
-                        add_unrecoverable_error(error.clone());
-                    }
+            match uv {
+                Ok(Some(uv)) => Some(BuildBackendObject::Uv(uv)),
+                Err(_) => {
+                    add_recoverable_error(
+                        "Migrating build backend to Hatch because package distribution metadata is too complex for uv.".to_string()
+                    );
 
-                    None
+                    let hatch = hatch::get_build_backend(
+                        &converter_options.project_path,
+                        poetry.packages.as_ref(),
+                        poetry.include.as_ref(),
+                        poetry.exclude.as_ref(),
+                    );
+
+                    match hatch {
+                        Ok(Some(hatch)) => Some(BuildBackendObject::Hatch(hatch)),
+                        Err(errors) => {
+                            for error in errors {
+                                add_unrecoverable_error(error.clone());
+                            }
+                            None
+                        }
+                        Ok(None) => None,
+                    }
                 }
                 Ok(None) => None,
             }
@@ -87,9 +103,29 @@ pub fn get_build_backend(
                     }
 
                     add_unrecoverable_error(format!(
-                        "Package distribution cound not be migrated to uv build backend due to the issues above. Consider using hatch build backend with \"{}\".",
+                        "Package distribution cound not be migrated to uv build backend due to the issues above. Consider using Hatch build backend with \"{}\".",
                         "--build-backend hatch".bold(),
                     ));
+
+                    None
+                }
+                Ok(None) => None,
+            }
+        }
+        Some(BuildBackend::Hatch) => {
+            let hatch = hatch::get_build_backend(
+                &converter_options.project_path,
+                poetry.packages.as_ref(),
+                poetry.include.as_ref(),
+                poetry.exclude.as_ref(),
+            );
+
+            match hatch {
+                Ok(Some(hatch)) => Some(BuildBackendObject::Hatch(hatch)),
+                Err(errors) => {
+                    for error in errors {
+                        add_unrecoverable_error(error.clone());
+                    }
 
                     None
                 }

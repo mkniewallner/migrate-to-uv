@@ -108,15 +108,9 @@ migration.
 ### Build backend
 
 Although uv has [its own build backend](https://docs.astral.sh/uv/concepts/build-backend/), it cannot express everything
-that Poetry supports. Additionally, `migrate-to-uv` was created before uv build backend was stabilized, and
-chose [Hatch](https://hatch.pypa.io/latest/config/build/) in the meantime.
-
-!!! info
-
-    Support for uv build backend was recently added, but is still considered experimental, so Hatch is still used by
-    default. If you want to explicitly use uv as a build backend, you can
-    use [`--build-backend uv`](configuration.md#-build-backend), but note that the migration can fail if you use some
-    package distribution options that cannot be expressed with uv build backend.
+that Poetry supports. For this reason, `migrate-to-uv` prioritises using uv if the package distribution metadata is
+simple enough to use it, but uses [Hatch](https://hatch.pypa.io/latest/config/build/) otherwise. It is possible to
+explicitly choose a build backend by using [`--build-backend`](configuration.md#-build-backend).
 
 When converting the build backend to Hatch, `migrate-to-uv` migrates the following things:
 
