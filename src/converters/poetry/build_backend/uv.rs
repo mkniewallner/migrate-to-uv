@@ -86,13 +86,25 @@ pub fn get_build_backend(
                 }
             } else {
                 let name = include.replace('/', ".");
+                let has_init_file = has_init_file(project_path, include, from.as_ref());
+
+                if !has_init_file {
+                    errors.push(
+                        format!(
+                            "\"{}\" from \"{}\" cannot be converted to uv, as it does not contain an \"{}\" file, which is required by uv for packages.",
+                            include.bold(),
+                            "poetry.packages.include".bold(),
+                            "__init__.py".bold(),
+                        )
+                    );
+                }
 
                 if add_to_sdist && add_to_wheel {
-                    if has_init_file(project_path, include, from.as_ref(), &mut errors) {
+                    if has_init_file {
                         module_name.push(name.clone());
                     }
                 } else if add_to_sdist {
-                    if has_init_file(project_path, include, from.as_ref(), &mut errors) {
+                    if has_init_file {
                         module_name.push(name.clone());
                         wheel_exclude.push(include.clone());
                     }
@@ -187,28 +199,11 @@ pub fn get_build_backend(
     }))
 }
 
-fn has_init_file(
-    project_path: &Path,
-    include: &String,
-    from: Option<&String>,
-    errors: &mut Vec<String>,
-) -> bool {
+fn has_init_file(project_path: &Path, include: &String, from: Option<&String>) -> bool {
     let path = from.map_or_else(
         || project_path.join(include).join("__init__.py"),
         |from| project_path.join(from).join(include).join("__init__.py"),
     );
 
-    if path.exists() {
-        true
-    } else {
-        errors.push(
-            format!(
-                "\"{}\" from \"{}\" cannot be converted to uv, as it does not contain an \"{}\" file, which is required by uv for packages.",
-                include.bold(),
-                "poetry.packages.include".bold(),
-                "__init__.py".bold(),
-            )
-        );
-        false
-    }
+    path.exists()
 }
