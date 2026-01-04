@@ -111,3 +111,16 @@ fn get_packages_distribution_format(format: Option<&SingleOrVec<Format>>) -> (bo
         Some(SingleOrVec::Vec(vec)) => (vec.contains(&Format::Sdist), vec.contains(&Format::Wheel)),
     }
 }
+
+/// Get the distributions to include an item from `include` to.
+/// <https://python-poetry.org/docs/pyproject/#exclude-and-include>
+fn get_include_distribution_format(format: Option<&SingleOrVec<Format>>) -> (bool, bool) {
+    match format {
+        // If there is no format specified, files are only added to sdist.
+        None | Some(SingleOrVec::Single(Format::Sdist)) => (true, false),
+        Some(SingleOrVec::Single(Format::Wheel)) => (false, true),
+        // Note: An empty `format = []` in Poetry means that the files will not be added to
+        // any distribution at all.
+        Some(SingleOrVec::Vec(vec)) => (vec.contains(&Format::Sdist), vec.contains(&Format::Wheel)),
+    }
+}
