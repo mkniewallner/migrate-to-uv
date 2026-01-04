@@ -1794,6 +1794,7 @@ fn test_build_backend_uv_errors() {
     ----- stderr -----
     error: Could not automatically migrate the project to uv because of the following errors:
     error: - "packages_wheel" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
+    error: - "packages_wheel_2" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
     error: - "packages_glob_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
     error: - "packages_glob_sdist_wheel_2/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
     error: - "packages_glob_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and uses globs, which cannot be expressed with uv.
@@ -1835,6 +1836,7 @@ fn test_build_backend_uv_errors_dry_run() {
     ----- stderr -----
     error: Could not automatically migrate the project to uv because of the following errors:
     error: - "packages_wheel" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
+    error: - "packages_wheel_2" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
     error: - "packages_glob_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
     error: - "packages_glob_sdist_wheel_2/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
     error: - "packages_glob_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and uses globs, which cannot be expressed with uv.

@@ -152,12 +152,15 @@ pub fn get_build_backend(
                                     module_name.push(name.clone());
                                     wheel_exclude.push(include.clone());
                                 }
-                            } else if vec.contains(&Format::Wheel)
-                                && !vec.contains(&Format::Sdist)
-                                && has_init_file(project_path, include, from.as_ref(), &mut errors)
+                            } else if vec.contains(&Format::Wheel) && !vec.contains(&Format::Sdist)
                             {
-                                module_name.push(name.clone());
-                                source_exclude.push(include.clone());
+                                errors.push(
+                                    format!(
+                                        "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.",
+                                        include.bold(),
+                                        "poetry.packages.include".bold(),
+                                    )
+                                );
                             }
                         }
                     }
