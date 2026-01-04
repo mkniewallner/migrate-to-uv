@@ -1,3 +1,4 @@
+use crate::converters::poetry::build_backend::get_packages_distribution_format;
 use crate::schema::hatch::{Build, BuildTarget, Hatch};
 use crate::schema::poetry::{Format, Include, Package};
 use crate::schema::utils::SingleOrVec;
@@ -100,16 +101,7 @@ fn get_include(
                 // Ensure that separator remains "/" (Windows uses "\").
                 .replace(MAIN_SEPARATOR, "/");
 
-            let (add_to_sdist, add_to_wheel) = match format {
-                None => (true, true),
-                Some(SingleOrVec::Single(Format::Sdist)) => (true, false),
-                Some(SingleOrVec::Single(Format::Wheel)) => (false, true),
-                // Note: An empty `format = []` in Poetry means that the files will not be added to
-                // any distribution at all.
-                Some(SingleOrVec::Vec(vec)) => {
-                    (vec.contains(&Format::Sdist), vec.contains(&Format::Wheel))
-                }
-            };
+            let (add_to_sdist, add_to_wheel) = get_packages_distribution_format(format.as_ref());
 
             if add_to_sdist {
                 sdist_include.push(include_with_from.clone());

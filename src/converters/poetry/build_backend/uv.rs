@@ -1,3 +1,4 @@
+use crate::converters::poetry::build_backend::get_packages_distribution_format;
 use crate::schema::poetry::{Format, Include, Package};
 use crate::schema::utils::SingleOrVec;
 use crate::schema::uv::UvBuildBackend;
@@ -48,6 +49,8 @@ pub fn get_build_backend(
                 );
             }
 
+            let (add_to_sdist, add_to_wheel) = get_packages_distribution_format(format.as_ref());
+
             let contains_glob = include.contains('*');
             let is_file = project_path.join(include).is_file();
 
@@ -58,112 +61,47 @@ pub fn get_build_backend(
                     "is a file"
                 };
 
-                match format {
-                    None => {
-                        errors.push(
-                            format!(
-                                "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and {}, which cannot be expressed with uv.",
-                                include.bold(),
-                                "poetry.packages.include".bold(),
-                                reason,
-                            )
-                        );
-                    }
-                    Some(SingleOrVec::Single(Format::Wheel)) => {
-                        errors.push(
-                            format!(
-                                "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to wheels only, and {}, which cannot be expressed with uv.",
-                                include.bold(),
-                                "poetry.packages.include".bold(),
-                                reason,
-                            )
-                        );
-                    }
-                    Some(SingleOrVec::Single(Format::Sdist)) => {
-                        source_include.push(include.clone());
-                    }
-                    Some(SingleOrVec::Vec(vec)) => {
-                        // Note: An empty `format = []` in Poetry means that the files will not be added to
-                        // any distribution at all.
-                        if !vec.is_empty() {
-                            if vec.contains(&Format::Sdist) && !vec.contains(&Format::Wheel) {
-                                source_include.push(include.clone());
-                            } else if vec.contains(&Format::Wheel) && vec.contains(&Format::Sdist) {
-                                errors.push(
-                                    format!(
-                                        "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and {}, which cannot be expressed with uv.",
-                                        include.bold(),
-                                        "poetry.packages.include".bold(),
-                                        reason,
-                                    )
-                                );
-                            } else if vec.contains(&Format::Wheel) && !vec.contains(&Format::Sdist)
-                            {
-                                errors.push(
-                                    format!(
-                                        "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to wheels only, and {}, which cannot be expressed with uv.",
-                                        include.bold(),
-                                        "poetry.packages.include".bold(),
-                                        reason,
-                                    )
-                                );
-                            }
-                        }
-                    }
+                if add_to_sdist && add_to_wheel {
+                    errors.push(
+                        format!(
+                            "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and {}, which cannot be expressed with uv.",
+                            include.bold(),
+                            "poetry.packages.include".bold(),
+                            reason,
+                        )
+                    );
+                } else if add_to_sdist {
+                    source_include.push(include.clone());
+                } else if add_to_wheel {
+                    errors.push(
+                        format!(
+                            "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to wheels only, and {}, which cannot be expressed with uv.",
+                            include.bold(),
+                            "poetry.packages.include".bold(),
+                            reason,
+                        )
+                    );
                 }
             } else {
                 let name = include.replace('/', ".");
 
-                match format {
-                    None => {
-                        if has_init_file(project_path, include, from.as_ref(), &mut errors) {
-                            module_name.push(name.clone());
-                        }
+                if add_to_sdist && add_to_wheel {
+                    if has_init_file(project_path, include, from.as_ref(), &mut errors) {
+                        module_name.push(name.clone());
                     }
-                    Some(SingleOrVec::Single(Format::Wheel)) => {
-                        errors.push(
-                            format!(
-                                "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.",
-                                include.bold(),
-                                "poetry.packages.include".bold(),
-                            )
-                        );
+                } else if add_to_sdist {
+                    if has_init_file(project_path, include, from.as_ref(), &mut errors) {
+                        module_name.push(name.clone());
+                        wheel_exclude.push(include.clone());
                     }
-                    Some(SingleOrVec::Single(Format::Sdist)) => {
-                        if has_init_file(project_path, include, from.as_ref(), &mut errors) {
-                            module_name.push(name.clone());
-                            wheel_exclude.push(include.clone());
-                        }
-                    }
-
-                    Some(SingleOrVec::Vec(vec)) => {
-                        // Note: An empty `format = []` in Poetry means that the files will not be added to
-                        // any distribution at all.
-                        if !vec.is_empty() {
-                            if vec.contains(&Format::Sdist) && vec.contains(&Format::Wheel) {
-                                if has_init_file(project_path, include, from.as_ref(), &mut errors)
-                                {
-                                    module_name.push(name.clone());
-                                }
-                            } else if vec.contains(&Format::Sdist) && !vec.contains(&Format::Wheel)
-                            {
-                                if has_init_file(project_path, include, from.as_ref(), &mut errors)
-                                {
-                                    module_name.push(name.clone());
-                                    wheel_exclude.push(include.clone());
-                                }
-                            } else if vec.contains(&Format::Wheel) && !vec.contains(&Format::Sdist)
-                            {
-                                errors.push(
-                                    format!(
-                                        "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.",
-                                        include.bold(),
-                                        "poetry.packages.include".bold(),
-                                    )
-                                );
-                            }
-                        }
-                    }
+                } else if add_to_wheel {
+                    errors.push(
+                        format!(
+                            "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.",
+                            include.bold(),
+                            "poetry.packages.include".bold(),
+                        )
+                    );
                 }
             }
         }
