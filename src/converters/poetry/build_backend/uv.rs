@@ -12,10 +12,10 @@ pub fn get_build_backend(
 ) -> Result<Option<UvBuildBackend>, Vec<String>> {
     let mut errors = Vec::new();
 
-    let mut module_name = Vec::new();
-    let mut source_include = Vec::new();
-    let mut source_exclude = Vec::new();
-    let mut wheel_exclude = Vec::new();
+    let mut module_name: Vec<String> = Vec::new();
+    let mut source_include: Vec<String> = Vec::new();
+    let mut source_exclude: Vec<String> = Vec::new();
+    let mut wheel_exclude: Vec<String> = Vec::new();
 
     // https://python-poetry.org/docs/pyproject/#packages
     if let Some(packages) = packages {
@@ -152,12 +152,15 @@ pub fn get_build_backend(
                                     module_name.push(name.clone());
                                     wheel_exclude.push(include.clone());
                                 }
-                            } else if vec.contains(&Format::Wheel)
-                                && !vec.contains(&Format::Sdist)
-                                && has_init_file(project_path, include, from.as_ref(), &mut errors)
+                            } else if vec.contains(&Format::Wheel) && !vec.contains(&Format::Sdist)
                             {
-                                module_name.push(name.clone());
-                                source_exclude.push(include.clone());
+                                errors.push(
+                                    format!(
+                                        "\"{}\" from \"{}\" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.",
+                                        include.bold(),
+                                        "poetry.packages.include".bold(),
+                                    )
+                                );
                             }
                         }
                     }
@@ -234,10 +237,8 @@ pub fn get_build_backend(
 
     // https://python-poetry.org/docs/pyproject/#exclude-and-include
     if let Some(exclude) = exclude {
-        for excl in exclude {
-            source_exclude.push(excl.clone());
-            wheel_exclude.push(excl.clone());
-        }
+        source_exclude.extend(exclude.clone());
+        wheel_exclude.extend(exclude.clone());
     }
 
     if !errors.is_empty() {
