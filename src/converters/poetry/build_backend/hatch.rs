@@ -1,6 +1,8 @@
+use crate::converters::poetry::build_backend::{
+    get_include_distribution_format, get_packages_distribution_format,
+};
 use crate::schema::hatch::{Build, BuildTarget, Hatch};
-use crate::schema::poetry::{Format, Include, Package};
-use crate::schema::utils::SingleOrVec;
+use crate::schema::poetry::{Include, Package};
 use indexmap::IndexMap;
 use std::path::{MAIN_SEPARATOR, Path, PathBuf};
 
@@ -100,16 +102,7 @@ fn get_include(
                 // Ensure that separator remains "/" (Windows uses "\").
                 .replace(MAIN_SEPARATOR, "/");
 
-            let (add_to_sdist, add_to_wheel) = match format {
-                None => (true, true),
-                Some(SingleOrVec::Single(Format::Sdist)) => (true, false),
-                Some(SingleOrVec::Single(Format::Wheel)) => (false, true),
-                // Note: An empty `format = []` in Poetry means that the files will not be added to
-                // any distribution at all.
-                Some(SingleOrVec::Vec(vec)) => {
-                    (vec.contains(&Format::Sdist), vec.contains(&Format::Wheel))
-                }
-            };
+            let (add_to_sdist, add_to_wheel) = get_packages_distribution_format(format.as_ref());
 
             if add_to_sdist {
                 sdist_include.push(include_with_from.clone());
@@ -134,32 +127,11 @@ fn get_include(
     // https://python-poetry.org/docs/pyproject/#exclude-and-include
     if let Some(include) = include {
         for inc in include {
-            let (add_to_sdist, add_to_wheel, path) = match inc {
-                Include::String(path)
-                | Include::Map {
-                    path,
-                    format: None | Some(SingleOrVec::Single(Format::Sdist)),
-                } => {
-                    // https://python-poetry.org/docs/1.8/pyproject/#include-and-exclude
-                    // If there is no format specified, files are only added to sdist.
-                    (true, false, path)
-                }
-                Include::Map {
-                    path,
-                    format: Some(SingleOrVec::Single(Format::Wheel)),
-                } => (false, true, path),
-                // Note: An empty `format = []` in Poetry means that the files will not be added to
-                // any distribution at all.
-                Include::Map {
-                    path,
-                    format: Some(SingleOrVec::Vec(format)),
-                } => match format[..] {
-                    [Format::Sdist, Format::Wheel] => (true, true, path),
-                    [Format::Sdist] => (true, false, path),
-                    [Format::Wheel] => (false, true, path),
-                    _ => (false, false, path),
-                },
+            let (path, format) = match inc {
+                Include::Map { path, format } => (path, format.as_ref()),
+                Include::String(path) => (path, None),
             };
+            let (add_to_sdist, add_to_wheel) = get_include_distribution_format(format);
 
             if add_to_sdist {
                 sdist_force_include.insert(path.clone(), path.clone());

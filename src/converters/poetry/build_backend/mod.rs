@@ -1,8 +1,9 @@
 use crate::converters::{BuildBackend, ConverterOptions};
 use crate::errors::add_unrecoverable_error;
 use crate::schema::hatch::Hatch;
-use crate::schema::poetry::Poetry;
+use crate::schema::poetry::{Format, Poetry};
 use crate::schema::pyproject::BuildSystem;
+use crate::schema::utils::SingleOrVec;
 use crate::schema::uv::UvBuildBackend;
 use owo_colors::OwoColorize;
 use std::fmt::Display;
@@ -95,5 +96,31 @@ pub fn get_build_backend(
                 Ok(None) => None,
             }
         }
+    }
+}
+
+/// Get the distributions to include an item from `packages` to.
+/// <https://python-poetry.org/docs/pyproject/#packages>
+fn get_packages_distribution_format(format: Option<&SingleOrVec<Format>>) -> (bool, bool) {
+    match format {
+        None => (true, true),
+        Some(SingleOrVec::Single(Format::Sdist)) => (true, false),
+        Some(SingleOrVec::Single(Format::Wheel)) => (false, true),
+        // Note: An empty `format = []` in Poetry means that the files will not be added to
+        // any distribution at all.
+        Some(SingleOrVec::Vec(vec)) => (vec.contains(&Format::Sdist), vec.contains(&Format::Wheel)),
+    }
+}
+
+/// Get the distributions to include an item from `include` to.
+/// <https://python-poetry.org/docs/pyproject/#exclude-and-include>
+fn get_include_distribution_format(format: Option<&SingleOrVec<Format>>) -> (bool, bool) {
+    match format {
+        // If there is no format specified, files are only added to sdist.
+        None | Some(SingleOrVec::Single(Format::Sdist)) => (true, false),
+        Some(SingleOrVec::Single(Format::Wheel)) => (false, true),
+        // Note: An empty `format = []` in Poetry means that the files will not be added to
+        // any distribution at all.
+        Some(SingleOrVec::Vec(vec)) => (vec.contains(&Format::Sdist), vec.contains(&Format::Wheel)),
     }
 }
