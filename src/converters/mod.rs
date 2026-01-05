@@ -195,11 +195,6 @@ pub trait Converter: Any + Debug {
         self.get_converter_options().dependency_groups_strategy
     }
 
-    /// Build backend to use when migrating package distribution metadata.
-    fn get_build_backend(&self) -> Option<BuildBackend> {
-        self.get_converter_options().build_backend
-    }
-
     /// List of files tied to the current package manager to delete at the end of the migration.
     fn get_migrated_files_to_delete(&self) -> Vec<String>;
 

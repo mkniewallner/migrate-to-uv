@@ -5,15 +5,24 @@ icon: lucide/scroll-text
 
 ## Unreleased
 
-### New features
+### Breaking changes
+
+#### Automatic selection of build backend
+
+When migrating Poetry package distribution metadata, `migrate-to-uv` now automatically chooses the build backend to use based on the metadata complexity, prioritising [uv](https://docs.astral.sh/uv/concepts/build-backend/) if it is simple enough, or using [Hatch](https://hatch.pypa.io/latest/config/build/) otherwise.
+
+It is still possible to explicitly choose a specific build backend with `--build-backend hatch` or `--build-backend uv`, but if the latter is chosen and the package distribution metadata cannot be expressed with uv build backend, the migration will fail, suggesting to use `--build-backend hatch` instead.
+
+### Features
 
 * Abort migration early if uv executable is required but not found ([#558](https://github.com/mkniewallner/migrate-to-uv/pull/558))
+* [poetry] Choose build backend based on distribution complexity ([#597](https://github.com/mkniewallner/migrate-to-uv/pull/597))
 
 ### Bug fixes
 
 * [poetry] Fix typo on `--build-backend` error message ([#571](https://github.com/mkniewallner/migrate-to-uv/pull/571))
 * [poetry] Use `python_full_version` for 3-components Python markers ([#559](https://github.com/mkniewallner/migrate-to-uv/pull/559))
-* [poetry] Handle platform markers delimited by pipe ([#576](https://github.com/mkniewallner/migrate-to-uv/pull/576))
+* [poetry] Handle platform markers delimited by pipe ([#576](https://github.com/mkniewallner/migrate-to-uv/pull/576), [#498](https://github.com/mkniewallner/migrate-to-uv/pull/498))
 * [poetry] Avoid empty arrays in uv build backend ([#582](https://github.com/mkniewallner/migrate-to-uv/pull/582))
 * [poetry] Consistently use `python_full_version` for Python markers to match uv behavior ([#583](https://github.com/mkniewallner/migrate-to-uv/pull/583))
 * [poetry] Fail on wheel-only packages using array for uv build backend ([#595](https://github.com/mkniewallner/migrate-to-uv/pull/595))

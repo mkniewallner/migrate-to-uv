@@ -102,17 +102,15 @@ migrate-to-uv --package-manager poetry
 
 ### `--build-backend`
 
-The build backend to choose when performing the migration. If the option is not provided, `hatch` is chosen by default.
-
-!!!info
-
-    Support for `uv` is considered experimental, but the default will likely change in the future, where the build
-    backend will be chosen based on the complexity of the package distribution metadata.
+The build backend to choose when performing the migration. If the option is not provided, the build backend will be
+automatically chosen based on the package distribution complexity,
+using [uv](https://docs.astral.sh/uv/concepts/build-backend/) if it is simple enough, or
+using [Hatch](https://hatch.pypa.io/latest/config/build/) otherwise.
 
 !!!note
 
-    If you choose `uv` and the migration cannot be performed because the project uses package distribution metadata that
-    cannot be expressed with uv build backend, the migration will fail, suggesting to use hatch with
+    If you explicitly choose `uv` and the migration cannot be performed because the project uses package distribution
+    metadata that cannot be expressed with uv build backend, the migration will fail, suggesting to use hatch with
     `--build-backend hatch`.
 
 **Available options**:
