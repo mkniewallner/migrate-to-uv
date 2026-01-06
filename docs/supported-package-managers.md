@@ -122,6 +122,57 @@ When converting the build backend to Hatch, `migrate-to-uv` migrates the followi
     Path rewriting, defined with `to` in `packages` for Poetry, is also migrated to Hatch by defining
     [sources](https://hatch.pypa.io/latest/config/build/#rewriting-paths) in wheel target.
 
+### Specificities
+
+#### Python classifiers
+
+When building distributions,
+Poetry [automatically adds Python classifiers](https://python-poetry.org/docs/pyproject#classifiers-1) based on the
+Python versions allowed by `python` under `[tool.poetry.dependencies]`. Since uv does not, if `migrate-to-uv` detects
+that Poetry build backend is used, it will assume that the project is a package, and will add the classifiers in
+`classifiers` under `[project]` section, in order to not lose those classifiers after the migration.
+
+For instance, this `pyproject.toml`:
+
+```toml
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "foo"
+version = "0.0.1"
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+```
+
+would get converted to:
+
+```toml
+[build-system]
+requires = ["uv_build"]
+build-backend = "uv_build"
+
+[project]
+name = "foo"
+version = "0.0.1"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+```
+
+!!! note
+
+    Python classifiers will not get automatically added if a `classifiers` key is already defined under `[project]`
+    section, as Poetry [does not add them](https://python-poetry.org/docs/pyproject#classifiers) in that specific case.
+
 ## Pipenv
 
 All existing [Pipenv](https://pipenv.pypa.io/en/stable/) metadata should be converted to uv when performing the
