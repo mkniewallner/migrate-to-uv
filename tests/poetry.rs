@@ -197,6 +197,13 @@ fn test_complete_workflow_pep_621_no_poetry_section() {
     version = "0.1.0"
     description = "A fabulous project."
     requires-python = ">=3.11"
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+    ]
     dependencies = ["arrow>=1.2.3,<2"]
 
     [dependency-groups]
@@ -645,6 +652,11 @@ fn test_skip_lock_full() {
         "License :: OSI Approved :: MIT License",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
     ]
     dependencies = [
         "caret>=1.2.3,<2",
@@ -1454,6 +1466,14 @@ fn test_build_backend_auto_hatch() {
     description = "A fabulous project."
     authors = [{ name = "John Doe", email = "john.doe@example.com" }]
     requires-python = ">=3.10"
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+    ]
 
     [tool.hatch.build.targets.sdist]
     include = [
@@ -1587,6 +1607,14 @@ fn test_build_backend_auto_uv() {
     description = "A fabulous project."
     authors = [{ name = "John Doe", email = "john.doe@example.com" }]
     requires-python = ">=3.10"
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+    ]
 
     [tool.uv.build-backend]
     module-name = [
@@ -1683,6 +1711,14 @@ fn test_build_backend_hatch() {
     description = "A fabulous project."
     authors = [{ name = "John Doe", email = "john.doe@example.com" }]
     requires-python = ">=3.10"
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+    ]
 
     [tool.hatch.build.targets.sdist]
     include = [
@@ -1816,6 +1852,14 @@ fn test_build_backend_uv() {
     description = "A fabulous project."
     authors = [{ name = "John Doe", email = "john.doe@example.com" }]
     requires-python = ">=3.10"
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+    ]
 
     [tool.uv.build-backend]
     module-name = [

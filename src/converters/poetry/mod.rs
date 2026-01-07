@@ -7,6 +7,7 @@ pub mod version;
 use crate::converters::Converter;
 use crate::converters::ConverterOptions;
 use crate::converters::poetry::build_backend::{BuildBackendObject, get_build_backend};
+use crate::converters::poetry::project::get_classifiers;
 use crate::converters::pyproject_updater::PyprojectUpdater;
 use crate::errors::{
     MIGRATION_ERRORS, MigrationError, add_recoverable_error, add_unrecoverable_error,
@@ -40,6 +41,8 @@ impl Converter for Poetry {
             .unwrap_or_default();
 
         let build_backend = get_build_backend(&self.converter_options, &poetry);
+        let build_system =
+            build_backend::get_new_build_system(pyproject.build_system, build_backend.as_ref());
 
         let mut uv_source_index: IndexMap<String, SourceContainer> = IndexMap::new();
         let (dependency_groups, uv_default_groups) =
@@ -53,6 +56,14 @@ impl Converter for Poetry {
         let python_specification = poetry_dependencies
             .as_mut()
             .and_then(|dependencies| dependencies.shift_remove("python"));
+
+        let requires_python = python_specification.and_then(|p| match p.to_pep_508() {
+            Ok(v) => Some(v),
+            Err(e) => {
+                add_unrecoverable_error(e.format("python"));
+                None
+            }
+        });
 
         let optional_dependencies =
             dependencies::get_optional(&mut poetry_dependencies, poetry.extras);
@@ -72,18 +83,17 @@ impl Converter for Poetry {
             version: Some(poetry.version.unwrap_or_else(|| "0.0.1".to_string())),
             description: poetry.description,
             authors: project::get_authors(poetry.authors),
-            requires_python: python_specification.and_then(|p| match p.to_pep_508() {
-                Ok(v) => Some(v),
-                Err(e) => {
-                    add_unrecoverable_error(e.format("python"));
-                    None
-                }
-            }),
+            requires_python: requires_python.clone(),
             readme: project::get_readme(poetry.readme),
             license: poetry.license.map(License::String),
             maintainers: project::get_authors(poetry.maintainers),
             keywords: poetry.keywords,
-            classifiers: poetry.classifiers,
+            classifiers: get_classifiers(
+                poetry.classifiers,
+                build_system.as_ref(),
+                requires_python,
+                pyproject.project.as_ref(),
+            ),
             dependencies: dependencies::get(poetry_dependencies.as_ref(), &mut uv_source_index),
             optional_dependencies,
             urls: project::get_urls(
@@ -120,10 +130,7 @@ impl Converter for Poetry {
             pyproject: &mut updated_pyproject,
         };
 
-        pyproject_updater.insert_build_system(
-            build_backend::get_new_build_system(pyproject.build_system, build_backend.as_ref())
-                .as_ref(),
-        );
+        pyproject_updater.insert_build_system(build_system.as_ref());
         pyproject_updater.insert_pep_621(&self.build_project(pyproject.project, project));
         pyproject_updater.insert_dependency_groups(dependency_groups.as_ref());
         pyproject_updater.insert_uv(&uv);
@@ -328,6 +335,543 @@ mod tests {
         version = "0.0.1"
         requires-python = ">=3.12,<4"
         license = { file = "LICENSE" }
+        "#);
+    }
+
+    #[test]
+    fn test_classifiers_no_python() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                skip_uv_checks: false,
+                ignore_locked_versions: true,
+                replace_project_section: false,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [build-system]
+        requires = ["uv_build"]
+        build-backend = "uv_build"
+
+        [project]
+        name = ""
+        version = "0.0.1"
+        classifiers = [
+            "Programming Language :: Python :: 2",
+            "Programming Language :: Python :: 2.7",
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.4",
+            "Programming Language :: Python :: 3.5",
+            "Programming Language :: Python :: 3.6",
+            "Programming Language :: Python :: 3.7",
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
+            "Programming Language :: Python :: 3.14",
+        ]
+        "#);
+    }
+
+    #[test]
+    fn test_classifiers_python_restricted() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                skip_uv_checks: false,
+                ignore_locked_versions: true,
+                replace_project_section: false,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [build-system]
+        requires = ["uv_build"]
+        build-backend = "uv_build"
+
+        [project]
+        name = ""
+        version = "0.0.1"
+        requires-python = ">=3.10,<4"
+        classifiers = [
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
+            "Programming Language :: Python :: 3.14",
+        ]
+        "#);
+    }
+
+    #[test]
+    fn test_classifiers_python_restricted_2() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+python = ">=3.2,<3.13"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                skip_uv_checks: false,
+                ignore_locked_versions: true,
+                replace_project_section: false,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [build-system]
+        requires = ["uv_build"]
+        build-backend = "uv_build"
+
+        [project]
+        name = ""
+        version = "0.0.1"
+        requires-python = ">=3.2,<3.13"
+        classifiers = [
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.4",
+            "Programming Language :: Python :: 3.5",
+            "Programming Language :: Python :: 3.6",
+            "Programming Language :: Python :: 3.7",
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
+        ]
+        "#);
+    }
+
+    #[test]
+    fn test_classifiers_python_restricted_3() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+python = ">=2.6"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                skip_uv_checks: false,
+                ignore_locked_versions: true,
+                replace_project_section: false,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [build-system]
+        requires = ["uv_build"]
+        build-backend = "uv_build"
+
+        [project]
+        name = ""
+        version = "0.0.1"
+        requires-python = ">=2.6"
+        classifiers = [
+            "Programming Language :: Python :: 2",
+            "Programming Language :: Python :: 2.7",
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.4",
+            "Programming Language :: Python :: 3.5",
+            "Programming Language :: Python :: 3.6",
+            "Programming Language :: Python :: 3.7",
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
+            "Programming Language :: Python :: 3.14",
+        ]
+        "#);
+    }
+
+    #[test]
+    fn test_classifiers_merge_existing() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Libraries",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                skip_uv_checks: false,
+                ignore_locked_versions: true,
+                replace_project_section: false,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [build-system]
+        requires = ["uv_build"]
+        build-backend = "uv_build"
+
+        [project]
+        name = ""
+        version = "0.0.1"
+        requires-python = ">=3.10"
+        classifiers = [
+            "Intended Audience :: Developers",
+            "Programming Language :: Python :: 3.13",
+            "Programming Language :: Python :: 3.14",
+            "Topic :: Software Development :: Libraries",
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
+        ]
+        "#);
+    }
+
+    #[test]
+    fn test_classifiers_no_build_system() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[tool.poetry]
+name = ""
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                skip_uv_checks: false,
+                ignore_locked_versions: true,
+                replace_project_section: false,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = ""
+        version = "0.0.1"
+        "#);
+    }
+
+    #[test]
+    fn test_classifiers_non_poetry_build_system() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[build-system]
+requires = ["foo"]
+build-backend = "bar"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                skip_uv_checks: false,
+                ignore_locked_versions: true,
+                replace_project_section: false,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = ""
+        version = "0.0.1"
+
+
+        [build-system]
+        requires = ["foo"]
+        build-backend = "bar"
+        "#);
+    }
+
+    #[test]
+    fn test_classifiers_pep_621_no_python() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = ""
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                skip_uv_checks: false,
+                ignore_locked_versions: true,
+                replace_project_section: false,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [build-system]
+        requires = ["uv_build"]
+        build-backend = "uv_build"
+
+        [project]
+        name = ""
+        version = "0.0.1"
+        classifiers = [
+            "Programming Language :: Python :: 2",
+            "Programming Language :: Python :: 2.7",
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.4",
+            "Programming Language :: Python :: 3.5",
+            "Programming Language :: Python :: 3.6",
+            "Programming Language :: Python :: 3.7",
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
+            "Programming Language :: Python :: 3.14",
+        ]
+        "#);
+    }
+
+    #[test]
+    fn test_classifiers_pep_621_python_restricted() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+requires-python = ">=3.10"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                skip_uv_checks: false,
+                ignore_locked_versions: true,
+                replace_project_section: false,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [build-system]
+        requires = ["uv_build"]
+        build-backend = "uv_build"
+
+        [project]
+        name = ""
+        version = "0.0.1"
+        requires-python = ">=3.10"
+        classifiers = [
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
+            "Programming Language :: Python :: 3.14",
+        ]
+        "#);
+    }
+
+    #[test]
+    fn test_classifiers_pep_621_with_classifiers() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Libraries",
+]
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                skip_uv_checks: false,
+                ignore_locked_versions: true,
+                replace_project_section: false,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [build-system]
+        requires = ["uv_build"]
+        build-backend = "uv_build"
+
+        [project]
+        name = ""
+        version = "0.0.1"
+        classifiers = [
+            "Intended Audience :: Developers",
+            "Programming Language :: Python :: 3.13",
+            "Programming Language :: Python :: 3.14",
+            "Topic :: Software Development :: Libraries",
+        ]
         "#);
     }
 }
