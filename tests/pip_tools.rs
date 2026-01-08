@@ -32,22 +32,22 @@ fn test_complete_workflow() {
         .arg("--dev-requirements-file")
         .arg("requirements-dev.in")
         .arg("--dev-requirements-file")
-        .arg("requirements-typing.in"), @r###"
+        .arg("requirements-typing.in"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
-    Locking dependencies with "uv lock" again to remove constraints...
+    Locking dependencies again using "uv lock" to remove constraints...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip-tools to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
     [project]
@@ -146,18 +146,18 @@ fn test_ignore_locked_versions() {
         .arg("requirements-dev.in")
         .arg("--dev-requirements-file")
         .arg("requirements-typing.in")
-        .arg("--ignore-locked-versions"), @r###"
+        .arg("--ignore-locked-versions"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies using "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip-tools to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
     [project]
@@ -226,22 +226,22 @@ fn test_keep_current_data() {
         .arg("requirements-dev.in")
         .arg("--dev-requirements-file")
         .arg("requirements-typing.in")
-        .arg("--keep-current-data"), @r###"
+        .arg("--keep-current-data"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
-    Locking dependencies with "uv lock" again to remove constraints...
+    Locking dependencies again using "uv lock" to remove constraints...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip-tools to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
     [project]

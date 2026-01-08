@@ -1,11 +1,40 @@
 use log::{error, info, warn};
 use owo_colors::OwoColorize;
+use std::fmt::Display;
 use std::path::{Path, PathBuf};
 use std::process;
 use std::process::Command;
 use which::which;
 
 const UV_EXECUTABLE: &str = "uv";
+
+pub enum LockType {
+    ConstraintsRemoval,
+    LockWithConstraints,
+    LockWithoutConstraints,
+}
+
+impl Display for LockType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ConstraintsRemoval => write!(
+                f,
+                "Locking dependencies again using \"{}\" to remove constraints...",
+                format!("{UV_EXECUTABLE} lock").bold(),
+            ),
+            Self::LockWithConstraints => write!(
+                f,
+                "Locking dependencies with constraints from existing lock file(s) using \"{}\"...",
+                format!("{UV_EXECUTABLE} lock").bold(),
+            ),
+            Self::LockWithoutConstraints => write!(
+                f,
+                "Locking dependencies using \"{}\"...",
+                format!("{UV_EXECUTABLE} lock").bold(),
+            ),
+        }
+    }
+}
 
 /// Get the path to uv executable, if it exists.
 pub fn get_executable() -> Option<PathBuf> {
@@ -27,7 +56,7 @@ pub fn ensure_executable_exists() {
 }
 
 /// Lock dependencies with uv by running `uv lock` command.
-pub fn lock_dependencies(project_path: &Path, is_removing_constraints: bool) -> Result<(), ()> {
+pub fn lock_dependencies(project_path: &Path, lock_type: &LockType) -> Result<(), ()> {
     get_executable().map_or_else(
         || {
             warn!(
@@ -38,15 +67,7 @@ pub fn lock_dependencies(project_path: &Path, is_removing_constraints: bool) -> 
             Err(())
         },
         |uv| {
-            info!(
-                "Locking dependencies with \"{}\"{}...",
-                format!("{UV_EXECUTABLE} lock").bold(),
-                if is_removing_constraints {
-                    " again to remove constraints"
-                } else {
-                    ""
-                }
-            );
+            info!("{lock_type}");
 
             Command::new(uv)
                 .arg("lock")
