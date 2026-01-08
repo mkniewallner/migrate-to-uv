@@ -35,7 +35,7 @@ fn test_complete_workflow() {
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies using "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
        Updating https://github.com/encode/uvicorn (HEAD)
@@ -106,7 +106,7 @@ fn test_keep_current_data() {
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies using "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
        Updating https://github.com/encode/uvicorn (HEAD)

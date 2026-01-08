@@ -19,22 +19,22 @@ fn test_complete_workflow() {
     copy_dir(fixture_path, project_path).unwrap();
 
     apply_lock_filters!();
-    assert_cmd_snapshot!(cli().arg(project_path), @r###"
+    assert_cmd_snapshot!(cli().arg(project_path), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
-    Locking dependencies with "uv lock" again to remove constraints...
+    Locking dependencies again using "uv lock" to remove constraints...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Pipenv to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
     [project]
@@ -124,18 +124,18 @@ fn test_ignore_locked_versions() {
     copy_dir(fixture_path, project_path).unwrap();
 
     apply_lock_filters!();
-    assert_cmd_snapshot!(cli().arg(project_path).arg("--ignore-locked-versions"), @r###"
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--ignore-locked-versions"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies using "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Pipenv to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
     [project]
@@ -195,22 +195,22 @@ fn test_keep_current_data() {
     copy_dir(fixture_path, project_path).unwrap();
 
     apply_lock_filters!();
-    assert_cmd_snapshot!(cli().arg(project_path).arg("--keep-current-data"), @r###"
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--keep-current-data"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
-    Locking dependencies with "uv lock" again to remove constraints...
+    Locking dependencies again using "uv lock" to remove constraints...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Pipenv to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
     [project]
@@ -252,22 +252,22 @@ fn test_dependency_groups_strategy_include_in_dev() {
     assert_cmd_snapshot!(cli()
         .arg(project_path)
         .arg("--dependency-groups-strategy")
-        .arg("include-in-dev"), @r###"
+        .arg("include-in-dev"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
-    Locking dependencies with "uv lock" again to remove constraints...
+    Locking dependencies again using "uv lock" to remove constraints...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Pipenv to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
     [project]
@@ -308,22 +308,22 @@ fn test_dependency_groups_strategy_keep_existing() {
     assert_cmd_snapshot!(cli()
         .arg(project_path)
         .arg("--dependency-groups-strategy")
-        .arg("keep-existing"), @r###"
+        .arg("keep-existing"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
-    Locking dependencies with "uv lock" again to remove constraints...
+    Locking dependencies again using "uv lock" to remove constraints...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Pipenv to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
     [project]
@@ -361,22 +361,22 @@ fn test_dependency_groups_strategy_merge_into_dev() {
     assert_cmd_snapshot!(cli()
         .arg(project_path)
         .arg("--dependency-groups-strategy")
-        .arg("merge-into-dev"), @r###"
+        .arg("merge-into-dev"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
-    Locking dependencies with "uv lock" again to remove constraints...
+    Locking dependencies again using "uv lock" to remove constraints...
     Using [PYTHON_INTERPRETER]
     warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Pipenv to uv!
-    "###);
+    "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
     [project]

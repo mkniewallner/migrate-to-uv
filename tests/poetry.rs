@@ -77,10 +77,10 @@ fn test_complete_workflow() {
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
-    Locking dependencies with "uv lock" again to remove constraints...
+    Locking dependencies again using "uv lock" to remove constraints...
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
@@ -178,10 +178,10 @@ fn test_complete_workflow_pep_621_no_poetry_section() {
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
-    Locking dependencies with "uv lock" again to remove constraints...
+    Locking dependencies again using "uv lock" to remove constraints...
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
@@ -280,7 +280,7 @@ fn test_ignore_locked_versions() {
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies using "uv lock"...
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
@@ -348,10 +348,10 @@ fn test_keep_current_data() {
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
-    Locking dependencies with "uv lock" again to remove constraints...
+    Locking dependencies again using "uv lock" to remove constraints...
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
@@ -421,10 +421,10 @@ fn test_dependency_groups_strategy_include_in_dev() {
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
-    Locking dependencies with "uv lock" again to remove constraints...
+    Locking dependencies again using "uv lock" to remove constraints...
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
@@ -473,10 +473,10 @@ fn test_dependency_groups_strategy_keep_existing() {
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
-    Locking dependencies with "uv lock" again to remove constraints...
+    Locking dependencies again using "uv lock" to remove constraints...
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
@@ -522,10 +522,10 @@ fn test_dependency_groups_strategy_merge_into_dev() {
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
-    Locking dependencies with "uv lock" again to remove constraints...
+    Locking dependencies again using "uv lock" to remove constraints...
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
@@ -1232,10 +1232,10 @@ fn test_manage_warnings() {
     ----- stdout -----
 
     ----- stderr -----
-    Locking dependencies with "uv lock"...
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
-    Locking dependencies with "uv lock" again to remove constraints...
+    Locking dependencies again using "uv lock" to remove constraints...
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!

@@ -3,6 +3,7 @@ use crate::errors::{MIGRATION_ERRORS, MigrationError};
 use crate::schema::pep_621::Project;
 use crate::schema::pyproject::DependencyGroupSpecification;
 use crate::uv;
+use crate::uv::LockType;
 use indexmap::IndexMap;
 use log::{error, info, warn};
 use owo_colors::OwoColorize;
@@ -218,8 +219,14 @@ pub trait Converter: Any + Debug {
 
     /// Lock dependencies with uv, unless user has explicitly opted out of locking dependencies.
     fn lock_dependencies(&self) {
+        let lock_type = if self.respect_locked_versions() {
+            LockType::LockWithConstraints
+        } else {
+            LockType::LockWithoutConstraints
+        };
+
         if !self.skip_lock()
-            && uv::lock_dependencies(self.get_project_path().as_ref(), false).is_err()
+            && uv::lock_dependencies(self.get_project_path().as_ref(), &lock_type).is_err()
         {
             warn!(
                 "An error occurred while locking dependencies, so \"{}\" was likely not created.",
@@ -255,7 +262,11 @@ pub trait Converter: Any + Debug {
 
             // Lock dependencies a second time, to remove constraints from lock file.
             if !self.skip_lock()
-                && uv::lock_dependencies(self.get_project_path().as_ref(), true).is_err()
+                && uv::lock_dependencies(
+                    self.get_project_path().as_ref(),
+                    &LockType::ConstraintsRemoval,
+                )
+                .is_err()
             {
                 warn!("An error occurred while locking dependencies after removing constraints.");
             }
