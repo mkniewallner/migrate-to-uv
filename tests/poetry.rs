@@ -1665,6 +1665,64 @@ fn test_build_backend_auto_uv() {
 }
 
 #[test]
+fn test_build_backend_auto_errors() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_incompatible");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(&fixture_path, project_path).unwrap();
+
+    // Ensure that the project is valid for Poetry, even if we cannot convert it to uv.
+    Command::new("uvx")
+        .arg("poetry")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    assert_cmd_snapshot!(cli().arg(project_path), @r#"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    error: Could not automatically migrate the project to uv because of the following errors:
+    error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/another_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    "#);
+}
+
+#[test]
+fn test_build_backend_auto_errors_dry_run() {
+    let project_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_incompatible");
+    let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
+
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r#"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    error: Could not automatically migrate the project to uv because of the following errors:
+    error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/another_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    "#);
+
+    // Assert that `pyproject.toml` was not updated.
+    assert_eq!(
+        pyproject,
+        fs::read_to_string(project_path.join("pyproject.toml")).unwrap()
+    );
+}
+
+#[test]
 fn test_build_backend_hatch() {
     let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch");
 
@@ -1803,6 +1861,64 @@ fn test_build_backend_hatch() {
 
     assert_eq!(sdist_files_before, sdist_files_after);
     assert_eq!(wheel_files_before, wheel_files_after);
+}
+
+#[test]
+fn test_build_backend_hatch_errors() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_incompatible");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(&fixture_path, project_path).unwrap();
+
+    // Ensure that the project is valid for Poetry, even if we cannot convert it to uv.
+    Command::new("uvx")
+        .arg("poetry")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--build-backend").arg("hatch"), @r#"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    error: Could not automatically migrate the project to uv because of the following errors:
+    error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/another_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    "#);
+}
+
+#[test]
+fn test_build_backend_hatch_errors_dry_run() {
+    let project_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_incompatible");
+    let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
+
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run").arg("--build-backend").arg("hatch"), @r#"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    error: Could not automatically migrate the project to uv because of the following errors:
+    error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/another_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    "#);
+
+    // Assert that `pyproject.toml` was not updated.
+    assert_eq!(
+        pyproject,
+        fs::read_to_string(project_path.join("pyproject.toml")).unwrap()
+    );
 }
 
 #[test]

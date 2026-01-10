@@ -25,6 +25,7 @@ It is still possible to explicitly choose a specific build backend with `--build
 * [poetry] Avoid empty arrays in uv build backend ([#582](https://github.com/mkniewallner/migrate-to-uv/pull/582))
 * [poetry] Consistently use `python_full_version` for Python markers to match uv behavior ([#583](https://github.com/mkniewallner/migrate-to-uv/pull/583))
 * [poetry] Fail on wheel-only packages using array for uv build backend ([#595](https://github.com/mkniewallner/migrate-to-uv/pull/595))
+* [poetry] Abort migration for files using `from` in `packages` ([#567](https://github.com/mkniewallner/migrate-to-uv/pull/567))
 
 ## 0.9.1 - 2025-12-24
 
