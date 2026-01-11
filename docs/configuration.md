@@ -176,6 +176,23 @@ set multiple times, if there are multiple files.
 migrate-to-uv --dev-requirements-file requirements-dev.txt --dev-requirements-file requirements-docs.txt
 ```
 
+### `--keep-current-build-backend`
+
+Keep the current build backend during the migration. This can be useful if the build backend cannot be expressed with
+any of the supported build backends (Hatch and uv), if you prefer to migrate it yourself, or if you want to stay on the
+current build backend.
+
+When using Poetry (which is the only package manager where this setting applies), this will:
+
+- leave `[build-system]` section untouched
+- keep [`packages`](https://python-poetry.org/docs/pyproject#packages) and [`include`/`exclude`](https://python-poetry.org/docs/pyproject#exclude-and-include) keys from `[tool.poetry]` section
+
+**Example**:
+
+```bash
+migrate-to-uv --keep-current-build-backend
+```
+
 ### `--keep-current-data`
 
 Keep the current package manager data (lock file, sections in `pyproject.toml`, ...) after the migration, if you want to

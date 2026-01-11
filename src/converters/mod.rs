@@ -35,6 +35,7 @@ pub struct ConverterOptions {
     pub skip_uv_checks: bool,
     pub ignore_locked_versions: bool,
     pub replace_project_section: bool,
+    pub keep_current_build_backend: bool,
     pub keep_old_metadata: bool,
     pub dependency_groups_strategy: DependencyGroupsStrategy,
     pub build_backend: Option<BuildBackend>,
@@ -177,6 +178,11 @@ pub trait Converter: Any + Debug {
     /// fields.
     fn replace_project_section(&self) -> bool {
         self.get_converter_options().replace_project_section
+    }
+
+    /// Whether to keep current build backend.
+    fn keep_current_build_backend(&self) -> bool {
+        self.get_converter_options().keep_current_build_backend
     }
 
     /// Whether to keep current package manager data at the end of the migration.

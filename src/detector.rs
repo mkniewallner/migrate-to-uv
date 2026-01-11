@@ -261,6 +261,7 @@ mod tests {
             skip_uv_checks: false,
             ignore_locked_versions: false,
             replace_project_section: false,
+            keep_current_build_backend: false,
             keep_old_metadata: false,
             dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
             build_backend: None,

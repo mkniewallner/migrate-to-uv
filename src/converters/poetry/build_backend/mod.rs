@@ -28,8 +28,13 @@ impl Display for BuildBackendObject {
 
 pub fn get_new_build_system(
     current_build_system: Option<BuildSystem>,
+    keep_current_build_backend: bool,
     new_build_system: Option<&BuildBackendObject>,
 ) -> Option<BuildSystem> {
+    if keep_current_build_backend {
+        return None;
+    }
+
     if current_build_system?.build_backend? == "poetry.core.masonry.api" {
         return match new_build_system {
             None | Some(BuildBackendObject::Uv(_)) => Some(BuildSystem {
@@ -42,6 +47,7 @@ pub fn get_new_build_system(
             }),
         };
     }
+
     None
 }
 
@@ -51,6 +57,10 @@ pub fn get_build_backend(
     converter_options: &ConverterOptions,
     poetry: &Poetry,
 ) -> Option<BuildBackendObject> {
+    if converter_options.keep_current_build_backend {
+        return None;
+    }
+
     match &converter_options.build_backend {
         None => {
             let uv = uv::get_build_backend(
