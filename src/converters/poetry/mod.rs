@@ -41,8 +41,11 @@ impl Converter for Poetry {
             .unwrap_or_default();
 
         let build_backend = get_build_backend(&self.converter_options, &poetry);
-        let build_system =
-            build_backend::get_new_build_system(pyproject.build_system, build_backend.as_ref());
+        let build_system = build_backend::get_new_build_system(
+            pyproject.build_system,
+            self.converter_options.keep_current_build_backend,
+            build_backend.as_ref(),
+        );
 
         let mut uv_source_index: IndexMap<String, SourceContainer> = IndexMap::new();
         let (dependency_groups, uv_default_groups) =
@@ -139,9 +142,7 @@ impl Converter for Poetry {
             pyproject_updater.insert_hatch(Some(hatch));
         }
 
-        if !self.keep_old_metadata() {
-            remove_pyproject_poetry_section(&mut updated_pyproject);
-        }
+        self.remove_pyproject_poetry_section(&mut updated_pyproject);
 
         if let Some(build_backend) = build_backend {
             add_recoverable_error(format!(
@@ -203,11 +204,43 @@ impl Converter for Poetry {
     }
 }
 
-fn remove_pyproject_poetry_section(pyproject: &mut DocumentMut) {
-    if let Some(tool) = pyproject.get_mut("tool")
-        && let Some(tool_table) = tool.as_table_mut()
-    {
-        tool_table.remove("poetry");
+impl Poetry {
+    /// Remove `[tool.poetry]` section from `pyproject.toml`, unless user has explicitly asked for
+    /// the old metadata to be kept.
+    /// If the current build backend should be kept, instead of removing `[tool.poetry]` section, we
+    /// only remove the keys that are not related to the build backend.
+    fn remove_pyproject_poetry_section(&self, pyproject: &mut DocumentMut) {
+        if self.keep_old_metadata() {
+            return;
+        }
+
+        if let Some(tool) = pyproject.get_mut("tool")
+            && let Some(tool_table) = tool.as_table_mut()
+        {
+            if self.keep_current_build_backend() {
+                if let Some(poetry) = tool_table.get_mut("poetry")
+                    && let Some(poetry_table) = poetry.as_table_mut()
+                {
+                    let keys_to_keep = ["packages", "include", "exclude"];
+                    let mut found_keys_to_keep = false;
+
+                    for (key, _) in &poetry_table.clone() {
+                        if keys_to_keep.contains(&key) {
+                            found_keys_to_keep = true;
+                        } else {
+                            poetry_table.remove(key);
+                        }
+                    }
+
+                    // If none of the keys to keep was found, remove the entire section.
+                    if !found_keys_to_keep {
+                        tool_table.remove("poetry");
+                    }
+                }
+            } else {
+                tool_table.remove("poetry");
+            }
+        }
     }
 }
 
@@ -243,6 +276,7 @@ mod tests {
                 skip_uv_checks: false,
                 ignore_locked_versions: true,
                 replace_project_section: false,
+                keep_current_build_backend: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
                 build_backend: None,
@@ -282,6 +316,7 @@ mod tests {
                 skip_uv_checks: false,
                 ignore_locked_versions: true,
                 replace_project_section: false,
+                keep_current_build_backend: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
                 build_backend: None,
@@ -323,6 +358,7 @@ mod tests {
                 skip_uv_checks: false,
                 ignore_locked_versions: true,
                 replace_project_section: false,
+                keep_current_build_backend: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
                 build_backend: None,
@@ -362,6 +398,7 @@ build-backend = "poetry.core.masonry.api"
                 skip_uv_checks: false,
                 ignore_locked_versions: true,
                 replace_project_section: false,
+                keep_current_build_backend: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
                 build_backend: None,
@@ -422,6 +459,7 @@ python = "^3.10"
                 skip_uv_checks: false,
                 ignore_locked_versions: true,
                 replace_project_section: false,
+                keep_current_build_backend: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
                 build_backend: None,
@@ -475,6 +513,7 @@ python = ">=3.2,<3.13"
                 skip_uv_checks: false,
                 ignore_locked_versions: true,
                 replace_project_section: false,
+                keep_current_build_backend: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
                 build_backend: None,
@@ -532,6 +571,7 @@ python = ">=2.6"
                 skip_uv_checks: false,
                 ignore_locked_versions: true,
                 replace_project_section: false,
+                keep_current_build_backend: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
                 build_backend: None,
@@ -601,6 +641,7 @@ python = ">=3.10"
                 skip_uv_checks: false,
                 ignore_locked_versions: true,
                 replace_project_section: false,
+                keep_current_build_backend: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
                 build_backend: None,
@@ -652,6 +693,7 @@ name = ""
                 skip_uv_checks: false,
                 ignore_locked_versions: true,
                 replace_project_section: false,
+                keep_current_build_backend: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
                 build_backend: None,
@@ -689,6 +731,7 @@ build-backend = "bar"
                 skip_uv_checks: false,
                 ignore_locked_versions: true,
                 replace_project_section: false,
+                keep_current_build_backend: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
                 build_backend: None,
@@ -734,6 +777,7 @@ name = ""
                 skip_uv_checks: false,
                 ignore_locked_versions: true,
                 replace_project_section: false,
+                keep_current_build_backend: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
                 build_backend: None,
@@ -794,6 +838,7 @@ requires-python = ">=3.10"
                 skip_uv_checks: false,
                 ignore_locked_versions: true,
                 replace_project_section: false,
+                keep_current_build_backend: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
                 build_backend: None,
@@ -852,6 +897,7 @@ classifiers = [
                 skip_uv_checks: false,
                 ignore_locked_versions: true,
                 replace_project_section: false,
+                keep_current_build_backend: false,
                 keep_old_metadata: false,
                 dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
                 build_backend: None,
@@ -872,6 +918,151 @@ classifiers = [
             "Programming Language :: Python :: 3.14",
             "Topic :: Software Development :: Libraries",
         ]
+        "#);
+    }
+
+    #[test]
+    fn test_keep_current_build_backend() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "foo"
+
+[tool.poetry]
+# A comment that shoud be preserved
+packages = [{ include = "foo" }]
+# A comment that shoud be preserved
+include = ["foo.txt"]
+# A comment that shoud be preserved
+exclude = ["bar.txt"]
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                skip_uv_checks: false,
+                ignore_locked_versions: true,
+                replace_project_section: false,
+                keep_current_build_backend: true,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = "foo"
+        version = "0.0.1"
+
+
+        [build-system]
+        requires = ["poetry-core>=1.0.0"]
+        build-backend = "poetry.core.masonry.api"
+
+        [tool.poetry]
+        # A comment that shoud be preserved
+        packages = [{ include = "foo" }]
+        # A comment that shoud be preserved
+        include = ["foo.txt"]
+        # A comment that shoud be preserved
+        exclude = ["bar.txt"]
+        "#);
+    }
+
+    #[test]
+    fn test_keep_current_build_backend_no_keys_to_keep() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "foo"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                skip_uv_checks: false,
+                ignore_locked_versions: true,
+                replace_project_section: false,
+                keep_current_build_backend: true,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = "foo"
+        version = "0.0.1"
+
+
+        [build-system]
+        requires = ["poetry-core>=1.0.0"]
+        build-backend = "poetry.core.masonry.api"
+        "#);
+    }
+
+    #[test]
+    fn test_keep_current_build_backend_no_build_backend() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[project]
+name = "foo"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                skip_uv_checks: false,
+                ignore_locked_versions: true,
+                replace_project_section: false,
+                keep_current_build_backend: true,
+                keep_old_metadata: false,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                build_backend: None,
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = "foo"
+        version = "0.0.1"
         "#);
     }
 }

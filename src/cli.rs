@@ -62,8 +62,18 @@ struct Cli {
         help = "Strategy to use when migrating dependency groups"
     )]
     dependency_groups_strategy: DependencyGroupsStrategy,
-    #[arg(long, help = "Enforce a specific build backend to use when migrating")]
+    #[arg(
+        long,
+        conflicts_with = "keep_current_build_backend",
+        help = "Enforce a specific build backend to use when migrating"
+    )]
     build_backend: Option<BuildBackend>,
+    #[arg(
+        long,
+        conflicts_with = "build_backend",
+        help = "Keep the current build backend"
+    )]
+    keep_current_build_backend: bool,
     #[arg(long, help = "Keep data from current package manager")]
     keep_current_data: bool,
     #[arg(long, default_values = vec!["requirements.txt"], help = "Requirements file to migrate")]
@@ -86,6 +96,7 @@ pub fn cli() {
         skip_uv_checks: cli.skip_uv_checks,
         ignore_locked_versions: cli.ignore_locked_versions,
         replace_project_section: cli.replace_project_section,
+        keep_current_build_backend: cli.keep_current_build_backend,
         keep_old_metadata: cli.keep_current_data,
         dependency_groups_strategy: cli.dependency_groups_strategy,
         build_backend: cli.build_backend,

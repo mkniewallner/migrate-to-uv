@@ -1665,6 +1665,113 @@ fn test_build_backend_auto_uv() {
 }
 
 #[test]
+fn test_build_backend_auto_keep_current_build_backend() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(&fixture_path, project_path).unwrap();
+
+    Command::new("uvx")
+        .arg("poetry")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
+    let wheel_files_before =
+        get_zip_entries(&project_path.join("dist"), "foobar-0.1.0-py3-none-any.whl");
+
+    remove_dir_all(project_path.join("dist")).unwrap();
+
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock").arg("--keep-current-build-backend"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Successfully migrated project from Poetry to uv!
+    ");
+
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [project]
+    name = "foobar"
+    version = "0.1.0"
+    description = "A fabulous project."
+    authors = [{ name = "John Doe", email = "john.doe@example.com" }]
+    requires-python = ">=3.10"
+
+    [build-system]
+    requires = ["poetry-core>=1.0.0"]
+    build-backend = "poetry.core.masonry.api"
+
+    [tool.poetry]
+    packages = [
+        { include = "packages_sdist_wheel" },
+        { include = "packages_sdist_wheel_2", format = ["sdist", "wheel"] },
+        { include = "packages_sdist", format = "sdist" },
+        { include = "packages_sdist_2", format = ["sdist"] },
+        { include = "packages_wheel", format = "wheel" },
+        { include = "packages_wheel_2", format = ["wheel"] },
+        # An empty array for `format` means that files are not included anywhere.
+        { include = "packages_nowhere", format = [] },
+        { include = "packages_glob_sdist_wheel/**/*.py" },
+        { include = "packages_glob_sdist_wheel_2/**/*.py", format = ["sdist", "wheel"] },
+        { include = "packages_glob_sdist/**/*.py", format = "sdist" },
+        { include = "packages_glob_sdist_2/**/*.py", format = ["sdist"] },
+        { include = "packages_glob_wheel/**/*.py", format = "wheel" },
+        { include = "packages_glob_wheel_2/**/*.py", format = ["wheel"] },
+        # An empty array for `format` means that files are not included anywhere.
+        { include = "packages_glob_nowhere/**/*.py", format = [] },
+        { include = "packages_from_sdist_wheel", from = "from" },
+        { include = "packages_to_sdist_wheel", to = "to" },
+        { include = "packages_from_to_sdist_wheel", from = "from", to = "to" },
+        { include = "packages_glob_to_sdist_wheel/**/*.py", to = "to" },
+        { include = "packages_glob_from_to_sdist_wheel/**/*.py", from = "from", to = "to" },
+        { include = "packages_sdist_wheel_with_excluded_files" },
+        { include = "text_file_sdist_wheel.txt" },
+        { include = "text_file_sdist.txt", format = "sdist" },
+        { include = "text_file_wheel.txt", format = "wheel" },
+    ]
+    include = [
+        "include_sdist",
+        { path = "include_sdist_2" },
+        { path = "include_sdist_3", format = "sdist" },
+        { path = "include_sdist_4", format = ["sdist"] },
+        { path = "include_sdist_wheel", format = ["sdist", "wheel"] },
+        { path = "include_wheel", format = "wheel" },
+        { path = "include_wheel_2", format = ["wheel"] },
+        # An empty array for `format` means that files are not included anywhere.
+        { path = "include_nowhere", format = [] },
+    ]
+    exclude = [
+        "packages_sdist_wheel_with_excluded_files/bar.py",
+        "packages_sdist_wheel_with_excluded_files/foobar",
+    ]
+    "#);
+
+    Command::new("uvx")
+        .arg("poetry")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
+    let wheel_files_after =
+        get_zip_entries(&project_path.join("dist"), "foobar-0.1.0-py3-none-any.whl");
+
+    assert_eq!(sdist_files_before, sdist_files_after);
+    assert_eq!(wheel_files_before, wheel_files_after);
+}
+
+#[test]
 fn test_build_backend_auto_errors() {
     let fixture_path = Path::new(FIXTURES_PATH).join("build_backend_hatch_incompatible");
 
