@@ -57,7 +57,7 @@ pub fn get_indexes(poetry_sources: Option<Vec<Source>>) -> Option<Vec<Index>> {
                     _ => None,
                 },
                 explicit: match source.priority {
-                    Some(SourcePriority::Explicit) => Some(true),
+                    Some(SourcePriority::Explicit | SourcePriority::Supplemental) => Some(true),
                     _ => None,
                 },
             })
