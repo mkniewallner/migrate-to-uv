@@ -10,8 +10,22 @@ authors = ["John Doe <john.doe@example.com>"]
 packages = [
     { include = "foo.txt", from = "from" },
     { include = "foo.txt", from = "from", to = "parent_directory/sub_directory" },
+    { include = "foo.txt", to = "parent_directory/sub_directory" },
     { include = "a_directory/foo.txt", from = "from_multi_level", to = "parent_directory/sub_directory" },
     { include = "a_directory/another_directory/foo.txt", from = "from_multi_level_2", to = "parent_directory/sub_directory" },
+    { include = "packages_glob_sdist_wheel/**/*.py" },
+    { include = "packages_glob_sdist_wheel_2/**/*.py", format = ["sdist", "wheel"] },
+    { include = "packages_glob_sdist/**/*.py", format = "sdist" },
+    { include = "packages_glob_sdist_2/**/*.py", format = ["sdist"] },
+    { include = "packages_glob_wheel/**/*.py", format = "wheel" },
+    { include = "packages_glob_wheel_2/**/*.py", format = ["wheel"] },
+    { include = "packages_glob_to_sdist_wheel/**/*.py", to = "to" },
+    { include = "packages_glob_from_to_sdist_wheel/**/*.py", from = "from", to = "to" },
+    # An empty array for `format` means that files are not included anywhere.
+    { include = "packages_glob_nowhere/**/*.py", format = [] },
+    { include = "**/*.json", from = "from" },
+    { include = "**/*.json", to = "to/json" },
+    { include = "**/*.json", from = "from", to = "to/json" },
 ]
 
 [tool.poetry.dependencies]
