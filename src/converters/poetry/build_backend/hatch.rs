@@ -197,50 +197,42 @@ fn get_source(
     to: Option<&String>,
     from: Option<&String>,
 ) -> Result<Option<(String, String)>, String> {
-    let project_include_with_from = project_path.join(&include_with_from);
+    if include.contains('*') {
+        return if from.is_none() && to.is_none() {
+            Ok(None)
+        } else {
+            Err(format!(
+                "\"{}\" from \"{}\" cannot be converted to Hatch, as it uses glob pattern with \"{}\"/\"{}\" from the root directory, which cannot be expressed with Hatch.",
+                include.bold(),
+                "poetry.packages.include".bold(),
+                "from".bold(),
+                "to".bold(),
+            ))
+        };
+    }
 
     // Rewrite for files cannot be handled properly, since Hatch only rewrites directories.
     // We could take the parent directory in that case, but this could conflict with other
     // rules in place.
-    if from.is_some() && !include.contains('*') && project_include_with_from.is_file() {
+    if (from.is_some() || to.is_some()) && project_path.join(&include_with_from).is_file() {
         return Err(format!(
-            "\"{}\" from \"{}\" cannot be converted to Hatch, as it uses \"{}\" on a file, which cannot be expressed with Hatch.",
+            "\"{}\" from \"{}\" cannot be converted to Hatch, as it uses \"{}\"/\"{}\" on a file, which cannot be expressed with Hatch.",
             include.bold(),
             "poetry.packages.include".bold(),
             "from".bold(),
+            "to".bold(),
         ));
     }
 
     if let Some(to) = to {
-        return if include.contains('*') {
-            // Hatch path rewrite behaves differently to Poetry, as rewriting is only possible on
-            // static paths, so we build the longest path until we reach a glob for both the initial
-            // and the path to rewrite to, to only rewrite the static part for both.
-            let from_without_glob = extract_parent_path_from_glob(&include_with_from).unwrap();
-            let to_without_glob = extract_parent_path_from_glob(&include).unwrap();
-
-            Ok(Some((
-                from_without_glob,
-                Path::new(to)
-                    .join(to_without_glob)
-                    .display()
-                    .to_string()
-                    // Ensure that separator remains "/" (Windows uses "\").
-                    .replace(MAIN_SEPARATOR, "/"),
-            )))
-        } else {
-            Ok(Some((
-                PathBuf::from(include_with_from)
-                    .display()
-                    .to_string()
-                    .replace(MAIN_SEPARATOR, "/"),
-                PathBuf::from(to)
-                    .join(&include)
-                    .display()
-                    .to_string()
-                    .replace(MAIN_SEPARATOR, "/"),
-            )))
-        };
+        return Ok(Some((
+            include_with_from,
+            PathBuf::from(to)
+                .join(&include)
+                .display()
+                .to_string()
+                .replace(MAIN_SEPARATOR, "/"),
+        )));
     }
 
     if from.is_some() {
@@ -248,21 +240,4 @@ fn get_source(
     }
 
     Ok(None)
-}
-
-/// Extract the longest path part from a path until a glob is found.
-fn extract_parent_path_from_glob(s: &str) -> Option<String> {
-    let mut parents = Vec::new();
-
-    for part in s.split('/') {
-        if part.contains('*') {
-            break;
-        }
-        parents.push(part);
-    }
-
-    if parents.is_empty() {
-        return None;
-    }
-    Some(parents.join("/"))
 }
