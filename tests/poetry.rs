@@ -1,4 +1,4 @@
-use crate::common::{LockedPackage, UvLock, apply_lock_filters, cli};
+use crate::common::{LockedPackage, UvLock, apply_filters, cli};
 use dircpy::copy_dir;
 use flate2::read::GzDecoder;
 use insta_cmd::assert_cmd_snapshot;
@@ -70,7 +70,7 @@ fn test_complete_workflow() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli().arg(project_path), @r#"
     success: true
     exit_code: 0
@@ -171,7 +171,7 @@ fn test_complete_workflow_pep_621_no_poetry_section() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli().arg(project_path), @r#"
     success: true
     exit_code: 0
@@ -273,7 +273,7 @@ fn test_ignore_locked_versions() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli().arg(project_path).arg("--ignore-locked-versions"), @r#"
     success: true
     exit_code: 0
@@ -341,7 +341,7 @@ fn test_keep_current_data() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli().arg(project_path).arg("--keep-current-data"), @r#"
     success: true
     exit_code: 0
@@ -411,7 +411,7 @@ fn test_dependency_groups_strategy_include_in_dev() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli()
         .arg(project_path)
         .arg("--dependency-groups-strategy")
@@ -463,7 +463,7 @@ fn test_dependency_groups_strategy_keep_existing() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli()
         .arg(project_path)
         .arg("--dependency-groups-strategy")
@@ -512,7 +512,7 @@ fn test_dependency_groups_strategy_merge_into_dev() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli()
         .arg(project_path)
         .arg("--dependency-groups-strategy")
@@ -1080,7 +1080,7 @@ fn test_replaces_existing_project() {
 fn test_pep_621() {
     let project_path = Path::new(FIXTURES_PATH).join("pep_621");
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r#"
     success: true
     exit_code: 0
@@ -1155,7 +1155,7 @@ fn test_manage_errors() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli().arg(project_path), @r#"
     success: false
     exit_code: 1
@@ -1212,7 +1212,7 @@ fn test_manage_warnings() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli().arg(project_path), @r#"
     success: true
     exit_code: 0
@@ -1577,7 +1577,7 @@ fn test_build_backend_auto_uv() {
     warning: - Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
     ");
 
-    apply_lock_filters!();
+    apply_filters!();
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [build-system]
     requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
@@ -2066,7 +2066,7 @@ fn test_build_backend_uv() {
     warning: - Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
     ");
 
-    apply_lock_filters!();
+    apply_filters!();
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [build-system]
     requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]

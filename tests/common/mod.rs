@@ -2,7 +2,7 @@ use insta_cmd::get_cargo_bin;
 use serde::Deserialize;
 use std::process::Command;
 
-macro_rules! apply_lock_filters {
+macro_rules! apply_filters {
     {} => {
         let mut settings = insta::Settings::clone_current();
         settings.add_filter(r"Using .+", "Using [PYTHON_INTERPRETER]");
@@ -14,7 +14,7 @@ macro_rules! apply_lock_filters {
     }
 }
 
-pub(crate) use apply_lock_filters;
+pub(crate) use apply_filters;
 
 #[allow(dead_code)]
 #[derive(Deserialize, Eq, PartialEq, Debug)]

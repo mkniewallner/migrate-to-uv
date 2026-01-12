@@ -1,4 +1,4 @@
-use crate::common::{apply_lock_filters, cli};
+use crate::common::{apply_filters, cli};
 use dircpy::copy_dir;
 use insta_cmd::assert_cmd_snapshot;
 use std::fs;
@@ -23,7 +23,7 @@ fn test_complete_workflow() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli()
         .arg(project_path)
         .arg("--dev-requirements-file")
@@ -93,7 +93,7 @@ fn test_keep_current_data() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli()
         .arg(project_path)
         .arg("--dev-requirements-file")
