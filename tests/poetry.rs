@@ -1788,6 +1788,7 @@ fn test_build_backend_auto_errors() {
     error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
     error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
     error: - "**/*.yaml" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
+    error: - Package distribution could not be migrated to uv nor Hatch build backend due to the issues above. Consider keeping the current build backend with "--keep-current-build-backend".
     "#);
 }
 
@@ -1814,6 +1815,7 @@ fn test_build_backend_auto_errors_dry_run() {
     error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
     error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
     error: - "**/*.yaml" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
+    error: - Package distribution could not be migrated to uv nor Hatch build backend due to the issues above. Consider keeping the current build backend with "--keep-current-build-backend".
     "#);
 
     // Assert that `pyproject.toml` was not updated.
@@ -1995,6 +1997,7 @@ fn test_build_backend_hatch_errors() {
     error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
     error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
     error: - "**/*.yaml" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
+    error: - Package distribution could not be migrated to Hatch build backend due to the issues above. Consider keeping the current build backend with "--keep-current-build-backend".
     "#);
 }
 
@@ -2021,6 +2024,7 @@ fn test_build_backend_hatch_errors_dry_run() {
     error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
     error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
     error: - "**/*.yaml" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
+    error: - Package distribution could not be migrated to Hatch build backend due to the issues above. Consider keeping the current build backend with "--keep-current-build-backend".
     "#);
 
     // Assert that `pyproject.toml` was not updated.
@@ -2187,7 +2191,7 @@ fn test_build_backend_uv_errors() {
     error: - "include_sdist_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, which cannot be expressed with uv.
     error: - "include_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
     error: - "include_wheel_2" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
-    error: - Package distribution cound not be migrated to uv build backend due to the issues above. Consider using Hatch build backend with "--build-backend hatch".
+    error: - Package distribution could not be migrated to uv build backend due to the issues above. Consider using Hatch build backend with "--build-backend hatch".
     "#);
 }
 
@@ -2229,7 +2233,7 @@ fn test_build_backend_uv_errors_dry_run() {
     error: - "include_sdist_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, which cannot be expressed with uv.
     error: - "include_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
     error: - "include_wheel_2" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
-    error: - Package distribution cound not be migrated to uv build backend due to the issues above. Consider using Hatch build backend with "--build-backend hatch".
+    error: - Package distribution could not be migrated to uv build backend due to the issues above. Consider using Hatch build backend with "--build-backend hatch".
     "#);
 
     // Assert that `pyproject.toml` was not updated.
