@@ -1,9 +1,10 @@
-use crate::converters::poetry::build_backend;
 use crate::converters::poetry::build_backend::{
     get_include_distribution_format, get_packages_distribution_format,
 };
 use crate::schema::hatch::{Build, BuildTarget, Hatch};
 use crate::schema::poetry::{Include, Package};
+use crate::utils::non_empty_index_map;
+use crate::utils::non_empty_vec;
 use indexmap::IndexMap;
 use owo_colors::OwoColorize;
 use std::path::{MAIN_SEPARATOR, Path, PathBuf};
@@ -26,11 +27,11 @@ impl HatchTargetsInclude {
         wheel_sources: IndexMap<String, String>,
     ) -> Self {
         Self {
-            sdist_include: build_backend::non_empty_vec(sdist_include),
-            wheel_include: build_backend::non_empty_vec(wheel_include),
-            sdist_force_include: build_backend::non_empty_index_map(sdist_force_include),
-            wheel_force_include: build_backend::non_empty_index_map(wheel_force_include),
-            wheel_sources: build_backend::non_empty_index_map(wheel_sources),
+            sdist_include: non_empty_vec(sdist_include),
+            wheel_include: non_empty_vec(wheel_include),
+            sdist_force_include: non_empty_index_map(sdist_force_include),
+            wheel_force_include: non_empty_index_map(wheel_force_include),
+            wheel_sources: non_empty_index_map(wheel_sources),
         }
     }
 }

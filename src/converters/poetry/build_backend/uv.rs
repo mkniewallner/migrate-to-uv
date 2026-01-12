@@ -1,9 +1,10 @@
 use crate::converters::poetry::build_backend::{
-    get_include_distribution_format, get_packages_distribution_format, non_empty_vec,
+    get_include_distribution_format, get_packages_distribution_format,
 };
 use crate::schema::poetry::{Include, Package};
 use crate::schema::utils::SingleOrVec;
 use crate::schema::uv::UvBuildBackend;
+use crate::utils::non_empty_vec;
 use owo_colors::OwoColorize;
 use std::path::Path;
 
