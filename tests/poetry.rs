@@ -847,15 +847,9 @@ fn test_skip_lock_full() {
         "packages_sdist_wheel_2",
         "packages_sdist",
         "packages_sdist_2",
-        "packages_glob_sdist_wheel/**/*.py",
-        "packages_glob_sdist_wheel_2/**/*.py",
-        "packages_glob_sdist/**/*.py",
-        "packages_glob_sdist_2/**/*.py",
         "from/packages_from",
         "packages_to",
         "from/packages_from_to",
-        "packages_glob_to/**/*.py",
-        "from/packages_glob_from_to/**/*.py",
         "text_file_sdist_wheel.txt",
         "text_file_sdist.txt",
     ]
@@ -877,15 +871,9 @@ fn test_skip_lock_full() {
         "packages_sdist_wheel_2",
         "packages_wheel",
         "packages_wheel_2",
-        "packages_glob_sdist_wheel/**/*.py",
-        "packages_glob_sdist_wheel_2/**/*.py",
-        "packages_glob_wheel/**/*.py",
-        "packages_glob_wheel_2/**/*.py",
         "from/packages_from",
         "packages_to",
         "from/packages_from_to",
-        "packages_glob_to/**/*.py",
-        "from/packages_glob_from_to/**/*.py",
         "text_file_sdist_wheel.txt",
         "text_file_wheel.txt",
     ]
@@ -903,8 +891,6 @@ fn test_skip_lock_full() {
     "from/packages_from" = "packages_from"
     packages_to = "to/packages_to"
     "from/packages_from_to" = "to/packages_from_to"
-    packages_glob_to = "to/packages_glob_to"
-    "from/packages_glob_from_to" = "to/packages_glob_from_to"
 
     # This comment should be preserved.
     [tool.ruff]
@@ -1488,8 +1474,6 @@ fn test_build_backend_auto_hatch() {
         "from/packages_from_sdist_wheel",
         "packages_to_sdist_wheel",
         "from/packages_from_to_sdist_wheel",
-        "packages_glob_to_sdist_wheel/**/*.py",
-        "from/packages_glob_from_to_sdist_wheel/**/*.py",
         "packages_sdist_wheel_with_excluded_files",
         "text_file_sdist_wheel.txt",
         "text_file_sdist.txt",
@@ -1519,8 +1503,6 @@ fn test_build_backend_auto_hatch() {
         "from/packages_from_sdist_wheel",
         "packages_to_sdist_wheel",
         "from/packages_from_to_sdist_wheel",
-        "packages_glob_to_sdist_wheel/**/*.py",
-        "from/packages_glob_from_to_sdist_wheel/**/*.py",
         "packages_sdist_wheel_with_excluded_files",
         "text_file_sdist_wheel.txt",
         "text_file_wheel.txt",
@@ -1539,8 +1521,6 @@ fn test_build_backend_auto_hatch() {
     "from/packages_from_sdist_wheel" = "packages_from_sdist_wheel"
     packages_to_sdist_wheel = "to/packages_to_sdist_wheel"
     "from/packages_from_to_sdist_wheel" = "to/packages_from_to_sdist_wheel"
-    packages_glob_to_sdist_wheel = "to/packages_glob_to_sdist_wheel"
-    "from/packages_glob_from_to_sdist_wheel" = "to/packages_glob_from_to_sdist_wheel"
     "#);
 
     Command::new("uvx")
@@ -1730,8 +1710,6 @@ fn test_build_backend_auto_keep_current_build_backend() {
         { include = "packages_from_sdist_wheel", from = "from" },
         { include = "packages_to_sdist_wheel", to = "to" },
         { include = "packages_from_to_sdist_wheel", from = "from", to = "to" },
-        { include = "packages_glob_to_sdist_wheel/**/*.py", to = "to" },
-        { include = "packages_glob_from_to_sdist_wheel/**/*.py", from = "from", to = "to" },
         { include = "packages_sdist_wheel_with_excluded_files" },
         { include = "text_file_sdist_wheel.txt" },
         { include = "text_file_sdist.txt", format = "sdist" },
@@ -1798,9 +1776,16 @@ fn test_build_backend_auto_errors() {
     ----- stderr -----
     error: Could not automatically migrate the project to uv because of the following errors:
     error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
-    error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
-    error: - "a_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
-    error: - "a_directory/another_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "bar.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "to" on a file, which cannot be expressed with Hatch.
+    error: - "foobar.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/another_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "packages_glob_from/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
+    error: - "packages_glob_to/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
+    error: - "packages_glob_from_to/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
+    error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
+    error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
+    error: - "**/*.yaml" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
     "#);
 }
 
@@ -1817,9 +1802,16 @@ fn test_build_backend_auto_errors_dry_run() {
     ----- stderr -----
     error: Could not automatically migrate the project to uv because of the following errors:
     error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
-    error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
-    error: - "a_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
-    error: - "a_directory/another_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "bar.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "to" on a file, which cannot be expressed with Hatch.
+    error: - "foobar.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/another_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "packages_glob_from/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
+    error: - "packages_glob_to/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
+    error: - "packages_glob_from_to/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
+    error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
+    error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
+    error: - "**/*.yaml" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
     "#);
 
     // Assert that `pyproject.toml` was not updated.
@@ -1898,8 +1890,6 @@ fn test_build_backend_hatch() {
         "from/packages_from_sdist_wheel",
         "packages_to_sdist_wheel",
         "from/packages_from_to_sdist_wheel",
-        "packages_glob_to_sdist_wheel/**/*.py",
-        "from/packages_glob_from_to_sdist_wheel/**/*.py",
         "packages_sdist_wheel_with_excluded_files",
         "text_file_sdist_wheel.txt",
         "text_file_sdist.txt",
@@ -1929,8 +1919,6 @@ fn test_build_backend_hatch() {
         "from/packages_from_sdist_wheel",
         "packages_to_sdist_wheel",
         "from/packages_from_to_sdist_wheel",
-        "packages_glob_to_sdist_wheel/**/*.py",
-        "from/packages_glob_from_to_sdist_wheel/**/*.py",
         "packages_sdist_wheel_with_excluded_files",
         "text_file_sdist_wheel.txt",
         "text_file_wheel.txt",
@@ -1949,8 +1937,6 @@ fn test_build_backend_hatch() {
     "from/packages_from_sdist_wheel" = "packages_from_sdist_wheel"
     packages_to_sdist_wheel = "to/packages_to_sdist_wheel"
     "from/packages_from_to_sdist_wheel" = "to/packages_from_to_sdist_wheel"
-    packages_glob_to_sdist_wheel = "to/packages_glob_to_sdist_wheel"
-    "from/packages_glob_from_to_sdist_wheel" = "to/packages_glob_from_to_sdist_wheel"
     "#);
 
     Command::new("uvx")
@@ -1997,9 +1983,16 @@ fn test_build_backend_hatch_errors() {
     ----- stderr -----
     error: Could not automatically migrate the project to uv because of the following errors:
     error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
-    error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
-    error: - "a_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
-    error: - "a_directory/another_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "bar.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "to" on a file, which cannot be expressed with Hatch.
+    error: - "foobar.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/another_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "packages_glob_from/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
+    error: - "packages_glob_to/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
+    error: - "packages_glob_from_to/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
+    error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
+    error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
+    error: - "**/*.yaml" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
     "#);
 }
 
@@ -2016,9 +2009,16 @@ fn test_build_backend_hatch_errors_dry_run() {
     ----- stderr -----
     error: Could not automatically migrate the project to uv because of the following errors:
     error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
-    error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
-    error: - "a_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
-    error: - "a_directory/another_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "bar.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "to" on a file, which cannot be expressed with Hatch.
+    error: - "foobar.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/another_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "packages_glob_from/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
+    error: - "packages_glob_to/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
+    error: - "packages_glob_from_to/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
+    error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
+    error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
+    error: - "**/*.yaml" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
     "#);
 
     // Assert that `pyproject.toml` was not updated.

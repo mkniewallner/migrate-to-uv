@@ -27,8 +27,6 @@ packages = [
     { include = "packages_from_sdist_wheel", from = "from" },
     { include = "packages_to_sdist_wheel", to = "to" },
     { include = "packages_from_to_sdist_wheel", from = "from", to = "to" },
-    { include = "packages_glob_to_sdist_wheel/**/*.py", to = "to" },
-    { include = "packages_glob_from_to_sdist_wheel/**/*.py", from = "from", to = "to" },
     { include = "packages_sdist_wheel_with_excluded_files" },
     { include = "text_file_sdist_wheel.txt" },
     { include = "text_file_sdist.txt", format = "sdist" },

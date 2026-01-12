@@ -9,9 +9,16 @@ description = "A fabulous project."
 authors = ["John Doe <john.doe@example.com>"]
 packages = [
     { include = "foo.txt", from = "from" },
-    { include = "foo.txt", from = "from", to = "parent_directory/sub_directory" },
+    { include = "bar.txt", to = "parent_directory/sub_directory" },
+    { include = "foobar.txt", from = "from", to = "parent_directory/sub_directory" },
     { include = "a_directory/foo.txt", from = "from_multi_level", to = "parent_directory/sub_directory" },
     { include = "a_directory/another_directory/foo.txt", from = "from_multi_level_2", to = "parent_directory/sub_directory" },
+    { include = "packages_glob_from/**/*.py", from = "from" },
+    { include = "packages_glob_to/**/*.py", to = "to" },
+    { include = "packages_glob_from_to/**/*.py", from = "from", to = "to" },
+    { include = "**/*.json", from = "from" },
+    { include = "**/*.json", to = "to/json" },
+    { include = "**/*.yaml", from = "from", to = "to/yaml" },
 ]
 
 [tool.poetry.dependencies]
