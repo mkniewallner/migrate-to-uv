@@ -106,3 +106,29 @@ pub fn lock_dependencies(project_path: &Path, lock_type: &LockType) -> Result<()
         },
     )
 }
+
+/// Get the current version of uv, if uv is found.
+pub fn get_version() -> Option<String> {
+    let uv = get_executable()?;
+
+    match Command::new(uv)
+        .arg("self")
+        .arg("version")
+        .arg("--short")
+        .arg("--no-color")
+        .output()
+    {
+        Ok(output) => {
+            String::from_utf8(output.stdout).map_or(None, |stdout| {
+                // On some platforms (e.g., Homebrew), some additional information can be displayed,
+                // so we need to trim that information.
+                if let Some((version, _)) = stdout.split_once(char::is_whitespace) {
+                    Some(version.to_string())
+                } else {
+                    Some(stdout)
+                }
+            })
+        }
+        Err(_) => None,
+    }
+}

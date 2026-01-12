@@ -5,6 +5,7 @@ mod errors;
 mod logger;
 mod schema;
 mod toml;
+mod utils;
 mod uv;
 
 use crate::cli::cli;

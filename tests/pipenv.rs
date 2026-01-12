@@ -1,4 +1,4 @@
-use crate::common::{LockedPackage, UvLock, apply_lock_filters, cli};
+use crate::common::{LockedPackage, UvLock, apply_filters, cli};
 use dircpy::copy_dir;
 use insta_cmd::assert_cmd_snapshot;
 use std::fs;
@@ -18,7 +18,7 @@ fn test_complete_workflow() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli().arg(project_path), @r#"
     success: true
     exit_code: 0
@@ -123,7 +123,7 @@ fn test_ignore_locked_versions() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli().arg(project_path).arg("--ignore-locked-versions"), @r#"
     success: true
     exit_code: 0
@@ -194,7 +194,7 @@ fn test_keep_current_data() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli().arg(project_path).arg("--keep-current-data"), @r#"
     success: true
     exit_code: 0
@@ -248,7 +248,7 @@ fn test_dependency_groups_strategy_include_in_dev() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli()
         .arg(project_path)
         .arg("--dependency-groups-strategy")
@@ -304,7 +304,7 @@ fn test_dependency_groups_strategy_keep_existing() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli()
         .arg(project_path)
         .arg("--dependency-groups-strategy")
@@ -357,7 +357,7 @@ fn test_dependency_groups_strategy_merge_into_dev() {
 
     copy_dir(fixture_path, project_path).unwrap();
 
-    apply_lock_filters!();
+    apply_filters!();
     assert_cmd_snapshot!(cli()
         .arg(project_path)
         .arg("--dependency-groups-strategy")

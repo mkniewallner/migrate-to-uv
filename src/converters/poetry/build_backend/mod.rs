@@ -5,12 +5,21 @@ use crate::schema::poetry::{Format, Poetry};
 use crate::schema::pyproject::BuildSystem;
 use crate::schema::utils::SingleOrVec;
 use crate::schema::uv::UvBuildBackend;
-use indexmap::IndexMap;
+use crate::uv::get_version;
 use owo_colors::OwoColorize;
+use pep440_rs::Version;
 use std::fmt::Display;
+use std::str::FromStr;
+use std::string::ToString;
 
 pub mod hatch;
 pub mod uv;
+
+/// Minimum version to use for `uv_build`. This corresponds to the version that stabilized the build
+/// backend (<https://github.com/astral-sh/uv/releases/tag/0.7.19>).
+const MIN_UV_BUILD_VERSION: &str = "0.7.19";
+/// Default bounds to use for `uv_build` when no version is found.
+const UV_BUILD_DEFAULT_BOUNDS: &str = ">=0.9.0,<0.10.0";
 
 pub enum BuildBackendObject {
     Uv(UvBuildBackend),
@@ -26,6 +35,27 @@ impl Display for BuildBackendObject {
     }
 }
 
+/// Get the lower and upper bounds to use for `uv_build`, following what the official documentation
+/// recommends (<https://docs.astral.sh/uv/concepts/build-backend/#using-the-uv-build-backend>).
+///
+/// The lower bound corresponds to the version of uv installed by the user, if found, is stable, and
+/// is greater or equal to the minimum version of uv that marked `uv_build` as stable.
+///
+/// If no version is found, we set lower and upper bounds to static versions as best effort, which
+/// is better than not setting any bounds at all.
+fn get_uv_build() -> String {
+    if let Some(raw_version) = get_version()
+        && let Ok(version) = Version::from_str(raw_version.as_str())
+        && version.is_stable()
+        && version > Version::from_str(MIN_UV_BUILD_VERSION).unwrap()
+        && let [x, y, _] = version.release()
+    {
+        return format!("uv_build>={version},<{x}.{}.0", y + 1);
+    }
+
+    format!("uv_build{UV_BUILD_DEFAULT_BOUNDS}")
+}
+
 pub fn get_new_build_system(
     current_build_system: Option<BuildSystem>,
     keep_current_build_backend: bool,
@@ -38,7 +68,7 @@ pub fn get_new_build_system(
     if current_build_system?.build_backend? == "poetry.core.masonry.api" {
         return match new_build_system {
             None | Some(BuildBackendObject::Uv(_)) => Some(BuildSystem {
-                requires: vec!["uv_build".to_string()],
+                requires: vec![get_uv_build()],
                 build_backend: Some("uv_build".to_string()),
             }),
             Some(BuildBackendObject::Hatch(_)) => Some(BuildSystem {
@@ -172,16 +202,25 @@ fn get_include_distribution_format(format: Option<&SingleOrVec<Format>>) -> (boo
     }
 }
 
-fn non_empty_vec<T>(vec: Vec<T>) -> Option<Vec<T>> {
-    if vec.is_empty() {
-        return None;
-    }
-    Some(vec)
-}
+#[cfg(test)]
+mod tests {
+    use crate::converters::poetry::build_backend::get_uv_build;
+    use crate::uv;
+    use pep440_rs::Version;
+    use std::str::FromStr;
 
-fn non_empty_index_map<T, U>(map: IndexMap<T, U>) -> Option<IndexMap<T, U>> {
-    if map.is_empty() {
-        return None;
+    #[test]
+    fn test_get_uv_build_version_specifier() {
+        let lower_bound = Version::from_str(uv::get_version().unwrap().as_str()).unwrap();
+        let upper_bound = if let [x, y, _] = lower_bound.release() {
+            format!("{x}.{}.0", y + 1)
+        } else {
+            panic!()
+        };
+
+        assert_eq!(
+            get_uv_build(),
+            format!("uv_build>={lower_bound},<{upper_bound}")
+        );
     }
-    Some(map)
 }
