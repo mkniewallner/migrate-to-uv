@@ -189,7 +189,7 @@ fn test_complete_workflow_pep_621_no_poetry_section() {
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [build-system]
-    requires = ["uv_build"]
+    requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
     build-backend = "uv_build"
 
     [project]
@@ -1080,6 +1080,7 @@ fn test_replaces_existing_project() {
 fn test_pep_621() {
     let project_path = Path::new(FIXTURES_PATH).join("pep_621");
 
+    apply_lock_filters!();
     assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r#"
     success: true
     exit_code: 0
@@ -1088,7 +1089,7 @@ fn test_pep_621() {
     ----- stderr -----
     Migrated pyproject.toml:
     [build-system]
-    requires = ["uv_build"]
+    requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
     build-backend = "uv_build"
 
     [project]
@@ -1576,9 +1577,10 @@ fn test_build_backend_auto_uv() {
     warning: - Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
     ");
 
+    apply_lock_filters!();
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [build-system]
-    requires = ["uv_build"]
+    requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
     build-backend = "uv_build"
 
     [project]
@@ -2064,9 +2066,10 @@ fn test_build_backend_uv() {
     warning: - Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
     ");
 
+    apply_lock_filters!();
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [build-system]
-    requires = ["uv_build"]
+    requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
     build-backend = "uv_build"
 
     [project]

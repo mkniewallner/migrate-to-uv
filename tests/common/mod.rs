@@ -9,6 +9,7 @@ macro_rules! apply_lock_filters {
         settings.add_filter(r"Defaulting to `\S+`", "Defaulting to `[PYTHON_VERSION]`");
         settings.add_filter(r"Resolved \d+ packages in \S+", "Resolved [PACKAGES] packages in [TIME]");
         settings.add_filter(r"Updated https://github.com/encode/uvicorn (\S+)", "Updated https://github.com/encode/uvicorn ([SHA1])");
+        settings.add_filter(r"uv_build>=[\d\.]+,<[\d\.]+", "uv_build>=[LOWER_BOUND],<[UPPER_BOUND]");
         let _bound = settings.bind_to_scope();
     }
 }

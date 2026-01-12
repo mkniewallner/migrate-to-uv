@@ -253,6 +253,14 @@ mod tests {
     use std::path::PathBuf;
     use tempfile::tempdir;
 
+    macro_rules! apply_filters {
+        {} => {
+            let mut settings = insta::Settings::clone_current();
+            settings.add_filter(r"uv_build>=[\d\.]+,<[\d\.]+", "uv_build>=[LOWER_BOUND],<[UPPER_BOUND]");
+            let _bound = settings.bind_to_scope();
+        }
+    }
+
     #[test]
     fn test_readme_empty_array() {
         let tmp_dir = tempdir().unwrap();
@@ -405,9 +413,10 @@ build-backend = "poetry.core.masonry.api"
             },
         };
 
+        apply_filters!();
         insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
         [build-system]
-        requires = ["uv_build"]
+        requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
         build-backend = "uv_build"
 
         [project]
@@ -466,9 +475,10 @@ python = "^3.10"
             },
         };
 
+        apply_filters!();
         insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
         [build-system]
-        requires = ["uv_build"]
+        requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
         build-backend = "uv_build"
 
         [project]
@@ -520,9 +530,10 @@ python = ">=3.2,<3.13"
             },
         };
 
+        apply_filters!();
         insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
         [build-system]
-        requires = ["uv_build"]
+        requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
         build-backend = "uv_build"
 
         [project]
@@ -578,9 +589,10 @@ python = ">=2.6"
             },
         };
 
+        apply_filters!();
         insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
         [build-system]
-        requires = ["uv_build"]
+        requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
         build-backend = "uv_build"
 
         [project]
@@ -648,9 +660,10 @@ python = ">=3.10"
             },
         };
 
+        apply_filters!();
         insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
         [build-system]
-        requires = ["uv_build"]
+        requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
         build-backend = "uv_build"
 
         [project]
@@ -784,9 +797,10 @@ name = ""
             },
         };
 
+        apply_filters!();
         insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
         [build-system]
-        requires = ["uv_build"]
+        requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
         build-backend = "uv_build"
 
         [project]
@@ -845,9 +859,10 @@ requires-python = ">=3.10"
             },
         };
 
+        apply_filters!();
         insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
         [build-system]
-        requires = ["uv_build"]
+        requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
         build-backend = "uv_build"
 
         [project]
@@ -904,9 +919,10 @@ classifiers = [
             },
         };
 
+        apply_filters!();
         insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
         [build-system]
-        requires = ["uv_build"]
+        requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
         build-backend = "uv_build"
 
         [project]
