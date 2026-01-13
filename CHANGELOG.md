@@ -21,6 +21,7 @@ It is still possible to explicitly choose a specific build backend with `--build
 
 ### Bug fixes
 
+* Abort migration on constraints lock failure and revert changes ([#629](https://github.com/mkniewallner/migrate-to-uv/pull/629))
 * [poetry] Fix typo on `--build-backend` error message ([#571](https://github.com/mkniewallner/migrate-to-uv/pull/571))
 * [poetry] Use `python_full_version` for 3-components Python markers ([#559](https://github.com/mkniewallner/migrate-to-uv/pull/559))
 * [poetry] Handle platform markers delimited by pipe ([#576](https://github.com/mkniewallner/migrate-to-uv/pull/576), [#498](https://github.com/mkniewallner/migrate-to-uv/pull/498))

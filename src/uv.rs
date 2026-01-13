@@ -1,4 +1,4 @@
-use log::{error, info, warn};
+use log::{error, info};
 use owo_colors::OwoColorize;
 use std::fmt::Display;
 use std::path::{Path, PathBuf};
@@ -57,54 +57,35 @@ pub fn ensure_executable_exists() {
 
 /// Lock dependencies with uv by running `uv lock` command.
 pub fn lock_dependencies(project_path: &Path, lock_type: &LockType) -> Result<(), ()> {
-    get_executable().map_or_else(
-        || {
-            warn!(
-                "Could not find \"{}\" executable, skipping \"{}\".",
-                UV_EXECUTABLE.bold(),
-                format!("{UV_EXECUTABLE} lock").bold(),
-            );
-            Err(())
-        },
-        |uv| {
-            info!("{lock_type}");
+    // Should be a safe `unwrap`, as we already check at the beginning of the migration if uv is
+    // present if we need to invoke it during the migration.
+    let uv = get_executable().unwrap();
 
-            Command::new(uv)
-                .arg("lock")
-                .current_dir(project_path)
-                .spawn()
-                .map_or_else(
-                    |_| {
-                        warn!(
-                            "Could not invoke \"{}\" command, skipping dependencies locking.",
-                            format!("{UV_EXECUTABLE} lock").bold()
-                        );
+    info!("{lock_type}");
+
+    Command::new(uv)
+        .arg("lock")
+        .current_dir(project_path)
+        .spawn()
+        .map_or_else(
+            |e| {
+                error!("{e}");
+                Err(())
+            },
+            |lock| match lock.wait_with_output() {
+                Ok(output) => {
+                    if output.status.success() {
+                        Ok(())
+                    } else {
                         Err(())
-                    },
-                    |lock| match lock.wait_with_output() {
-                        Ok(output) => {
-                            if output.status.success() {
-                                Ok(())
-                            } else {
-                                error!(
-                                    "Error while invoking \"{}\" command.",
-                                    format!("{UV_EXECUTABLE} lock").bold(),
-                                );
-                                Err(())
-                            }
-                        }
-                        Err(e) => {
-                            error!(
-                                "The following error occurred while invoking \"{}\" command:",
-                                format!("{UV_EXECUTABLE} lock").bold(),
-                            );
-                            error!("{e}");
-                            Err(())
-                        }
-                    },
-                )
-        },
-    )
+                    }
+                }
+                Err(e) => {
+                    error!("{e}");
+                    Err(())
+                }
+            },
+        )
 }
 
 /// Get the current version of uv, if uv is found.

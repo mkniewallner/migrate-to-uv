@@ -9,11 +9,11 @@ use log::{error, info, warn};
 use owo_colors::OwoColorize;
 use std::any::Any;
 use std::fmt::Debug;
-use std::format;
 use std::fs::{File, remove_file};
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::exit;
+use std::{format, fs};
 use toml_edit::DocumentMut;
 
 pub mod pip;
@@ -46,6 +46,9 @@ pub trait Converter: Any + Debug {
     /// Performs the conversion from the current package manager to uv.
     fn convert_to_uv(&self) {
         let pyproject_path = self.get_project_path().join("pyproject.toml");
+        let had_pyproject = pyproject_path.exists();
+        let old_pyproject = fs::read(&pyproject_path).ok();
+
         let updated_pyproject_string = self.build_uv_pyproject();
 
         self.manage_migration_errors();
@@ -66,9 +69,21 @@ pub trait Converter: Any + Debug {
             .write_all(updated_pyproject_string.as_bytes())
             .unwrap();
 
-        self.delete_migrated_files().unwrap();
-        self.lock_dependencies();
+        // If we were not able to lock dependencies with `uv lock`, we abort the migration, and
+        // either revert `pyproject.toml` file to its original content, or delete it if there was
+        // none.
+        if self.lock_dependencies() == Err(()) {
+            self.revert_changes(had_pyproject, old_pyproject);
+
+            error!(
+                "Could not lock dependencies, aborting the migration. Consider using \"{}\" if you don't need to keep versions from the lock file.",
+                "--ignore-locked-versions".bold(),
+            );
+            exit(1);
+        }
+
         self.remove_constraint_dependencies(updated_pyproject_string);
+        self.delete_migrated_files().unwrap();
 
         info!(
             "{}",
@@ -81,6 +96,22 @@ pub trait Converter: Any + Debug {
         );
 
         self.manage_migration_warnings();
+    }
+
+    /// Revert any change made, in case the migration is aborted after some files have already been
+    /// modified.
+    fn revert_changes(&self, had_pyproject: bool, old_pyproject: Option<Vec<u8>>) {
+        let pyproject_path = self.get_project_path().join("pyproject.toml");
+
+        // Some package managers do not use `pyproject.toml`, so we either revert back the content
+        // of a `pyproject.toml`, or delete the file if we did not have any.
+        if had_pyproject {
+            let mut pyproject_file = File::create(&pyproject_path).unwrap();
+
+            pyproject_file.write_all(&old_pyproject.unwrap()).unwrap();
+        } else {
+            remove_file(pyproject_path).unwrap();
+        }
     }
 
     fn manage_migration_errors(&self) {
@@ -224,21 +255,18 @@ pub trait Converter: Any + Debug {
     }
 
     /// Lock dependencies with uv, unless user has explicitly opted out of locking dependencies.
-    fn lock_dependencies(&self) {
+    fn lock_dependencies(&self) -> Result<(), ()> {
         let lock_type = if self.respect_locked_versions() {
             LockType::LockWithConstraints
         } else {
             LockType::LockWithoutConstraints
         };
 
-        if !self.skip_lock()
-            && uv::lock_dependencies(self.get_project_path().as_ref(), &lock_type).is_err()
-        {
-            warn!(
-                "An error occurred while locking dependencies, so \"{}\" was likely not created.",
-                "uv.lock".bold(),
-            );
+        if self.skip_lock() {
+            return Ok(());
         }
+
+        uv::lock_dependencies(self.get_project_path().as_ref(), &lock_type)
     }
 
     /// Get dependencies constraints to set in `constraint-dependencies` under `[tool.uv]` section,
