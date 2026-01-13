@@ -1,0 +1,28 @@
+{
+    "_meta": {
+        "pipfile-spec": 6,
+        "requires": {
+            "python_version": "3.13"
+        }
+    },
+    "default": {
+        "certifi": {
+            "markers": "python_version >= '3.7'",
+            "version": "==2026.1.1"
+        },
+        "charset-normalizer": {
+            "markers": "python_version >= '3.7'",
+            "version": "==3.4.4"
+        },
+        "idna": {
+            "markers": "python_version >= '3.8'",
+            "version": "==3.11"
+        },
+        "requests": {
+            "index": "pip_conf_index_global",
+            "markers": "python_version >= '3.7'",
+            "version": "==2.30.0"
+        }
+    },
+    "develop": {}
+}

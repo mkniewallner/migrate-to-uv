@@ -1,0 +1,5 @@
+[packages]
+requests = "==2.30"
+
+[requires]
+python_version = "3.13"

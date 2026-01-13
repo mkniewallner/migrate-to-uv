@@ -1,0 +1,8 @@
+[tool.ruff]
+fix = true
+
+[tool.ruff.lint]
+fixable = ["I", "UP"]
+
+[tool.ruff.format]
+preview = true
