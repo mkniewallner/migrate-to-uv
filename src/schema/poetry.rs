@@ -113,7 +113,9 @@ impl DependencySpecification {
             } => {
                 let mut pep_508_version = String::new();
 
-                if let Some(extras) = extras {
+                if let Some(extras) = extras
+                    && !extras.is_empty()
+                {
                     pep_508_version.push_str(format!("[{}]", extras.join(", ")).as_str());
                 }
 
