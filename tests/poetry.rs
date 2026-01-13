@@ -694,6 +694,7 @@ fn test_skip_lock_full() {
         "pep440>=1.2.3",
         "with-version-only==1.2.3",
         "with-extras[asyncio, postgresql_asyncpg]==1.2.3",
+        "with-empty-extras==1.2.3",
         "with-markers==1.2.3 ; python_version <= '3.11' or sys_platform == 'win32'",
         "with-platform==1.2.3 ; sys_platform == 'darwin'",
         "with-pipe-delimited-platform==1.2.3 ; sys_platform == 'darwin' or sys_platform == 'linux'",

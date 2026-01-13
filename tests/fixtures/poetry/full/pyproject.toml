@@ -109,6 +109,7 @@ pep440 = ">=1.2.3"  # >=1.2.3 (already compliant)
 # Tables
 with-version-only = { version = "1.2.3" }
 with-extras = { version = "1.2.3", extras = ["asyncio", "postgresql_asyncpg"] }
+with-empty-extras = { version = "1.2.3", extras = [] }
 with-markers = { version = "1.2.3", markers = "python_version <= '3.11' or sys_platform == 'win32'" }
 with-platform = { version = "1.2.3", platform = "darwin" }
 with-pipe-delimited-platform = { version = "1.2.3", platform = "darwin|linux" }
