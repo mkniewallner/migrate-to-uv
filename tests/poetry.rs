@@ -2246,3 +2246,158 @@ fn test_build_backend_uv_errors_dry_run() {
     // Assert that `uv.lock` file was not generated.
     assert!(!project_path.join("uv.lock").exists());
 }
+
+#[test]
+fn test_build_backend_implicit_package() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend/implicit_package");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(&fixture_path, project_path).unwrap();
+
+    Command::new("uvx")
+        .arg("poetry")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
+    let wheel_files_before =
+        get_zip_entries(&project_path.join("dist"), "foobar-0.1.0-py3-none-any.whl");
+
+    remove_dir_all(project_path.join("dist")).unwrap();
+
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Successfully migrated project from Poetry to uv!
+
+    warning: The following warnings occurred during the migration:
+    warning: - Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    ");
+
+    apply_filters!();
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [build-system]
+    requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
+    build-backend = "uv_build"
+
+    [project]
+    name = "foobar"
+    version = "0.1.0"
+    description = "A fabulous project."
+    authors = [{ name = "John Doe", email = "john.doe@example.com" }]
+    requires-python = ">=3.10"
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+    ]
+
+    [tool.uv.build-backend]
+    module-root = ""
+    source-include = ["text_file_sdist.txt"]
+    "#);
+
+    Command::new("uv")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
+    let wheel_files_after =
+        get_zip_entries(&project_path.join("dist"), "foobar-0.1.0-py3-none-any.whl");
+
+    assert_eq!(sdist_files_before, sdist_files_after);
+    assert_eq!(wheel_files_before, wheel_files_after);
+}
+
+#[test]
+fn test_build_backend_implicit_package_src() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend/implicit_package_src");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(&fixture_path, project_path).unwrap();
+
+    Command::new("uvx")
+        .arg("poetry")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
+    let wheel_files_before =
+        get_zip_entries(&project_path.join("dist"), "foobar-0.1.0-py3-none-any.whl");
+
+    remove_dir_all(project_path.join("dist")).unwrap();
+
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--skip-lock"), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Successfully migrated project from Poetry to uv!
+
+    warning: The following warnings occurred during the migration:
+    warning: - Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    ");
+
+    apply_filters!();
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [build-system]
+    requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
+    build-backend = "uv_build"
+
+    [project]
+    name = "foobar"
+    version = "0.1.0"
+    description = "A fabulous project."
+    authors = [{ name = "John Doe", email = "john.doe@example.com" }]
+    requires-python = ">=3.10"
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+    ]
+
+    [tool.uv.build-backend]
+    source-include = ["text_file_sdist.txt"]
+    "#);
+
+    Command::new("uv")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
+    let wheel_files_after =
+        get_zip_entries(&project_path.join("dist"), "foobar-0.1.0-py3-none-any.whl");
+
+    assert_eq!(sdist_files_before, sdist_files_after);
+    assert_eq!(wheel_files_before, wheel_files_after);
+}
