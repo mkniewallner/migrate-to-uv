@@ -176,7 +176,11 @@ pub fn get_build_backend(
     }
 
     Ok(Some(UvBuildBackend {
-        module_name: Some(SingleOrVec::Vec(module_name)),
+        module_name: if module_name.is_empty() {
+            None
+        } else {
+            Some(SingleOrVec::Vec(module_name))
+        },
         // By default, uv expects the modules to be in a "src" directory. Since Poetry does not
         // provide a similar option, we want to default to the same thing as Poetry, i.e. an empty
         // string.
