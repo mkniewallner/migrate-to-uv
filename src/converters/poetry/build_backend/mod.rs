@@ -94,6 +94,7 @@ pub fn get_build_backend(
     match &converter_options.build_backend {
         None => {
             let uv = uv::get_build_backend(
+                poetry.name.as_ref(),
                 &converter_options.project_path,
                 poetry.packages.as_ref(),
                 poetry.include.as_ref(),
@@ -136,6 +137,7 @@ pub fn get_build_backend(
         }
         Some(BuildBackend::Uv) => {
             let uv = uv::get_build_backend(
+                poetry.name.as_ref(),
                 &converter_options.project_path,
                 poetry.packages.as_ref(),
                 poetry.include.as_ref(),

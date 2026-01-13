@@ -31,6 +31,7 @@ It is still possible to explicitly choose a specific build backend with `--build
 * [poetry] Abort migration on `packages` using `from`/`to` and glob ([#615](https://github.com/mkniewallner/migrate-to-uv/pull/615))
 * [poetry] Avoid converting empty `extras` for dependencies ([#624](https://github.com/mkniewallner/migrate-to-uv/pull/624))
 * [poetry] Avoid setting empty `module-name` for uv build backend ([#627](https://github.com/mkniewallner/migrate-to-uv/pull/627))
+* [poetry] handle `src`-layout with empty packages for uv build backend ([#628](https://github.com/mkniewallner/migrate-to-uv/pull/628))
 
 ## 0.9.1 - 2025-12-24
 
