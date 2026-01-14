@@ -1,0 +1,14 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "foobar"
+version = "0.1.0"
+description = "A fabulous project."
+authors = ["John Doe <john.doe@example.com>"]
+packages = [{ include = "namespace" }]
+include = ["text_file_sdist.txt"]
+
+[tool.poetry.dependencies]
+python = ">=3.10"
