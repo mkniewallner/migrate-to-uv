@@ -43,11 +43,10 @@ fn test_complete_workflow() {
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip to uv!
 
-    warning: The following warnings occurred during the migration:
-    warning: - "file:bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:bar".
-    warning: - "file:./bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:./bar".
-    warning: - "git+https://github.com/psf/requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests".
-    warning: - "git+https://github.com/psf/requests#egg=requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests#egg=requests".
+    warning: "file:bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:bar".
+    warning: "file:./bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:./bar".
+    warning: "git+https://github.com/psf/requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests".
+    warning: "git+https://github.com/psf/requests#egg=requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests#egg=requests".
     "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
@@ -114,11 +113,10 @@ fn test_keep_current_data() {
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from pip to uv!
 
-    warning: The following warnings occurred during the migration:
-    warning: - "file:bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:bar".
-    warning: - "file:./bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:./bar".
-    warning: - "git+https://github.com/psf/requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests".
-    warning: - "git+https://github.com/psf/requests#egg=requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests#egg=requests".
+    warning: "file:bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:bar".
+    warning: "file:./bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:./bar".
+    warning: "git+https://github.com/psf/requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests".
+    warning: "git+https://github.com/psf/requests#egg=requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests#egg=requests".
     "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
@@ -178,11 +176,10 @@ fn test_skip_lock() {
     ----- stderr -----
     Successfully migrated project from pip to uv!
 
-    warning: The following warnings occurred during the migration:
-    warning: - "file:bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:bar".
-    warning: - "file:./bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:./bar".
-    warning: - "git+https://github.com/psf/requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests".
-    warning: - "git+https://github.com/psf/requests#egg=requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests#egg=requests".
+    warning: "file:bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:bar".
+    warning: "file:./bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:./bar".
+    warning: "git+https://github.com/psf/requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests".
+    warning: "git+https://github.com/psf/requests#egg=requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests#egg=requests".
     "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
@@ -260,11 +257,10 @@ fn test_dry_run() {
     [tool.uv]
     package = false
 
-    warning: The following warnings occurred during the migration:
-    warning: - "file:bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:bar".
-    warning: - "file:./bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:./bar".
-    warning: - "git+https://github.com/psf/requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests".
-    warning: - "git+https://github.com/psf/requests#egg=requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests#egg=requests".
+    warning: "file:bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:bar".
+    warning: "file:./bar" from "requirements.txt" could not be automatically migrated, try running "uv add file:./bar".
+    warning: "git+https://github.com/psf/requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests".
+    warning: "git+https://github.com/psf/requests#egg=requests" from "requirements.txt" could not be automatically migrated, try running "uv add git+https://github.com/psf/requests#egg=requests".
     "#);
 
     // Assert that previous package manager files have not been removed.

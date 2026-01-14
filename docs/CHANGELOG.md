@@ -22,6 +22,7 @@ It is still possible to explicitly choose a specific build backend with `--build
 * [poetry] Automatically add Python classifiers for packages based on `python` specifier ([#606](https://github.com/mkniewallner/migrate-to-uv/pull/606))
 * [poetry] Add lower and upper bounds to `uv_build` ([#617](https://github.com/mkniewallner/migrate-to-uv/pull/617))
 * [poetry] Enable namespace for packages without `__init__.py` on uv build backend ([#631](https://github.com/mkniewallner/migrate-to-uv/pull/631))
+* [poetry] Use more concise warnings output ([#632](https://github.com/mkniewallner/migrate-to-uv/pull/632))
 
 ### Bug fixes
 

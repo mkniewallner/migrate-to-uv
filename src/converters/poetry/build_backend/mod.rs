@@ -105,7 +105,7 @@ pub fn get_build_backend(
                 Ok(Some(uv)) => Some(BuildBackendObject::Uv(uv)),
                 Err(_) => {
                     add_recoverable_error(
-                        "Migrating build backend to Hatch because package distribution metadata is too complex for uv.".to_string()
+                        "Migrating build backend to Hatch, as package distribution is too complex to be expressed with uv.".to_string()
                     );
 
                     let hatch = hatch::get_build_backend(

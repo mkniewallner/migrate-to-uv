@@ -617,10 +617,9 @@ fn test_skip_lock_full() {
     ----- stderr -----
     Successfully migrated project from Poetry to uv!
 
-    warning: The following warnings occurred during the migration:
-    warning: - Migrating build backend to Hatch because package distribution metadata is too complex for uv.
-    warning: - Could not find dependency "non-existing-dependency" listed in "extra-with-non-existing-dependencies" extra.
-    warning: - Build backend was migrated to Hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    warning: Migrating build backend to Hatch, as package distribution is too complex to be expressed with uv.
+    warning: Could not find dependency "non-existing-dependency" listed in "extra-with-non-existing-dependencies" extra.
+    warning: Build backend was migrated to Hatch. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
     "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
@@ -1228,8 +1227,7 @@ fn test_manage_warnings() {
     Resolved [PACKAGES] packages in [TIME]
     Successfully migrated project from Poetry to uv!
 
-    warning: The following warnings occurred during the migration:
-    warning: - Could not find dependency "non-existing-dependency" listed in "extra-with-non-existing-dependencies" extra.
+    warning: Could not find dependency "non-existing-dependency" listed in "extra-with-non-existing-dependencies" extra.
     "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
@@ -1392,8 +1390,7 @@ fn test_manage_warnings_dry_run() {
         "typing",
     ]
 
-    warning: The following warnings occurred during the migration:
-    warning: - Could not find dependency "non-existing-dependency" listed in "extra-with-non-existing-dependencies" extra.
+    warning: Could not find dependency "non-existing-dependency" listed in "extra-with-non-existing-dependencies" extra.
     "#);
 
     // Assert that `pyproject.toml` was not updated.
@@ -1438,9 +1435,8 @@ fn test_build_backend_auto_hatch() {
     ----- stderr -----
     Successfully migrated project from Poetry to uv!
 
-    warning: The following warnings occurred during the migration:
-    warning: - Migrating build backend to Hatch because package distribution metadata is too complex for uv.
-    warning: - Build backend was migrated to Hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    warning: Migrating build backend to Hatch, as package distribution is too complex to be expressed with uv.
+    warning: Build backend was migrated to Hatch. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
     ");
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
@@ -1574,8 +1570,7 @@ fn test_build_backend_auto_uv() {
     ----- stderr -----
     Successfully migrated project from Poetry to uv!
 
-    warning: The following warnings occurred during the migration:
-    warning: - Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    warning: Build backend was migrated to uv. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
     ");
 
     apply_filters!();
@@ -1858,8 +1853,7 @@ fn test_build_backend_hatch() {
     ----- stderr -----
     Successfully migrated project from Poetry to uv!
 
-    warning: The following warnings occurred during the migration:
-    warning: - Build backend was migrated to Hatch. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    warning: Build backend was migrated to Hatch. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
     ");
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
@@ -2067,8 +2061,7 @@ fn test_build_backend_uv() {
     ----- stderr -----
     Successfully migrated project from Poetry to uv!
 
-    warning: The following warnings occurred during the migration:
-    warning: - Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    warning: Build backend was migrated to uv. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
     ");
 
     apply_filters!();
@@ -2267,8 +2260,7 @@ fn test_build_backend_implicit_package() {
     ----- stderr -----
     Successfully migrated project from Poetry to uv!
 
-    warning: The following warnings occurred during the migration:
-    warning: - Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    warning: Build backend was migrated to uv. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
     ");
 
     apply_filters!();
@@ -2345,8 +2337,7 @@ fn test_build_backend_implicit_package_src() {
     ----- stderr -----
     Successfully migrated project from Poetry to uv!
 
-    warning: The following warnings occurred during the migration:
-    warning: - Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    warning: Build backend was migrated to uv. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
     ");
 
     apply_filters!();
@@ -2423,8 +2414,7 @@ fn test_build_backend_implicit_package_src_and_no_src() {
     ----- stderr -----
     Successfully migrated project from Poetry to uv!
 
-    warning: The following warnings occurred during the migration:
-    warning: - Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    warning: Build backend was migrated to uv. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
     ");
 
     apply_filters!();
@@ -2501,8 +2491,7 @@ fn test_build_backend_uses_namespace() {
     ----- stderr -----
     Successfully migrated project from Poetry to uv!
 
-    warning: The following warnings occurred during the migration:
-    warning: - Build backend was migrated to uv. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration.
+    warning: Build backend was migrated to uv. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
     ");
 
     apply_filters!();

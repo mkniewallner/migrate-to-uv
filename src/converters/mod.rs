@@ -133,15 +133,11 @@ pub trait Converter: Any + Debug {
 
     fn manage_migration_warnings(&self) {
         let migration_errors = MIGRATION_ERRORS.lock().unwrap();
-        let recoverable_errors: Vec<&MigrationError> =
+        let warnings: Vec<&MigrationError> =
             migration_errors.iter().filter(|e| e.recoverable).collect();
 
-        if !recoverable_errors.is_empty() {
-            warn!("The following warnings occurred during the migration:");
-
-            for error in &recoverable_errors {
-                warn!("- {}", error.error);
-            }
+        for warning in &warnings {
+            warn!("{}", warning.error);
         }
     }
 
