@@ -262,6 +262,10 @@ name = "default"
 url = "https://default.example.com/simple/"
 priority = "default"
 
+[[tool.poetry.source]]
+name = "implicit_primary"
+url = "https://default.example.com/simple/"
+
 # This comment should be preserved.
 [tool.ruff]
 fix = true

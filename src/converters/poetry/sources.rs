@@ -43,8 +43,22 @@ pub fn get_source_index(dependency_specification: &DependencySpecification) -> O
 }
 
 pub fn get_indexes(poetry_sources: Option<Vec<Source>>) -> Option<Vec<Index>> {
+    let mut poetry_sources = poetry_sources?;
+    // Sort sources based on the priority, following the order in which Poetry considers
+    // sources (https://python-poetry.org/docs/1.8/repositories/#project-configuration). The order
+    // is important when converting sources to uv indexes, as uv mostly relies on the indexes
+    // position when searching for packages in the different indexes.
+    poetry_sources.sort_by(|a, b| {
+        // Sources without priority are considered as primary, so if not defined we treat them as
+        // primary in the comparison.
+        a.priority
+            .clone()
+            .or(Some(SourcePriority::Primary))
+            .cmp(&b.priority.clone().or(Some(SourcePriority::Primary)))
+    });
+
     Some(
-        poetry_sources?
+        poetry_sources
             .iter()
             .map(|source| Index {
                 name: source.name.clone(),
