@@ -66,10 +66,7 @@ pub fn get_indexes(poetry_sources: Option<Vec<Source>>) -> Option<Vec<Index>> {
                     "pypi" => Some("https://pypi.org/simple/".to_string()),
                     _ => source.url.clone(),
                 },
-                default: match source.priority {
-                    Some(SourcePriority::Default | SourcePriority::Primary) => Some(true),
-                    _ => None,
-                },
+                default: None,
                 explicit: match source.priority {
                     Some(SourcePriority::Explicit) => Some(true),
                     _ => None,
