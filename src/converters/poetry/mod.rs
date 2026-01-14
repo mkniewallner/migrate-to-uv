@@ -146,7 +146,7 @@ impl Converter for Poetry {
 
         if let Some(build_backend) = build_backend {
             add_recoverable_error(format!(
-                "Build backend was migrated to {build_backend}. It is highly recommended to manually check that files included in the source distribution and wheels are the same than before the migration."
+                "Build backend was migrated to {build_backend}. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration."
             ));
         }
 
