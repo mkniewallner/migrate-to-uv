@@ -26,6 +26,7 @@ pub fn get_build_backend(
     let mut source_include: Vec<String> = Vec::new();
     let mut source_exclude: Vec<String> = Vec::new();
     let mut wheel_exclude: Vec<String> = Vec::new();
+    let mut namespace: Option<bool> = None;
 
     // https://python-poetry.org/docs/pyproject/#packages
     if let Some(packages) = packages {
@@ -93,28 +94,15 @@ pub fn get_build_backend(
                 }
             } else {
                 let name = include.replace('/', ".");
-                let has_init_file = has_init_file(project_path, include, from.as_ref());
-
-                if !has_init_file {
-                    errors.push(
-                        format!(
-                            "\"{}\" from \"{}\" cannot be converted to uv, as it does not contain an \"{}\" file, which is required by uv for packages.",
-                            include.bold(),
-                            "poetry.packages.include".bold(),
-                            "__init__.py".bold(),
-                        )
-                    );
+                if !has_init_file(project_path, include, from.as_ref()) {
+                    namespace = Some(true);
                 }
 
                 if add_to_sdist && add_to_wheel {
-                    if has_init_file {
-                        module_name.push(name.clone());
-                    }
+                    module_name.push(name.clone());
                 } else if add_to_sdist {
-                    if has_init_file {
-                        module_name.push(name.clone());
-                        wheel_exclude.push(include.clone());
-                    }
+                    module_name.push(name.clone());
+                    wheel_exclude.push(include.clone());
                 } else if add_to_wheel {
                     errors.push(
                         format!(
@@ -204,6 +192,7 @@ pub fn get_build_backend(
         source_include: non_empty_vec(source_include),
         source_exclude: non_empty_vec(source_exclude),
         wheel_exclude: non_empty_vec(wheel_exclude),
+        namespace,
         ..UvBuildBackend::default()
     }))
 }

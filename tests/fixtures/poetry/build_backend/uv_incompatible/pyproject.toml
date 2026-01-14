@@ -21,10 +21,6 @@ packages = [
     { include = "packages_glob_from_to_sdist_wheel/**/*.py", from = "from", to = "to" },
     { include = "text_file_sdist_wheel.txt" },
     { include = "text_file_wheel.txt", format = "wheel" },
-    { include = "packages_without_init" },
-    { include = "packages_without_init_root" },
-    { include = "packages_from_without_init", from = "from" },
-    { include = "packages_from_without_init_root", from = "from" },
 ]
 include = [
     { path = "include_sdist_wheel", format = ["sdist", "wheel"] },

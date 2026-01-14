@@ -20,7 +20,8 @@ It is still possible to explicitly choose a specific build backend with `--build
 * Add `--keep-current-build-backend` flag ([#614](https://github.com/mkniewallner/migrate-to-uv/pull/614))
 * [poetry] Choose build backend based on distribution complexity ([#597](https://github.com/mkniewallner/migrate-to-uv/pull/597))
 * [poetry] Automatically add Python classifiers for packages based on `python` specifier ([#606](https://github.com/mkniewallner/migrate-to-uv/pull/606))
-* [poetry] Add lower and upper bounds to `uv_build`
+* [poetry] Add lower and upper bounds to `uv_build` ([#617](https://github.com/mkniewallner/migrate-to-uv/pull/617))
+* [poetry] Enable namespace for packages without `__init__.py` on uv build backend ([#631](https://github.com/mkniewallner/migrate-to-uv/pull/631))
 
 ### Bug fixes
 
