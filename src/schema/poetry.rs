@@ -41,7 +41,7 @@ pub struct DependencyGroup {
 }
 
 /// Represents a package source: <https://python-poetry.org/docs/repositories/#package-sources>.
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Default)]
 pub struct Source {
     pub name: String,
     pub url: Option<String>,

@@ -18,7 +18,7 @@ pub struct Uv {
     pub build_backend: Option<UvBuildBackend>,
 }
 
-#[derive(Default, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug)]
 pub struct Index {
     pub name: String,
     pub url: Option<String>,
