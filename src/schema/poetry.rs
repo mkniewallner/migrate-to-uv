@@ -41,26 +41,30 @@ pub struct DependencyGroup {
 }
 
 /// Represents a package source: <https://python-poetry.org/docs/repositories/#package-sources>.
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Default)]
 pub struct Source {
     pub name: String,
     pub url: Option<String>,
     pub priority: Option<SourcePriority>,
 }
 
-#[derive(Deserialize, Serialize, Eq, PartialEq, Debug)]
+/// Priority of the source. Order of the variants matters here, as it determines the order in which
+/// sources are converted to uv indexes. While it's not necessary to explicitly add numeric values
+/// as ordering is already done based on the variants positions, having explicit values better
+/// highlights that the order is important.
+#[derive(Deserialize, Serialize, Clone, Eq, PartialEq, Ord, PartialOrd, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum SourcePriority {
-    /// <https://python-poetry.org/docs/repositories/#primary-package-sources>.
-    Primary,
-    /// <https://python-poetry.org/docs/repositories/#supplemental-package-sources>.
-    Supplemental,
-    /// <https://python-poetry.org/docs/repositories/#explicit-package-sources>.
-    Explicit,
     /// <https://python-poetry.org/docs/1.8/repositories/#default-package-source-deprecated>.
-    Default,
+    Default = 1,
+    /// <https://python-poetry.org/docs/repositories/#primary-package-sources>.
+    Primary = 2,
     /// <https://python-poetry.org/docs/1.8/repositories/#secondary-package-sources-deprecated>.
-    Secondary,
+    Secondary = 3,
+    /// <https://python-poetry.org/docs/repositories/#supplemental-package-sources>.
+    Supplemental = 4,
+    /// <https://python-poetry.org/docs/repositories/#explicit-package-sources>.
+    Explicit = 5,
 }
 
 /// Represents the different ways a script can be defined in Poetry.

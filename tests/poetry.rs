@@ -790,9 +790,16 @@ fn test_skip_lock_full() {
     ]
 
     [[tool.uv.index]]
+    name = "default"
+    url = "https://default.example.com/simple/"
+
+    [[tool.uv.index]]
     name = "PyPI"
     url = "https://pypi.org/simple/"
-    default = true
+
+    [[tool.uv.index]]
+    name = "implicit_primary"
+    url = "https://default.example.com/simple/"
 
     [[tool.uv.index]]
     name = "secondary"
@@ -806,11 +813,6 @@ fn test_skip_lock_full() {
     name = "explicit"
     url = "https://explicit.example.com/simple/"
     explicit = true
-
-    [[tool.uv.index]]
-    name = "default"
-    url = "https://default.example.com/simple/"
-    default = true
 
     [tool.uv.sources]
     with-source = { index = "supplemental" }
@@ -1123,7 +1125,6 @@ fn test_pep_621() {
     [[tool.uv.index]]
     name = "PyPI"
     url = "https://pypi.org/simple/"
-    default = true
 
     [[tool.uv.index]]
     name = "supplemental"
