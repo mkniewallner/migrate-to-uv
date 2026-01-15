@@ -7,7 +7,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-01-05T00:43:55.496329308Z"
+exclude-newer = "2026-01-08T23:18:27.063310764Z"
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -51,7 +51,7 @@ wheels = [
 
 [[package]]
 name = "migrate-to-uv"
-version = "0.9.1"
+version = "0.10.0"
 source = { editable = "." }
 
 [package.dev-dependencies]
