@@ -34,7 +34,7 @@ fn test_revert_changes_no_pyproject() {
           cannot be used.
           And because your project depends on requests==2.30.0, we can conclude
           that your project's requirements are unsatisfiable.
-    error: Could not lock dependencies, aborting the migration. Consider using "--ignore-locked-versions" if you don't need to keep versions from the lock file.
+    error: Could not lock dependencies, aborting the migration. Consider using "--ignore-locked-versions" if you don't need to keep versions from the lock file, or "--skip-lock" if you don't want to lock dependencies at all.
     "#);
 
     // Assert that previous package manager files have not been removed.
@@ -72,7 +72,7 @@ fn test_revert_changes_existing_pyproject() {
           cannot be used.
           And because your project depends on requests==2.30.0, we can conclude
           that your project's requirements are unsatisfiable.
-    error: Could not lock dependencies, aborting the migration. Consider using "--ignore-locked-versions" if you don't need to keep versions from the lock file.
+    error: Could not lock dependencies, aborting the migration. Consider using "--ignore-locked-versions" if you don't need to keep versions from the lock file, or "--skip-lock" if you don't want to lock dependencies at all.
     "#);
 
     // Assert that previous package manager files have not been removed.
