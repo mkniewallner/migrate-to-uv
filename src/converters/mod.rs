@@ -76,8 +76,9 @@ pub trait Converter: Any + Debug {
             self.revert_changes(had_pyproject, old_pyproject);
 
             error!(
-                "Could not lock dependencies, aborting the migration. Consider using \"{}\" if you don't need to keep versions from the lock file.",
+                "Could not lock dependencies, aborting the migration. Consider using \"{}\" if you don't need to keep versions from the lock file, or \"{}\" if you don't want to lock dependencies at all.",
                 "--ignore-locked-versions".bold(),
+                "--skip-lock".bold(),
             );
             exit(1);
         }
