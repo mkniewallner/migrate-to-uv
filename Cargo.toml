@@ -2,7 +2,7 @@
 name = "migrate-to-uv"
 version = "0.10.0"
 edition = "2024"
-rust-version = "1.92"
+rust-version = "1.93"
 license = "MIT"
 authors = ["Mathieu Kniewallner <mathieu.kniewallner@gmail.com>"]
 default-run = "migrate-to-uv"
