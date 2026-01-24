@@ -248,23 +248,16 @@ pub fn get_converter(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::converters::DependencyGroupsStrategy;
     use rstest::rstest;
     use std::any::Any;
     use std::path::PathBuf;
 
-    const fn get_converter_options(project_path: PathBuf) -> ConverterOptions {
+    fn get_converter_options(project_path: PathBuf) -> ConverterOptions {
         ConverterOptions {
             project_path,
             dry_run: true,
             skip_lock: true,
-            skip_uv_checks: false,
-            ignore_locked_versions: false,
-            replace_project_section: false,
-            keep_current_build_backend: false,
-            keep_old_metadata: false,
-            dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-            build_backend: None,
+            ..Default::default()
         }
     }
 

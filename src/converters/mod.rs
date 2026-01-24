@@ -37,6 +37,7 @@ pub struct ConverterOptions {
     pub replace_project_section: bool,
     pub keep_current_build_backend: bool,
     pub keep_old_metadata: bool,
+    pub ignore_errors: bool,
     pub dependency_groups_strategy: DependencyGroupsStrategy,
     pub build_backend: Option<BuildBackend>,
 }
@@ -128,7 +129,10 @@ pub trait Converter: Any + Debug {
             for error in &unrecoverable_errors {
                 error!("- {}", error.error);
             }
-            exit(1);
+
+            if !self.ignore_errors() {
+                exit(1);
+            }
         }
     }
 
@@ -216,6 +220,11 @@ pub trait Converter: Any + Debug {
     /// Whether to keep current package manager data at the end of the migration.
     fn keep_old_metadata(&self) -> bool {
         self.get_converter_options().keep_old_metadata
+    }
+
+    /// Whether to perform the migration even if there are errors.
+    fn ignore_errors(&self) -> bool {
+        self.get_converter_options().ignore_errors
     }
 
     /// Whether to keep versions locked in the current package manager (if it supports lock files)
