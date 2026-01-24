@@ -1205,6 +1205,70 @@ fn test_manage_errors() {
 }
 
 #[test]
+fn test_manage_errors_ignore_errors() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("with_migration_errors");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(fixture_path, project_path).unwrap();
+
+    apply_filters!();
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--ignore-errors"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    error: The following errors occurred during the migration:
+    error: - Found multiple files ("README.md", "README2.md") in "tool.poetry.readme". PEP 621 only supports setting one. Make sure to manually edit the section before migrating.
+    error: - "caret-or" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-single" dependency with version "^1.0|^2.0|^3.0" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-whitespaces" dependency with version " ^1.0 || ^2.0  ||  ^3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-mix-single-double-whitespaces" dependency with version " ^1.0 | ^2.0  ||  ^3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-and-pep-440" dependency with version "^1.0,<1.3||^2.0,<2.2" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-table-version" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-multiple-constraints" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-multiple-constraints" dependency with version "^1.0||^2.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-single" dependency with version "~1.0|~2.0|~3.0" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-whitespaces" dependency with version " ~1.0 || ~2.0  ||  ~3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-mix-single-double-whitespaces" dependency with version " ~1.0 | ~2.0  ||  ~3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-and-pep-440" dependency with version "~1.0,<1.1||~1.0.1,<1.0.2" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-table-version" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-multiple-constraints" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-multiple-constraints" dependency with version "~1.0||~2.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "whitespace" dependency with version ">=7.0 <7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "whitespace-multiple" dependency with version ">=7.0  <7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "whitespace-caret" dependency with version "7.0 ^7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "whitespace-caret-multiple" dependency with version "7.0  ^7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "python-caret-or" dependency with python marker "^3.11 || ^3.12" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "python-caret-or-single" dependency with python marker "^3.11 | ^3.12" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "python-whitespace" dependency with python marker "3.11 <=3.14" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
+    Using [PYTHON_INTERPRETER]
+    warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
+    Resolved [PACKAGES] packages in [TIME]
+    Locking dependencies again using "uv lock" to remove constraints...
+    Using [PYTHON_INTERPRETER]
+    warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
+    Resolved [PACKAGES] packages in [TIME]
+    Partially migrated project from Poetry to uv, as errors occurred during the migration.
+    "#);
+
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [project]
+    name = "foobar"
+    version = "0.0.1"
+    dependencies = ["arrow==1.2.3"]
+    "#);
+
+    // Assert that previous package manager files are correctly removed.
+    assert!(!project_path.join("poetry.lock").exists());
+    assert!(!project_path.join("poetry.toml").exists());
+}
+
+#[test]
 fn test_manage_warnings() {
     let fixture_path = Path::new(FIXTURES_PATH).join("with_migration_warnings");
 
@@ -1346,6 +1410,59 @@ fn test_manage_errors_dry_run() {
     error: - "python-caret-or" dependency with python marker "^3.11 || ^3.12" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
     error: - "python-caret-or-single" dependency with python marker "^3.11 | ^3.12" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
     error: - "python-whitespace" dependency with python marker "3.11 <=3.14" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    "#);
+
+    // Assert that `pyproject.toml` was not updated.
+    assert_eq!(
+        pyproject,
+        fs::read_to_string(project_path.join("pyproject.toml")).unwrap()
+    );
+
+    // Assert that `uv.lock` file was not generated.
+    assert!(!project_path.join("uv.lock").exists());
+}
+
+#[test]
+fn test_manage_errors_dry_run_ignore_errors() {
+    let project_path = Path::new(FIXTURES_PATH).join("with_migration_errors");
+    let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
+
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run").arg("--ignore-errors"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    error: The following errors occurred during the migration:
+    error: - Found multiple files ("README.md", "README2.md") in "tool.poetry.readme". PEP 621 only supports setting one. Make sure to manually edit the section before migrating.
+    error: - "caret-or" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-single" dependency with version "^1.0|^2.0|^3.0" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-whitespaces" dependency with version " ^1.0 || ^2.0  ||  ^3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-mix-single-double-whitespaces" dependency with version " ^1.0 | ^2.0  ||  ^3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-and-pep-440" dependency with version "^1.0,<1.3||^2.0,<2.2" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-table-version" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-multiple-constraints" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-multiple-constraints" dependency with version "^1.0||^2.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-single" dependency with version "~1.0|~2.0|~3.0" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-whitespaces" dependency with version " ~1.0 || ~2.0  ||  ~3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-mix-single-double-whitespaces" dependency with version " ~1.0 | ~2.0  ||  ~3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-and-pep-440" dependency with version "~1.0,<1.1||~1.0.1,<1.0.2" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-table-version" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-multiple-constraints" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-multiple-constraints" dependency with version "~1.0||~2.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "whitespace" dependency with version ">=7.0 <7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "whitespace-multiple" dependency with version ">=7.0  <7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "whitespace-caret" dependency with version "7.0 ^7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "whitespace-caret-multiple" dependency with version "7.0  ^7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "python-caret-or" dependency with python marker "^3.11 || ^3.12" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "python-caret-or-single" dependency with python marker "^3.11 | ^3.12" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "python-whitespace" dependency with python marker "3.11 <=3.14" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    Migrated pyproject.toml:
+    [project]
+    name = "foobar"
+    version = "0.0.1"
+    dependencies = ["arrow==1.2.3"]
     "#);
 
     // Assert that `pyproject.toml` was not updated.

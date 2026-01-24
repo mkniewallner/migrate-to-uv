@@ -32,3 +32,5 @@ whitespace-caret-multiple = "^7.0  ^7.1"
 python-caret-or = { version = "1.2.3", python = "^3.11 || ^3.12" }
 python-caret-or-single = { version = "1.2.3", python = "^3.11 | ^3.12" }
 python-whitespace = { version = "1.2.3", python = "^3.11 <=3.14"}
+# This one has no error, and serves as a way to validate that we can still migrate valid dependencies.
+arrow = "1.2.3"
