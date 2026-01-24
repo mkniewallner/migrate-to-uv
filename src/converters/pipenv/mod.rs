@@ -128,7 +128,6 @@ impl Converter for Pipenv {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::converters::DependencyGroupsStrategy;
     use std::fs::File;
     use std::io::Write;
     use std::path::PathBuf;
@@ -152,13 +151,8 @@ mod tests {
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
-                keep_current_build_backend: false,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 
@@ -188,13 +182,8 @@ mod tests {
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
-                keep_current_build_backend: false,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 

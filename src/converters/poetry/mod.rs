@@ -247,7 +247,6 @@ impl Poetry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::converters::DependencyGroupsStrategy;
     use std::fs::File;
     use std::io::Write;
     use std::path::PathBuf;
@@ -281,13 +280,8 @@ mod tests {
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
-                keep_current_build_backend: false,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 
@@ -321,13 +315,8 @@ mod tests {
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
-                keep_current_build_backend: false,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 
@@ -363,13 +352,8 @@ mod tests {
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
-                keep_current_build_backend: false,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 
@@ -403,13 +387,8 @@ build-backend = "poetry.core.masonry.api"
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
-                keep_current_build_backend: false,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 
@@ -465,13 +444,8 @@ python = "^3.10"
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
-                keep_current_build_backend: false,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 
@@ -520,13 +494,8 @@ python = ">=3.2,<3.13"
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
-                keep_current_build_backend: false,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 
@@ -579,13 +548,8 @@ python = ">=2.6"
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
-                keep_current_build_backend: false,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 
@@ -650,13 +614,8 @@ python = ">=3.10"
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
-                keep_current_build_backend: false,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 
@@ -703,13 +662,8 @@ name = ""
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
-                keep_current_build_backend: false,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 
@@ -741,13 +695,8 @@ build-backend = "bar"
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
-                keep_current_build_backend: false,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 
@@ -787,13 +736,8 @@ name = ""
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
-                keep_current_build_backend: false,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 
@@ -849,13 +793,8 @@ requires-python = ">=3.10"
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
-                keep_current_build_backend: false,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 
@@ -909,13 +848,8 @@ classifiers = [
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
-                keep_current_build_backend: false,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 
@@ -969,13 +903,9 @@ exclude = ["bar.txt"]
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
                 keep_current_build_backend: true,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 
@@ -1023,13 +953,9 @@ name = "foo"
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
                 keep_current_build_backend: true,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 
@@ -1065,13 +991,9 @@ name = "foo"
                 project_path: PathBuf::from(project_path),
                 dry_run: true,
                 skip_lock: true,
-                skip_uv_checks: false,
                 ignore_locked_versions: true,
-                replace_project_section: false,
                 keep_current_build_backend: true,
-                keep_old_metadata: false,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
-                build_backend: None,
+                ..Default::default()
             },
         };
 

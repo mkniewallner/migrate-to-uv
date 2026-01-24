@@ -26,7 +26,7 @@ type DependencyGroupsAndDefaultGroups = (
     Option<Vec<String>>,
 );
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Default)]
 #[allow(clippy::struct_excessive_bools)]
 pub struct ConverterOptions {
     pub project_path: PathBuf,
@@ -305,8 +305,9 @@ pub trait Converter: Any + Debug {
     }
 }
 
-#[derive(clap::ValueEnum, Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(clap::ValueEnum, Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum DependencyGroupsStrategy {
+    #[default]
     SetDefaultGroups,
     IncludeInDev,
     KeepExisting,
