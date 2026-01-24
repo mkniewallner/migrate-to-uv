@@ -203,3 +203,15 @@ handle the cleaning yourself, or want to compare the differences first.
 ```bash
 migrate-to-uv --keep-current-data
 ```
+
+### `--ignore-errors`
+
+Perform the migration even if errors occur during the process, which would likely lead to a partial migration. Errors
+will still be displayed in the terminal. This flag could be useful if you prefer to manually fix the migration
+afterward based on the errors that could occur during the migration.
+
+**Example**:
+
+```bash
+migrate-to-uv --ignore-errors
+```
