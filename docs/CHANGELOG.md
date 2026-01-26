@@ -7,7 +7,7 @@ icon: lucide/scroll-text
 
 ### Bug fixes
 
-* [poetry] Keep explicit sources when using only one primary/default source with explicit sources
+* [poetry] Keep explicit sources when using only one primary/default source with explicit sources ([#662](https://github.com/mkniewallner/migrate-to-uv/pull/662))
 
 ## 0.10.0 - 2026-01-16
 
