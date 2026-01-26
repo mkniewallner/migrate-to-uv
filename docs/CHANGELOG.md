@@ -3,7 +3,7 @@ icon: lucide/scroll-text
 ---
 # Changelog
 
-## Unreleased
+## 0.10.1 - 2026-01-26
 
 ### Bug fixes
 
