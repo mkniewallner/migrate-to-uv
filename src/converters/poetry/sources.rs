@@ -60,29 +60,45 @@ pub fn get_indexes(poetry_sources: Option<Vec<Source>>) -> Option<Vec<Index>> {
     // If we only have one source that has primary or default priority, we can disable PyPI by
     // setting `default = true`. We filter out sources with explicit priority because they are only
     // used when explicitly requested by packages, and are not looked for otherwise.
-    if poetry_sources
+    let mut poetry_sources_without_explicit = poetry_sources
         .iter()
-        .filter(|s| s.priority != Some(SourcePriority::Explicit))
-        .count()
-        == 1
-        && let Some(SourcePriority::Primary | SourcePriority::Default) | None =
-            poetry_sources[0].priority
-    {
-        let source = &poetry_sources[0];
+        .filter(|s| s.priority != Some(SourcePriority::Explicit));
 
-        // Poetry fails if `pypi` sets a URL, so we can assume that we always have PyPI for this
-        // source name. Since PyPI is already enabled by default, there is no need to explicitly
-        // have it.
-        if source.name.to_lowercase() == "pypi" {
-            return None;
+    if poetry_sources_without_explicit.clone().count() == 1
+        && let Some(SourcePriority::Primary | SourcePriority::Default) | None =
+            &poetry_sources_without_explicit.next().unwrap().priority
+    {
+        let mut sources = Vec::new();
+
+        for source in poetry_sources {
+            if source.priority == Some(SourcePriority::Explicit) {
+                sources.push(Index {
+                    name: source.name,
+                    url: source.url,
+                    explicit: Some(true),
+                    ..Default::default()
+                });
+            } else {
+                // Poetry fails if `pypi` sets a URL, so we can assume that we always have PyPI for
+                // this source name. Since PyPI is already enabled by default, there is no need to
+                // explicitly have it.
+                if source.name.to_lowercase() == "pypi" {
+                    continue;
+                }
+
+                sources.push(Index {
+                    name: source.name,
+                    url: source.url,
+                    default: Some(true),
+                    ..Default::default()
+                });
+            }
         }
 
-        return Some(vec![Index {
-            name: source.name.clone(),
-            url: source.url.clone(),
-            default: Some(true),
-            ..Default::default()
-        }]);
+        if sources.is_empty() {
+            return None;
+        }
+        return Some(sources);
     }
 
     Some(
@@ -216,12 +232,26 @@ mod tests {
             },
         ];
 
-        let expected = vec![Index {
-            name: "foo".to_string(),
-            url: Some("http://foo.bar".to_string()),
-            default: Some(true),
-            ..Default::default()
-        }];
+        let expected = vec![
+            Index {
+                name: "foo".to_string(),
+                url: Some("http://foo.bar".to_string()),
+                default: Some(true),
+                ..Default::default()
+            },
+            Index {
+                name: "foobar".to_string(),
+                url: Some("http://foobar.foo".to_string()),
+                explicit: Some(true),
+                ..Default::default()
+            },
+            Index {
+                name: "bar".to_string(),
+                url: Some("http://bar.foo".to_string()),
+                explicit: Some(true),
+                ..Default::default()
+            },
+        ];
 
         assert_eq!(get_indexes(Some(sources)), Some(expected));
     }
