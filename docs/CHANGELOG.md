@@ -3,6 +3,12 @@ icon: lucide/scroll-text
 ---
 # Changelog
 
+## Unreleased
+
+### Bug fixes
+
+* [poetry] Respect `--build-backend hatch` when migrating projects that have neither `packages` nor `include` nor `exclude` ([#667](https://github.com/mkniewallner/migrate-to-uv/pull/667))
+
 ## 0.10.1 - 2026-01-26
 
 ### Bug fixes
