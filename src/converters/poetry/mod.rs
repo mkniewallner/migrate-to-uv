@@ -45,6 +45,7 @@ impl Converter for Poetry {
             pyproject.build_system,
             self.converter_options.keep_current_build_backend,
             build_backend.as_ref(),
+            self.converter_options.build_backend,
         );
 
         let mut uv_source_index: IndexMap<String, SourceContainer> = IndexMap::new();
