@@ -126,7 +126,8 @@ pub fn get_build_backend(
         // have a build system (otherwise that means we have no build backend at all) and we find a
         // directory that matches the project name.
         // Otherwise, we keep it to `None`, to use uv's default, which looks into `src` directory.
-        if build_system.is_some()
+        if let Some(build_system) = build_system
+            && build_system.build_backend == Some("poetry.core.masonry.api".to_string())
             && project_name.is_some_and(|name| project_path.join(name).exists())
         {
             module_root = Some(String::new());
