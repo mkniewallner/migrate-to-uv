@@ -2,6 +2,7 @@ use crate::converters::poetry::build_backend::{
     get_include_distribution_format, get_packages_distribution_format,
 };
 use crate::schema::poetry::{Include, Package};
+use crate::schema::pyproject::BuildSystem;
 use crate::schema::utils::SingleOrVec;
 use crate::schema::uv::UvBuildBackend;
 use crate::utils::non_empty_vec;
@@ -14,15 +15,12 @@ pub fn get_build_backend(
     packages: Option<&Vec<Package>>,
     include: Option<&Vec<Include>>,
     exclude: Option<&Vec<String>>,
+    build_system: Option<&BuildSystem>,
 ) -> Result<Option<UvBuildBackend>, Vec<String>> {
     let mut errors = Vec::new();
 
     let mut module_name: Vec<String> = Vec::new();
-    // By default, uv expects the modules to be in a "src" directory. Since Poetry does not provide
-    // a similar option, we want to default to the same thing as Poetry, i.e. an empty string. If
-    // the project does not set any `packages` and uses a `src` layout, we later set the value to
-    // `None` as in that case we do want to use uv's default.
-    let mut module_root: Option<String> = Some(String::new());
+    let mut module_root: Option<String> = None;
     let mut source_include: Vec<String> = Vec::new();
     let mut source_exclude: Vec<String> = Vec::new();
     let mut wheel_exclude: Vec<String> = Vec::new();
@@ -30,6 +28,11 @@ pub fn get_build_backend(
 
     // https://python-poetry.org/docs/pyproject/#packages
     if let Some(packages) = packages {
+        // By default, uv expects the modules to be in a "src" directory. Since Poetry does not
+        // provide a similar option, we want to default to the same thing as Poetry, i.e. an empty
+        // string.
+        module_root = Some(String::new());
+
         for Package {
             include,
             format,
@@ -119,13 +122,14 @@ pub fn get_build_backend(
         // particular order):
         // - `<project_name>` directory
         // - `src/<project_name>` directory if there was no match for the above
-        // We apply the same logic here, and in case an `src`-layout is found, we do not set
-        // `module-root` as uv defaults to looking for `src` in that case.
-        let has_project_name_directory =
-            project_name.is_some_and(|name| project_path.join(name).exists());
-
-        if !has_project_name_directory && project_path.join("src").exists() {
-            module_root = None;
+        // In order to have the same behavior, we set an empty string to `module_root` in case we
+        // have a build system (otherwise that means we have no build backend at all) and we find a
+        // directory that matches the project name.
+        // Otherwise, we keep it to `None`, to use uv's default, which looks into `src` directory.
+        if build_system.is_some()
+            && project_name.is_some_and(|name| project_path.join(name).exists())
+        {
+            module_root = Some(String::new());
         }
     }
 
@@ -178,6 +182,7 @@ pub fn get_build_backend(
         && source_include.is_empty()
         && source_exclude.is_empty()
         && wheel_exclude.is_empty()
+        && module_root.is_none()
     {
         return Ok(None);
     }
