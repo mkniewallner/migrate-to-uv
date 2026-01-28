@@ -40,7 +40,11 @@ impl Converter for Poetry {
             .poetry
             .unwrap_or_default();
 
-        let build_backend = get_build_backend(&self.converter_options, &poetry);
+        let build_backend = get_build_backend(
+            &self.converter_options,
+            pyproject.build_system.as_ref(),
+            &poetry,
+        );
         let build_system = build_backend::get_new_build_system(
             pyproject.build_system,
             self.converter_options.keep_current_build_backend,

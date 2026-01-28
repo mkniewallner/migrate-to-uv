@@ -8,6 +8,7 @@ icon: lucide/scroll-text
 ### Bug fixes
 
 * [poetry] Respect `--build-backend hatch` when migrating projects that have neither `packages` nor `include` nor `exclude` ([#667](https://github.com/mkniewallner/migrate-to-uv/pull/667))
+* [poetry] Correctly set `module-root` when migrating projects without `packages` nor `include` nor `exclude` to uv build backend ([#668](https://github.com/mkniewallner/migrate-to-uv/pull/668))
 
 ## 0.10.1 - 2026-01-26
 

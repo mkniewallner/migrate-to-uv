@@ -90,6 +90,7 @@ pub fn get_new_build_system(
 /// Hatch is selected. If `--build-backend` is set to `uv`, Uv is selected.
 pub fn get_build_backend(
     converter_options: &ConverterOptions,
+    build_system: Option<&BuildSystem>,
     poetry: &Poetry,
 ) -> Option<BuildBackendObject> {
     if converter_options.keep_current_build_backend {
@@ -104,6 +105,7 @@ pub fn get_build_backend(
                 poetry.packages.as_ref(),
                 poetry.include.as_ref(),
                 poetry.exclude.as_ref(),
+                build_system,
             );
 
             match uv {
@@ -147,6 +149,7 @@ pub fn get_build_backend(
                 poetry.packages.as_ref(),
                 poetry.include.as_ref(),
                 poetry.exclude.as_ref(),
+                build_system,
             );
 
             match uv {
