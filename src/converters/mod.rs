@@ -37,6 +37,7 @@ pub struct ConverterOptions {
     pub replace_project_section: bool,
     pub keep_current_build_backend: bool,
     pub keep_old_metadata: bool,
+    pub ignore_errors: bool,
     pub dependency_groups_strategy: DependencyGroupsStrategy,
     pub build_backend: Option<BuildBackend>,
 }
@@ -51,7 +52,7 @@ pub trait Converter: Any + Debug {
 
         let updated_pyproject_string = self.build_uv_pyproject();
 
-        self.manage_migration_errors();
+        let had_errors = self.manage_migration_errors();
 
         if self.is_dry_run() {
             info!(
@@ -86,15 +87,27 @@ pub trait Converter: Any + Debug {
         self.remove_constraint_dependencies(updated_pyproject_string);
         self.delete_migrated_files().unwrap();
 
-        info!(
-            "{}",
-            format!(
-                "Successfully migrated project from {} to uv!\n",
-                self.get_package_manager_name()
-            )
-            .bold()
-            .green()
-        );
+        if had_errors {
+            info!(
+                "{}",
+                format!(
+                    "Partially migrated project from {} to uv, as errors occurred during the migration.\n",
+                    self.get_package_manager_name()
+                )
+                .bold()
+                .yellow()
+            );
+        } else {
+            info!(
+                "{}",
+                format!(
+                    "Successfully migrated project from {} to uv!\n",
+                    self.get_package_manager_name()
+                )
+                .bold()
+                .green()
+            );
+        }
 
         self.manage_migration_warnings();
     }
@@ -115,21 +128,32 @@ pub trait Converter: Any + Debug {
         }
     }
 
-    fn manage_migration_errors(&self) {
+    fn manage_migration_errors(&self) -> bool {
         let migration_errors = MIGRATION_ERRORS.lock().unwrap();
         let unrecoverable_errors: Vec<&MigrationError> =
             migration_errors.iter().filter(|e| !e.recoverable).collect();
 
-        if !unrecoverable_errors.is_empty() {
+        if unrecoverable_errors.is_empty() {
+            return false;
+        }
+
+        if self.ignore_errors() {
+            error!("The following errors occurred during the migration:");
+        } else {
             error!(
                 "Could not automatically migrate the project to uv because of the following errors:"
             );
+        }
 
-            for error in &unrecoverable_errors {
-                error!("- {}", error.error);
-            }
+        for error in &unrecoverable_errors {
+            error!("- {}", error.error);
+        }
+
+        if !self.ignore_errors() {
             exit(1);
         }
+
+        true
     }
 
     fn manage_migration_warnings(&self) {
@@ -216,6 +240,11 @@ pub trait Converter: Any + Debug {
     /// Whether to keep current package manager data at the end of the migration.
     fn keep_old_metadata(&self) -> bool {
         self.get_converter_options().keep_old_metadata
+    }
+
+    /// Whether to perform the migration even if there are errors.
+    fn ignore_errors(&self) -> bool {
+        self.get_converter_options().ignore_errors
     }
 
     /// Whether to keep versions locked in the current package manager (if it supports lock files)

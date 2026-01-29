@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+* Add `--ignore-errors` flag to perform the migration even in case of errors ([#657](https://github.com/mkniewallner/migrate-to-uv/pull/657))
+
 ## 0.10.2 - 2026-01-29
 
 ### Bug fixes
