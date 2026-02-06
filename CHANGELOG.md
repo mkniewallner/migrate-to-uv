@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+* [poetry] Bump default `uv_build` bounds to `>=0.10.0,<0.11.0` ([#683](https://github.com/mkniewallner/migrate-to-uv/pull/683))
+
 ## 0.10.2 - 2026-01-29
 
 ### Bug fixes
