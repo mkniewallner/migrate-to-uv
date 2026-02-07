@@ -16,7 +16,7 @@ pub fn get_build_backend(
     include: Option<&Vec<Include>>,
     exclude: Option<&Vec<String>>,
     build_system: Option<&BuildSystem>,
-) -> Result<Option<UvBuildBackend>, Vec<String>> {
+) -> (Option<UvBuildBackend>, Vec<String>) {
     let mut errors = Vec::new();
 
     let mut module_name: Vec<String> = Vec::new();
@@ -175,32 +175,30 @@ pub fn get_build_backend(
         wheel_exclude.extend(exclude.clone());
     }
 
-    if !errors.is_empty() {
-        return Err(errors);
-    }
-
-    if module_name.is_empty()
+    let uv_build_backend = if module_name.is_empty()
         && source_include.is_empty()
         && source_exclude.is_empty()
         && wheel_exclude.is_empty()
         && module_root.is_none()
     {
-        return Ok(None);
-    }
+        None
+    } else {
+        Some(UvBuildBackend {
+            module_name: if module_name.is_empty() {
+                None
+            } else {
+                Some(SingleOrVec::Vec(module_name))
+            },
+            module_root,
+            source_include: non_empty_vec(source_include),
+            source_exclude: non_empty_vec(source_exclude),
+            wheel_exclude: non_empty_vec(wheel_exclude),
+            namespace,
+            ..UvBuildBackend::default()
+        })
+    };
 
-    Ok(Some(UvBuildBackend {
-        module_name: if module_name.is_empty() {
-            None
-        } else {
-            Some(SingleOrVec::Vec(module_name))
-        },
-        module_root,
-        source_include: non_empty_vec(source_include),
-        source_exclude: non_empty_vec(source_exclude),
-        wheel_exclude: non_empty_vec(wheel_exclude),
-        namespace,
-        ..UvBuildBackend::default()
-    }))
+    (uv_build_backend, errors)
 }
 
 fn has_init_file(project_path: &Path, include: &String, from: Option<&String>) -> bool {

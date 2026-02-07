@@ -99,7 +99,7 @@ pub fn get_build_backend(
 
     match &converter_options.build_backend {
         None => {
-            let uv = uv::get_build_backend(
+            let (uv, errors) = uv::get_build_backend(
                 poetry.name.as_ref(),
                 &converter_options.project_path,
                 poetry.packages.as_ref(),
@@ -108,90 +108,82 @@ pub fn get_build_backend(
                 build_system,
             );
 
-            match uv {
-                Ok(Some(uv)) => Some(BuildBackendObject::Uv(uv)),
-                Err(_) => {
-                    add_recoverable_error(
-                        "Migrating build backend to Hatch, as package distribution is too complex to be expressed with uv.".to_string()
-                    );
+            if errors.is_empty() {
+                uv.map(BuildBackendObject::Uv)
+            } else {
+                add_recoverable_error(
+                    "Migrating build backend to Hatch, as package distribution is too complex to be expressed with uv.".to_string()
+                );
 
-                    let hatch = hatch::get_build_backend(
-                        &converter_options.project_path,
-                        poetry.packages.as_ref(),
-                        poetry.include.as_ref(),
-                        poetry.exclude.as_ref(),
-                    );
+                let (hatch, errors) = hatch::get_build_backend(
+                    &converter_options.project_path,
+                    poetry.packages.as_ref(),
+                    poetry.include.as_ref(),
+                    poetry.exclude.as_ref(),
+                );
 
-                    match hatch {
-                        Ok(Some(hatch)) => Some(BuildBackendObject::Hatch(hatch)),
-                        Err(errors) => {
-                            for error in errors {
-                                add_unrecoverable_error(error.clone());
-                            }
-
-                            add_unrecoverable_error(format!(
-                                "Package distribution could not be migrated to uv nor Hatch build backend due to the issues above. Consider keeping the current build backend with \"{}\".",
-                                "--keep-current-build-backend".bold(),
-                            ));
-
-                            None
-                        }
-                        Ok(None) => None,
-                    }
-                }
-                Ok(None) => None,
-            }
-        }
-        Some(BuildBackend::Uv) => {
-            let uv = uv::get_build_backend(
-                poetry.name.as_ref(),
-                &converter_options.project_path,
-                poetry.packages.as_ref(),
-                poetry.include.as_ref(),
-                poetry.exclude.as_ref(),
-                build_system,
-            );
-
-            match uv {
-                Ok(Some(uv)) => Some(BuildBackendObject::Uv(uv)),
-                Err(errors) => {
+                if errors.is_empty() {
+                    hatch.map(BuildBackendObject::Hatch)
+                } else {
                     for error in errors {
                         add_unrecoverable_error(error.clone());
                     }
 
                     add_unrecoverable_error(format!(
-                        "Package distribution could not be migrated to uv build backend due to the issues above. Consider using Hatch build backend with \"{}\".",
-                        "--build-backend hatch".bold(),
-                    ));
-
-                    None
-                }
-                Ok(None) => None,
-            }
-        }
-        Some(BuildBackend::Hatch) => {
-            let hatch = hatch::get_build_backend(
-                &converter_options.project_path,
-                poetry.packages.as_ref(),
-                poetry.include.as_ref(),
-                poetry.exclude.as_ref(),
-            );
-
-            match hatch {
-                Ok(Some(hatch)) => Some(BuildBackendObject::Hatch(hatch)),
-                Err(errors) => {
-                    for error in errors {
-                        add_unrecoverable_error(error.clone());
-                    }
-
-                    add_unrecoverable_error(format!(
-                        "Package distribution could not be migrated to Hatch build backend due to the issues above. Consider keeping the current build backend with \"{}\".",
+                        "Package distribution could not be migrated to uv nor Hatch build backend due to the issues above. Consider keeping the current build backend with \"{}\".",
                         "--keep-current-build-backend".bold(),
                     ));
 
                     None
                 }
-                Ok(None) => None,
+            }
+        }
+        Some(BuildBackend::Uv) => {
+            let (uv, errors) = uv::get_build_backend(
+                poetry.name.as_ref(),
+                &converter_options.project_path,
+                poetry.packages.as_ref(),
+                poetry.include.as_ref(),
+                poetry.exclude.as_ref(),
+                build_system,
+            );
+
+            if errors.is_empty() {
+                uv.map(BuildBackendObject::Uv)
+            } else {
+                for error in errors {
+                    add_unrecoverable_error(error.clone());
+                }
+
+                add_unrecoverable_error(format!(
+                    "Package distribution could not be migrated to uv build backend due to the issues above. Consider using Hatch build backend with \"{}\".",
+                    "--build-backend hatch".bold(),
+                ));
+
+                None
+            }
+        }
+        Some(BuildBackend::Hatch) => {
+            let (hatch, errors) = hatch::get_build_backend(
+                &converter_options.project_path,
+                poetry.packages.as_ref(),
+                poetry.include.as_ref(),
+                poetry.exclude.as_ref(),
+            );
+
+            if errors.is_empty() {
+                hatch.map(BuildBackendObject::Hatch)
+            } else {
+                for error in errors {
+                    add_unrecoverable_error(error.clone());
+                }
+
+                add_unrecoverable_error(format!(
+                    "Package distribution could not be migrated to Hatch build backend due to the issues above. Consider keeping the current build backend with \"{}\".",
+                    "--keep-current-build-backend".bold(),
+                ));
+
+                None
             }
         }
     }
