@@ -53,7 +53,7 @@ pub fn get_build_backend(
     packages: Option<&Vec<Package>>,
     include: Option<&Vec<Include>>,
     exclude: Option<&Vec<String>>,
-) -> Result<Option<Hatch>, Vec<String>> {
+) -> (Option<Hatch>, Vec<String>) {
     let mut errors = Vec::new();
 
     let mut targets = IndexMap::new();
@@ -85,19 +85,17 @@ pub fn get_build_backend(
         targets.insert("wheel".to_string(), wheel_target);
     }
 
-    if !errors.is_empty() {
-        return Err(errors);
-    }
+    let hatch = if targets.is_empty() {
+        None
+    } else {
+        Some(Hatch {
+            build: Some(Build {
+                targets: Some(targets),
+            }),
+        })
+    };
 
-    if targets.is_empty() {
-        return Ok(None);
-    }
-
-    Ok(Some(Hatch {
-        build: Some(Build {
-            targets: Some(targets),
-        }),
-    }))
+    (hatch, errors)
 }
 
 /// Inclusion behavior: <https://hatch.pypa.io/latest/config/build/#patterns>
