@@ -1950,12 +1950,13 @@ fn test_build_backend_auto_errors_ignore_errors() {
     Partially migrated project from Poetry to uv, as errors occurred during the migration.
 
     warning: Migrating build backend to Hatch, as package distribution is too complex to be expressed with uv.
+    warning: Build backend was migrated to Hatch. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
     "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [build-system]
-    requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
-    build-backend = "uv_build"
+    requires = ["hatchling"]
+    build-backend = "hatchling.build"
 
     [project]
     name = "foobar"
@@ -1971,6 +1972,12 @@ fn test_build_backend_auto_errors_ignore_errors() {
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
     ]
+
+    [tool.hatch.build.targets.sdist]
+    include = ["foo"]
+
+    [tool.hatch.build.targets.wheel]
+    include = ["foo"]
     "#);
 }
 
@@ -2033,8 +2040,8 @@ fn test_build_backend_auto_errors_dry_run_ignore_errors() {
     error: - "**/*.yaml" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
     Migrated pyproject.toml:
     [build-system]
-    requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
-    build-backend = "uv_build"
+    requires = ["hatchling"]
+    build-backend = "hatchling.build"
 
     [project]
     name = "foobar"
@@ -2051,7 +2058,14 @@ fn test_build_backend_auto_errors_dry_run_ignore_errors() {
         "Programming Language :: Python :: 3.14",
     ]
 
+    [tool.hatch.build.targets.sdist]
+    include = ["foo"]
+
+    [tool.hatch.build.targets.wheel]
+    include = ["foo"]
+
     warning: Migrating build backend to Hatch, as package distribution is too complex to be expressed with uv.
+    warning: Build backend was migrated to Hatch. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
     "#);
 
     // Assert that `pyproject.toml` was not updated.
@@ -2278,6 +2292,8 @@ fn test_build_backend_hatch_errors_ignore_errors() {
     Using [PYTHON_INTERPRETER]
     Resolved [PACKAGES] package in [TIME]
     Partially migrated project from Poetry to uv, as errors occurred during the migration.
+
+    warning: Build backend was migrated to Hatch. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
     "#);
 
     insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
@@ -2299,6 +2315,12 @@ fn test_build_backend_hatch_errors_ignore_errors() {
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
     ]
+
+    [tool.hatch.build.targets.sdist]
+    include = ["foo"]
+
+    [tool.hatch.build.targets.wheel]
+    include = ["foo"]
     "#);
 }
 
@@ -2377,6 +2399,14 @@ fn test_build_backend_hatch_errors_dry_run_ignore_errors() {
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
     ]
+
+    [tool.hatch.build.targets.sdist]
+    include = ["foo"]
+
+    [tool.hatch.build.targets.wheel]
+    include = ["foo"]
+
+    warning: Build backend was migrated to Hatch. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
     "#);
 
     // Assert that `pyproject.toml` was not updated.
