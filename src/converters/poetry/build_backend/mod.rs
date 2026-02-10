@@ -129,12 +129,16 @@ pub fn get_build_backend(
                         add_unrecoverable_error(error.clone());
                     }
 
-                    add_unrecoverable_error(format!(
-                        "Package distribution could not be migrated to uv nor Hatch build backend due to the issues above. Consider keeping the current build backend with \"{}\".",
-                        "--keep-current-build-backend".bold(),
-                    ));
+                    if converter_options.ignore_errors {
+                        hatch.map(BuildBackendObject::Hatch)
+                    } else {
+                        add_unrecoverable_error(format!(
+                            "Package distribution could not be migrated to uv nor Hatch build backend due to the issues above. Consider keeping the current build backend with \"{}\".",
+                            "--keep-current-build-backend".bold(),
+                        ));
 
-                    None
+                        None
+                    }
                 }
             }
         }
@@ -155,12 +159,16 @@ pub fn get_build_backend(
                     add_unrecoverable_error(error.clone());
                 }
 
-                add_unrecoverable_error(format!(
-                    "Package distribution could not be migrated to uv build backend due to the issues above. Consider using Hatch build backend with \"{}\".",
-                    "--build-backend hatch".bold(),
-                ));
+                if converter_options.ignore_errors {
+                    uv.map(BuildBackendObject::Uv)
+                } else {
+                    add_unrecoverable_error(format!(
+                        "Package distribution could not be migrated to uv build backend due to the issues above. Consider using Hatch build backend with \"{}\".",
+                        "--build-backend hatch".bold(),
+                    ));
 
-                None
+                    None
+                }
             }
         }
         Some(BuildBackend::Hatch) => {
@@ -178,12 +186,16 @@ pub fn get_build_backend(
                     add_unrecoverable_error(error.clone());
                 }
 
-                add_unrecoverable_error(format!(
-                    "Package distribution could not be migrated to Hatch build backend due to the issues above. Consider keeping the current build backend with \"{}\".",
-                    "--keep-current-build-backend".bold(),
-                ));
+                if converter_options.ignore_errors {
+                    hatch.map(BuildBackendObject::Hatch)
+                } else {
+                    add_unrecoverable_error(format!(
+                        "Package distribution could not be migrated to Hatch build backend due to the issues above. Consider keeping the current build backend with \"{}\".",
+                        "--keep-current-build-backend".bold(),
+                    ));
 
-                None
+                    None
+                }
             }
         }
     }

@@ -19,6 +19,8 @@ packages = [
     { include = "**/*.json", from = "from" },
     { include = "**/*.json", to = "to/json" },
     { include = "**/*.yaml", from = "from", to = "to/yaml" },
+    # This one has no error, and serves as a way to validate that we can still migrate valid specifications.
+    { include = "foo" },
 ]
 
 [tool.poetry.dependencies]

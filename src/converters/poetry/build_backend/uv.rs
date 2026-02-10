@@ -40,6 +40,8 @@ pub fn get_build_backend(
             to,
         } in packages
         {
+            let mut has_error = false;
+
             if from.is_some() {
                 errors.push(
                     format!(
@@ -49,6 +51,7 @@ pub fn get_build_backend(
                         "from".bold(),
                     )
                 );
+                has_error = true;
             }
 
             if to.is_some() {
@@ -60,6 +63,7 @@ pub fn get_build_backend(
                         "to".bold(),
                     )
                 );
+                has_error = true;
             }
 
             let (add_to_sdist, add_to_wheel) = get_packages_distribution_format(format.as_ref());
@@ -83,8 +87,6 @@ pub fn get_build_backend(
                             reason,
                         )
                     );
-                } else if add_to_sdist {
-                    source_include.push(include.clone());
                 } else if add_to_wheel {
                     errors.push(
                         format!(
@@ -94,6 +96,8 @@ pub fn get_build_backend(
                             reason,
                         )
                     );
+                } else if add_to_sdist && !has_error {
+                    source_include.push(include.clone());
                 }
             } else {
                 let name = include.replace('/', ".");
@@ -102,10 +106,14 @@ pub fn get_build_backend(
                 }
 
                 if add_to_sdist && add_to_wheel {
-                    module_name.push(name.clone());
+                    if !has_error {
+                        module_name.push(name.clone());
+                    }
                 } else if add_to_sdist {
-                    module_name.push(name.clone());
-                    wheel_exclude.push(include.clone());
+                    if !has_error {
+                        module_name.push(name.clone());
+                        wheel_exclude.push(include.clone());
+                    }
                 } else if add_to_wheel {
                     errors.push(
                         format!(

@@ -7,6 +7,7 @@ macro_rules! apply_filters {
         let mut settings = insta::Settings::clone_current();
         settings.add_filter(r"Using .+", "Using [PYTHON_INTERPRETER]");
         settings.add_filter(r"Defaulting to `\S+`", "Defaulting to `[PYTHON_VERSION]`");
+        settings.add_filter(r"Resolved \d+ package in \S+", "Resolved [PACKAGES] package in [TIME]");
         settings.add_filter(r"Resolved \d+ packages in \S+", "Resolved [PACKAGES] packages in [TIME]");
         settings.add_filter(r"Updated https://github.com/encode/uvicorn (\S+)", "Updated https://github.com/encode/uvicorn ([SHA1])");
         settings.add_filter(r"uv_build>=[\d\.]+,<[\d\.]+", "uv_build>=[LOWER_BOUND],<[UPPER_BOUND]");

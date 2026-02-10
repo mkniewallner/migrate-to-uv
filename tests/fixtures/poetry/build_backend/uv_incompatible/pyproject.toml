@@ -21,6 +21,8 @@ packages = [
     { include = "packages_glob_from_to_sdist_wheel/**/*.py", from = "from", to = "to" },
     { include = "text_file_sdist_wheel.txt" },
     { include = "text_file_wheel.txt", format = "wheel" },
+    # This one has no error, and serves as a way to validate that we can still migrate valid specifications.
+    { include = "foo" },
 ]
 include = [
     { path = "include_sdist_wheel", format = ["sdist", "wheel"] },

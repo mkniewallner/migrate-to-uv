@@ -1205,6 +1205,70 @@ fn test_manage_errors() {
 }
 
 #[test]
+fn test_manage_errors_ignore_errors() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("with_migration_errors");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(fixture_path, project_path).unwrap();
+
+    apply_filters!();
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--ignore-errors"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    error: The following errors occurred during the migration:
+    error: - Found multiple files ("README.md", "README2.md") in "tool.poetry.readme". PEP 621 only supports setting one. Make sure to manually edit the section before migrating.
+    error: - "caret-or" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-single" dependency with version "^1.0|^2.0|^3.0" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-whitespaces" dependency with version " ^1.0 || ^2.0  ||  ^3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-mix-single-double-whitespaces" dependency with version " ^1.0 | ^2.0  ||  ^3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-and-pep-440" dependency with version "^1.0,<1.3||^2.0,<2.2" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-table-version" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-multiple-constraints" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-multiple-constraints" dependency with version "^1.0||^2.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-single" dependency with version "~1.0|~2.0|~3.0" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-whitespaces" dependency with version " ~1.0 || ~2.0  ||  ~3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-mix-single-double-whitespaces" dependency with version " ~1.0 | ~2.0  ||  ~3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-and-pep-440" dependency with version "~1.0,<1.1||~1.0.1,<1.0.2" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-table-version" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-multiple-constraints" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-multiple-constraints" dependency with version "~1.0||~2.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "whitespace" dependency with version ">=7.0 <7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "whitespace-multiple" dependency with version ">=7.0  <7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "whitespace-caret" dependency with version "7.0 ^7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "whitespace-caret-multiple" dependency with version "7.0  ^7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "python-caret-or" dependency with python marker "^3.11 || ^3.12" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "python-caret-or-single" dependency with python marker "^3.11 | ^3.12" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "python-whitespace" dependency with python marker "3.11 <=3.14" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
+    Using [PYTHON_INTERPRETER]
+    warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
+    Resolved [PACKAGES] packages in [TIME]
+    Locking dependencies again using "uv lock" to remove constraints...
+    Using [PYTHON_INTERPRETER]
+    warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
+    Resolved [PACKAGES] packages in [TIME]
+    Partially migrated project from Poetry to uv, as errors occurred during the migration.
+    "#);
+
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [project]
+    name = "foobar"
+    version = "0.0.1"
+    dependencies = ["arrow==1.2.3"]
+    "#);
+
+    // Assert that previous package manager files are correctly removed.
+    assert!(!project_path.join("poetry.lock").exists());
+    assert!(!project_path.join("poetry.toml").exists());
+}
+
+#[test]
 fn test_manage_warnings() {
     let fixture_path = Path::new(FIXTURES_PATH).join("with_migration_warnings");
 
@@ -1346,6 +1410,59 @@ fn test_manage_errors_dry_run() {
     error: - "python-caret-or" dependency with python marker "^3.11 || ^3.12" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
     error: - "python-caret-or-single" dependency with python marker "^3.11 | ^3.12" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
     error: - "python-whitespace" dependency with python marker "3.11 <=3.14" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    "#);
+
+    // Assert that `pyproject.toml` was not updated.
+    assert_eq!(
+        pyproject,
+        fs::read_to_string(project_path.join("pyproject.toml")).unwrap()
+    );
+
+    // Assert that `uv.lock` file was not generated.
+    assert!(!project_path.join("uv.lock").exists());
+}
+
+#[test]
+fn test_manage_errors_dry_run_ignore_errors() {
+    let project_path = Path::new(FIXTURES_PATH).join("with_migration_errors");
+    let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
+
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run").arg("--ignore-errors"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    error: The following errors occurred during the migration:
+    error: - Found multiple files ("README.md", "README2.md") in "tool.poetry.readme". PEP 621 only supports setting one. Make sure to manually edit the section before migrating.
+    error: - "caret-or" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-single" dependency with version "^1.0|^2.0|^3.0" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-whitespaces" dependency with version " ^1.0 || ^2.0  ||  ^3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-mix-single-double-whitespaces" dependency with version " ^1.0 | ^2.0  ||  ^3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-and-pep-440" dependency with version "^1.0,<1.3||^2.0,<2.2" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-table-version" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-multiple-constraints" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "caret-or-multiple-constraints" dependency with version "^1.0||^2.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-single" dependency with version "~1.0|~2.0|~3.0" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-whitespaces" dependency with version " ~1.0 || ~2.0  ||  ~3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-mix-single-double-whitespaces" dependency with version " ~1.0 | ~2.0  ||  ~3.0 " contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-and-pep-440" dependency with version "~1.0,<1.1||~1.0.1,<1.0.2" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-table-version" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-multiple-constraints" dependency with version "~1.0||~2.0||~3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "tilde-or-multiple-constraints" dependency with version "~1.0||~2.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "whitespace" dependency with version ">=7.0 <7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "whitespace-multiple" dependency with version ">=7.0  <7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "whitespace-caret" dependency with version "7.0 ^7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "whitespace-caret-multiple" dependency with version "7.0  ^7.1" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    error: - "python-caret-or" dependency with python marker "^3.11 || ^3.12" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "python-caret-or-single" dependency with python marker "^3.11 | ^3.12" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
+    error: - "python-whitespace" dependency with python marker "3.11 <=3.14" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
+    Migrated pyproject.toml:
+    [project]
+    name = "foobar"
+    version = "0.0.1"
+    dependencies = ["arrow==1.2.3"]
     "#);
 
     // Assert that `pyproject.toml` was not updated.
@@ -1790,6 +1907,81 @@ fn test_build_backend_auto_errors() {
 }
 
 #[test]
+fn test_build_backend_auto_errors_ignore_errors() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend/hatch_incompatible");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(&fixture_path, project_path).unwrap();
+
+    // Ensure that the project is valid for Poetry, even if we cannot convert it to uv.
+    Command::new("uvx")
+        .arg("poetry")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    apply_filters!();
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--ignore-errors"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    error: The following errors occurred during the migration:
+    error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "bar.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "to" on a file, which cannot be expressed with Hatch.
+    error: - "foobar.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/another_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "packages_glob_from/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
+    error: - "packages_glob_to/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
+    error: - "packages_glob_from_to/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
+    error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
+    error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
+    error: - "**/*.yaml" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
+    Using [PYTHON_INTERPRETER]
+    Resolved [PACKAGES] package in [TIME]
+    Partially migrated project from Poetry to uv, as errors occurred during the migration.
+
+    warning: Migrating build backend to Hatch, as package distribution is too complex to be expressed with uv.
+    warning: Build backend was migrated to Hatch. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
+    "#);
+
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [build-system]
+    requires = ["hatchling"]
+    build-backend = "hatchling.build"
+
+    [project]
+    name = "foobar"
+    version = "0.1.0"
+    description = "A fabulous project."
+    authors = [{ name = "John Doe", email = "john.doe@example.com" }]
+    requires-python = ">=3.10"
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+    ]
+
+    [tool.hatch.build.targets.sdist]
+    include = ["foo"]
+
+    [tool.hatch.build.targets.wheel]
+    include = ["foo"]
+    "#);
+}
+
+#[test]
 fn test_build_backend_auto_errors_dry_run() {
     let project_path = Path::new(FIXTURES_PATH).join("build_backend/hatch_incompatible");
     let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
@@ -1813,6 +2005,67 @@ fn test_build_backend_auto_errors_dry_run() {
     error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
     error: - "**/*.yaml" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
     error: - Package distribution could not be migrated to uv nor Hatch build backend due to the issues above. Consider keeping the current build backend with "--keep-current-build-backend".
+    "#);
+
+    // Assert that `pyproject.toml` was not updated.
+    assert_eq!(
+        pyproject,
+        fs::read_to_string(project_path.join("pyproject.toml")).unwrap()
+    );
+}
+
+#[test]
+fn test_build_backend_auto_errors_dry_run_ignore_errors() {
+    let project_path = Path::new(FIXTURES_PATH).join("build_backend/hatch_incompatible");
+    let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
+
+    apply_filters!();
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run").arg("--ignore-errors"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    error: The following errors occurred during the migration:
+    error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "bar.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "to" on a file, which cannot be expressed with Hatch.
+    error: - "foobar.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/another_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "packages_glob_from/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
+    error: - "packages_glob_to/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
+    error: - "packages_glob_from_to/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
+    error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
+    error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
+    error: - "**/*.yaml" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
+    Migrated pyproject.toml:
+    [build-system]
+    requires = ["hatchling"]
+    build-backend = "hatchling.build"
+
+    [project]
+    name = "foobar"
+    version = "0.1.0"
+    description = "A fabulous project."
+    authors = [{ name = "John Doe", email = "john.doe@example.com" }]
+    requires-python = ">=3.10"
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+    ]
+
+    [tool.hatch.build.targets.sdist]
+    include = ["foo"]
+
+    [tool.hatch.build.targets.wheel]
+    include = ["foo"]
+
+    warning: Migrating build backend to Hatch, as package distribution is too complex to be expressed with uv.
+    warning: Build backend was migrated to Hatch. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
     "#);
 
     // Assert that `pyproject.toml` was not updated.
@@ -1998,6 +2251,80 @@ fn test_build_backend_hatch_errors() {
 }
 
 #[test]
+fn test_build_backend_hatch_errors_ignore_errors() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend/hatch_incompatible");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(&fixture_path, project_path).unwrap();
+
+    // Ensure that the project is valid for Poetry, even if we cannot convert it to uv.
+    Command::new("uvx")
+        .arg("poetry")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    apply_filters!();
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--build-backend").arg("hatch").arg("--ignore-errors"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    error: The following errors occurred during the migration:
+    error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "bar.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "to" on a file, which cannot be expressed with Hatch.
+    error: - "foobar.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/another_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "packages_glob_from/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
+    error: - "packages_glob_to/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
+    error: - "packages_glob_from_to/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
+    error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
+    error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
+    error: - "**/*.yaml" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
+    Using [PYTHON_INTERPRETER]
+    Resolved [PACKAGES] package in [TIME]
+    Partially migrated project from Poetry to uv, as errors occurred during the migration.
+
+    warning: Build backend was migrated to Hatch. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
+    "#);
+
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [build-system]
+    requires = ["hatchling"]
+    build-backend = "hatchling.build"
+
+    [project]
+    name = "foobar"
+    version = "0.1.0"
+    description = "A fabulous project."
+    authors = [{ name = "John Doe", email = "john.doe@example.com" }]
+    requires-python = ">=3.10"
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+    ]
+
+    [tool.hatch.build.targets.sdist]
+    include = ["foo"]
+
+    [tool.hatch.build.targets.wheel]
+    include = ["foo"]
+    "#);
+}
+
+#[test]
 fn test_build_backend_hatch_errors_dry_run() {
     let project_path = Path::new(FIXTURES_PATH).join("build_backend/hatch_incompatible");
     let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
@@ -2021,6 +2348,65 @@ fn test_build_backend_hatch_errors_dry_run() {
     error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
     error: - "**/*.yaml" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
     error: - Package distribution could not be migrated to Hatch build backend due to the issues above. Consider keeping the current build backend with "--keep-current-build-backend".
+    "#);
+
+    // Assert that `pyproject.toml` was not updated.
+    assert_eq!(
+        pyproject,
+        fs::read_to_string(project_path.join("pyproject.toml")).unwrap()
+    );
+}
+
+#[test]
+fn test_build_backend_hatch_errors_dry_run_ignore_errors() {
+    let project_path = Path::new(FIXTURES_PATH).join("build_backend/hatch_incompatible");
+    let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
+
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run").arg("--build-backend").arg("hatch").arg("--ignore-errors"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    error: The following errors occurred during the migration:
+    error: - "foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" on a file, which cannot be expressed with Hatch.
+    error: - "bar.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "to" on a file, which cannot be expressed with Hatch.
+    error: - "foobar.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "a_directory/another_directory/foo.txt" from "poetry.packages.include" cannot be converted to Hatch, as it uses "from" and "to" on a file, which cannot be expressed with Hatch.
+    error: - "packages_glob_from/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
+    error: - "packages_glob_to/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
+    error: - "packages_glob_from_to/**/*.py" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
+    error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from", which cannot be expressed with Hatch.
+    error: - "**/*.json" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "to", which cannot be expressed with Hatch.
+    error: - "**/*.yaml" from "poetry.packages.include" cannot be converted to Hatch, as it uses glob pattern with "from" and "to", which cannot be expressed with Hatch.
+    Migrated pyproject.toml:
+    [build-system]
+    requires = ["hatchling"]
+    build-backend = "hatchling.build"
+
+    [project]
+    name = "foobar"
+    version = "0.1.0"
+    description = "A fabulous project."
+    authors = [{ name = "John Doe", email = "john.doe@example.com" }]
+    requires-python = ">=3.10"
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+    ]
+
+    [tool.hatch.build.targets.sdist]
+    include = ["foo"]
+
+    [tool.hatch.build.targets.wheel]
+    include = ["foo"]
+
+    warning: Build backend was migrated to Hatch. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
     "#);
 
     // Assert that `pyproject.toml` was not updated.
@@ -2185,6 +2571,87 @@ fn test_build_backend_uv_errors() {
 }
 
 #[test]
+fn test_build_backend_uv_errors_ignore_errors() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("build_backend/uv_incompatible");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(&fixture_path, project_path).unwrap();
+
+    // Ensure that the project is valid for Poetry, even if we cannot convert it to uv.
+    Command::new("uvx")
+        .arg("poetry")
+        .arg("build")
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap();
+
+    apply_filters!();
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--build-backend").arg("uv").arg("--ignore-errors"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    error: The following errors occurred during the migration:
+    error: - "packages_wheel" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
+    error: - "packages_wheel_2" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
+    error: - "packages_glob_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
+    error: - "packages_glob_sdist_wheel_2/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
+    error: - "packages_glob_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and uses globs, which cannot be expressed with uv.
+    error: - "packages_glob_wheel_2/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and uses globs, which cannot be expressed with uv.
+    error: - "packages_from_sdist_wheel" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_to_sdist_wheel" from "poetry.packages.include" cannot be converted to uv, as it uses "to", which cannot be expressed with uv.
+    error: - "packages_from_to_sdist_wheel" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_from_to_sdist_wheel" from "poetry.packages.include" cannot be converted to uv, as it uses "to", which cannot be expressed with uv.
+    error: - "packages_glob_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it uses "to", which cannot be expressed with uv.
+    error: - "packages_glob_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
+    error: - "packages_glob_from_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_glob_from_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it uses "to", which cannot be expressed with uv.
+    error: - "packages_glob_from_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
+    error: - "text_file_sdist_wheel.txt" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and is a file, which cannot be expressed with uv.
+    error: - "text_file_wheel.txt" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and is a file, which cannot be expressed with uv.
+    error: - "include_sdist_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, which cannot be expressed with uv.
+    error: - "include_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
+    error: - "include_wheel_2" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
+    Using [PYTHON_INTERPRETER]
+    Resolved [PACKAGES] package in [TIME]
+    Partially migrated project from Poetry to uv, as errors occurred during the migration.
+
+    warning: Build backend was migrated to uv. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
+    "#);
+
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [build-system]
+    requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
+    build-backend = "uv_build"
+
+    [project]
+    name = "foobar"
+    version = "0.1.0"
+    description = "A fabulous project."
+    authors = [{ name = "John Doe", email = "john.doe@example.com" }]
+    requires-python = ">=3.10"
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+    ]
+
+    [tool.uv.build-backend]
+    module-name = ["foo"]
+    module-root = ""
+    "#);
+}
+
+#[test]
 fn test_build_backend_uv_errors_dry_run() {
     let project_path = Path::new(FIXTURES_PATH).join("build_backend/uv_incompatible");
     let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
@@ -2227,6 +2694,73 @@ fn test_build_backend_uv_errors_dry_run() {
 
     // Assert that `uv.lock` file was not generated.
     assert!(!project_path.join("uv.lock").exists());
+}
+
+#[test]
+fn test_build_backend_uv_errors_dry_run_ignore_errors() {
+    let project_path = Path::new(FIXTURES_PATH).join("build_backend/uv_incompatible");
+    let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
+
+    apply_filters!();
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run").arg("--build-backend").arg("uv").arg("--ignore-errors"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    error: The following errors occurred during the migration:
+    error: - "packages_wheel" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
+    error: - "packages_wheel_2" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
+    error: - "packages_glob_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
+    error: - "packages_glob_sdist_wheel_2/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
+    error: - "packages_glob_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and uses globs, which cannot be expressed with uv.
+    error: - "packages_glob_wheel_2/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and uses globs, which cannot be expressed with uv.
+    error: - "packages_from_sdist_wheel" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_to_sdist_wheel" from "poetry.packages.include" cannot be converted to uv, as it uses "to", which cannot be expressed with uv.
+    error: - "packages_from_to_sdist_wheel" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_from_to_sdist_wheel" from "poetry.packages.include" cannot be converted to uv, as it uses "to", which cannot be expressed with uv.
+    error: - "packages_glob_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it uses "to", which cannot be expressed with uv.
+    error: - "packages_glob_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
+    error: - "packages_glob_from_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it uses "from", which cannot be expressed with uv.
+    error: - "packages_glob_from_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it uses "to", which cannot be expressed with uv.
+    error: - "packages_glob_from_to_sdist_wheel/**/*.py" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and uses globs, which cannot be expressed with uv.
+    error: - "text_file_sdist_wheel.txt" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, and is a file, which cannot be expressed with uv.
+    error: - "text_file_wheel.txt" from "poetry.packages.include" cannot be converted to uv, as it is configured to be added to wheels only, and is a file, which cannot be expressed with uv.
+    error: - "include_sdist_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to both source distribution and wheels, which cannot be expressed with uv.
+    error: - "include_wheel" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
+    error: - "include_wheel_2" from "poetry.include" cannot be converted to uv, as it is configured to be added to wheels only, which cannot be expressed with uv.
+    Migrated pyproject.toml:
+    [build-system]
+    requires = ["uv_build>=[LOWER_BOUND],<[UPPER_BOUND]"]
+    build-backend = "uv_build"
+
+    [project]
+    name = "foobar"
+    version = "0.1.0"
+    description = "A fabulous project."
+    authors = [{ name = "John Doe", email = "john.doe@example.com" }]
+    requires-python = ">=3.10"
+    classifiers = [
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
+    ]
+
+    [tool.uv.build-backend]
+    module-name = ["foo"]
+    module-root = ""
+
+    warning: Build backend was migrated to uv. It is highly recommended to check that files and data included in the source distribution and wheels are the same after the migration.
+    "#);
+
+    // Assert that `pyproject.toml` was not updated.
+    assert_eq!(
+        pyproject,
+        fs::read_to_string(project_path.join("pyproject.toml")).unwrap()
+    );
 }
 
 #[test]
