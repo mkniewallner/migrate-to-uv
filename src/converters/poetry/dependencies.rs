@@ -5,6 +5,7 @@ use crate::schema;
 use crate::schema::poetry::DependencySpecification;
 use crate::schema::pyproject::DependencyGroupSpecification;
 use crate::schema::uv::{SourceContainer, SourceIndex};
+use crate::utils::normalize_dependency_name;
 use indexmap::IndexMap;
 use owo_colors::OwoColorize;
 use std::collections::HashSet;
@@ -97,6 +98,7 @@ pub fn get_optional(
 ) -> Option<IndexMap<String, Vec<String>>> {
     let extras = extras?;
     let poetry_dependencies = poetry_dependencies.as_mut()?;
+    let normalized_poetry_dependencies = get_normalized_dependencies(poetry_dependencies.clone());
 
     let mut dependencies_to_remove: HashSet<&str> = HashSet::new();
 
@@ -109,24 +111,26 @@ pub fn get_optional(
                     .iter()
                     .filter_map(|dependency| {
                         // If dependency listed in extra does not exist, warn the user.
-                        poetry_dependencies.get(dependency).map_or_else(
-                            || {
-                                add_recoverable_error(format!(
-                                    "Could not find dependency \"{}\" listed in \"{}\" extra.",
-                                    dependency.bold(),
-                                    extra.bold()
-                                ));
-                                None
-                            },
-                            |dependency_specification| {
-                                dependencies_to_remove.insert(dependency);
-                                Some(format!(
-                                    "{}{}",
-                                    dependency,
-                                    dependency_specification.to_pep_508().unwrap(),
-                                ))
-                            },
-                        )
+                        normalized_poetry_dependencies
+                            .get(normalize_dependency_name(dependency).as_str())
+                            .map_or_else(
+                                || {
+                                    add_recoverable_error(format!(
+                                        "Could not find dependency \"{}\" listed in \"{}\" extra.",
+                                        dependency.bold(),
+                                        extra.bold()
+                                    ));
+                                    None
+                                },
+                                |(dep, dependency_specification)| {
+                                    dependencies_to_remove.insert(dep);
+                                    Some(format!(
+                                        "{}{}",
+                                        dep,
+                                        dependency_specification.to_pep_508().unwrap(),
+                                    ))
+                                },
+                            )
                     })
                     .collect(),
             )
@@ -142,6 +146,19 @@ pub fn get_optional(
     }
 
     Some(optional_dependencies)
+}
+
+/// Get a mapping of normalized dependency names to their original specifications.
+fn get_normalized_dependencies(
+    dependencies: IndexMap<String, DependencySpecification>,
+) -> IndexMap<String, (String, DependencySpecification)> {
+    let mut normalized_dependencies = IndexMap::new();
+
+    for (k, v) in dependencies {
+        normalized_dependencies.insert(normalize_dependency_name(k.as_str()), (k, v));
+    }
+
+    normalized_dependencies
 }
 
 pub fn get_dependency_groups_and_default_groups(

@@ -7,7 +7,12 @@ icon: lucide/scroll-text
 
 ### Features
 
+* Add `--ignore-errors` flag to perform the migration even in case of errors ([#657](https://github.com/mkniewallner/migrate-to-uv/pull/657))
 * [poetry] Bump default `uv_build` bounds to `>=0.10.0,<0.11.0` ([#683](https://github.com/mkniewallner/migrate-to-uv/pull/683))
+
+### Bug fixes
+
+* [poetry] Normalize dependency names when getting dependencies from extras ([#695](https://github.com/mkniewallner/migrate-to-uv/pull/695))
 
 ## 0.10.2 - 2026-01-29
 
