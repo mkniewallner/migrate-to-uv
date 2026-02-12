@@ -81,7 +81,7 @@ pub enum Script {
 /// Represents the different ways dependencies can be defined in Poetry.
 ///
 /// See <https://python-poetry.org/docs/dependency-specification/> for details.
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Clone)]
 #[serde(untagged)]
 #[allow(clippy::large_enum_variant)]
 pub enum DependencySpecification {

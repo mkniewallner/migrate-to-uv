@@ -1008,4 +1008,61 @@ name = "foo"
         version = "0.0.1"
         "#);
     }
+
+    #[test]
+    fn test_normalize_dependencies_for_extras() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[tool.poetry]
+name = "foo"
+version = "0.0.1"
+description = ""
+authors = []
+
+[tool.poetry.dependencies]
+foo-bar = { version = "1.2.3", optional = true }
+bAr_FoO = { version = "3.2.1", optional = true }
+foo = "1.2.3"
+
+[tool.poetry.extras]
+extra1 = ["foo_BAR"]
+extra2 = ["bar-foo"]
+extra3 = ["foo-bar", "bar-foo"]
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                keep_current_build_backend: true,
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = "foo"
+        version = "0.0.1"
+        description = ""
+        authors = []
+        dependencies = ["foo==1.2.3"]
+
+        [project.optional-dependencies]
+        extra1 = ["foo-bar==1.2.3"]
+        extra2 = ["bAr_FoO==3.2.1"]
+        extra3 = [
+            "foo-bar==1.2.3",
+            "bAr_FoO==3.2.1",
+        ]
+        "#);
+    }
 }
