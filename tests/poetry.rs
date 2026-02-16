@@ -403,6 +403,109 @@ fn test_keep_current_data() {
 }
 
 #[test]
+fn test_dependency_groups_strategy_set_default_groups_all() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("with_lock_file");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(fixture_path, project_path).unwrap();
+
+    apply_filters!();
+    assert_cmd_snapshot!(cli()
+        .arg(project_path)
+        .arg("--dependency-groups-strategy")
+        .arg("set-default-groups-all"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
+    Using [PYTHON_INTERPRETER]
+    Resolved [PACKAGES] packages in [TIME]
+    Locking dependencies again using "uv lock" to remove constraints...
+    Using [PYTHON_INTERPRETER]
+    Resolved [PACKAGES] packages in [TIME]
+    Successfully migrated project from Poetry to uv!
+    "#);
+
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [project]
+    name = "foo"
+    version = "0.0.1"
+    requires-python = ">=3.11,<4"
+    dependencies = ["arrow>=1.2.3,<2"]
+
+    [dependency-groups]
+    dev = ["factory-boy>=3.2.1,<4"]
+    typing = ["mypy>=1.13.0,<2"]
+    profiling = ["pyinstrument>=5.0.2,<6"]
+
+    [tool.uv]
+    package = false
+    default-groups = "all"
+    "#);
+
+    // Assert that previous package manager files are correctly removed.
+    assert!(!project_path.join("poetry.lock").exists());
+    assert!(!project_path.join("poetry.toml").exists());
+}
+
+#[test]
+fn test_dependency_groups_strategy_set_default_groups() {
+    let fixture_path = Path::new(FIXTURES_PATH).join("with_lock_file");
+
+    let tmp_dir = tempdir().unwrap();
+    let project_path = tmp_dir.path();
+
+    copy_dir(fixture_path, project_path).unwrap();
+
+    apply_filters!();
+    assert_cmd_snapshot!(cli()
+        .arg(project_path)
+        .arg("--dependency-groups-strategy")
+        .arg("set-default-groups"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Locking dependencies with constraints from existing lock file(s) using "uv lock"...
+    Using [PYTHON_INTERPRETER]
+    Resolved [PACKAGES] packages in [TIME]
+    Locking dependencies again using "uv lock" to remove constraints...
+    Using [PYTHON_INTERPRETER]
+    Resolved [PACKAGES] packages in [TIME]
+    Successfully migrated project from Poetry to uv!
+    "#);
+
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
+    [project]
+    name = "foo"
+    version = "0.0.1"
+    requires-python = ">=3.11,<4"
+    dependencies = ["arrow>=1.2.3,<2"]
+
+    [dependency-groups]
+    dev = ["factory-boy>=3.2.1,<4"]
+    typing = ["mypy>=1.13.0,<2"]
+    profiling = ["pyinstrument>=5.0.2,<6"]
+
+    [tool.uv]
+    package = false
+    default-groups = [
+        "dev",
+        "typing",
+    ]
+    "#);
+
+    // Assert that previous package manager files are correctly removed.
+    assert!(!project_path.join("poetry.lock").exists());
+    assert!(!project_path.join("poetry.toml").exists());
+}
+
+#[test]
 fn test_dependency_groups_strategy_include_in_dev() {
     let fixture_path = Path::new(FIXTURES_PATH).join("with_lock_file");
 

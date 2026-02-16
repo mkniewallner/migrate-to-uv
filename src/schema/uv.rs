@@ -11,7 +11,7 @@ pub struct Uv {
     pub sources: Option<IndexMap<String, SourceContainer>>,
     /// <https://docs.astral.sh/uv/concepts/projects/dependencies/#default-groups>
     #[serde(rename = "default-groups")]
-    pub default_groups: Option<Vec<String>>,
+    pub default_groups: Option<SingleOrVec<String>>,
     #[serde(rename = "constraint-dependencies")]
     pub constraint_dependencies: Option<Vec<String>>,
     #[serde(rename = "build-backend")]
