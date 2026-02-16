@@ -7,6 +7,8 @@ on:
 
 env:
   PYTHON_VERSION: '3.14'
+  # renovate: datasource=crate depName=maturin
+  MATURIN_VERSION: '1.12.2'
   # renovate: datasource=pypi depName=uv
   UV_VERSION: '0.10.0'
   # renovate: datasource=pypi depName=pypi-attestations
@@ -29,6 +31,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
         with:
+          maturin-version: ${{ env.MATURIN_VERSION }}
           target: ${{ matrix.target }}
           manylinux: ${{ matrix.manylinux }}
           args: --release --out dist
@@ -52,6 +55,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
         with:
+          maturin-version: ${{ env.MATURIN_VERSION }}
           target: ${{ matrix.target }}
           args: --release --out dist
 
@@ -74,6 +78,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
         with:
+          maturin-version: ${{ env.MATURIN_VERSION }}
           target: ${{ matrix.target }}
           args: --release --out dist
 
@@ -93,6 +98,7 @@ jobs:
       - name: Build sdist
         uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
         with:
+          maturin-version: ${{ env.MATURIN_VERSION }}
           command: sdist
           args: --out dist
 
