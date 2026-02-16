@@ -2,6 +2,7 @@ use crate::converters::{DependencyGroupsAndDefaultGroups, DependencyGroupsStrate
 use crate::schema;
 use crate::schema::pipenv::{DependencySpecification, KeywordMarkers};
 use crate::schema::pyproject::DependencyGroupSpecification;
+use crate::schema::utils::SingleOrVec;
 use crate::schema::uv::{SourceContainer, SourceIndex};
 use indexmap::IndexMap;
 
@@ -143,6 +144,7 @@ pub fn get_dependency_groups_and_default_groups(
     let mut dependency_groups: IndexMap<String, Vec<DependencyGroupSpecification>> =
         IndexMap::new();
     let mut default_groups: Vec<String> = Vec::new();
+    let mut all_default_groups = false;
 
     // Add dependencies from legacy `[dev-packages]` into `dev` dependency group.
     if let Some(dev_dependencies) = &pipfile.dev_packages {
@@ -176,6 +178,12 @@ pub fn get_dependency_groups_and_default_groups(
         }
 
         match dependency_groups_strategy {
+            // When using `SetDefaultGroupsAll` strategy, set `default-groups` to "all" under
+            // `[tool.uv]`, to closely match what Pipenv does by default, since it includes all
+            // dependency groups.
+            DependencyGroupsStrategy::SetDefaultGroupsAll => {
+                all_default_groups = true;
+            }
             // When using `SetDefaultGroups` strategy, all dependency groups are referenced in
             // `default-groups` under `[tool.uv]` section. If we only have `dev` dependency group,
             // do not set `default-groups`, as this is already uv's default.
@@ -204,12 +212,13 @@ pub fn get_dependency_groups_and_default_groups(
         return (None, None);
     }
 
-    (
-        Some(dependency_groups),
-        if default_groups.is_empty() {
-            None
-        } else {
-            Some(default_groups)
-        },
-    )
+    let default_groups = if all_default_groups {
+        Some(SingleOrVec::Single("all".to_string()))
+    } else if default_groups.is_empty() {
+        None
+    } else {
+        Some(SingleOrVec::Vec(default_groups))
+    };
+
+    (Some(dependency_groups), default_groups)
 }

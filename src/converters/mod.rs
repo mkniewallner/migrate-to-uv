@@ -2,6 +2,7 @@ use crate::converters::pyproject_updater::PyprojectUpdater;
 use crate::errors::{MIGRATION_ERRORS, MigrationError};
 use crate::schema::pep_621::Project;
 use crate::schema::pyproject::DependencyGroupSpecification;
+use crate::schema::utils::SingleOrVec;
 use crate::uv;
 use crate::uv::LockType;
 use indexmap::IndexMap;
@@ -23,7 +24,7 @@ mod pyproject_updater;
 
 type DependencyGroupsAndDefaultGroups = (
     Option<IndexMap<String, Vec<DependencyGroupSpecification>>>,
-    Option<Vec<String>>,
+    Option<SingleOrVec<String>>,
 );
 
 #[derive(Debug, PartialEq, Eq, Clone, Default)]
@@ -337,6 +338,7 @@ pub trait Converter: Any + Debug {
 #[derive(clap::ValueEnum, Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum DependencyGroupsStrategy {
     #[default]
+    SetDefaultGroupsAll,
     SetDefaultGroups,
     IncludeInDev,
     KeepExisting,
