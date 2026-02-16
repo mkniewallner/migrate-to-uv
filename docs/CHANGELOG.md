@@ -5,10 +5,19 @@ icon: lucide/scroll-text
 
 ## Unreleased
 
+### Breaking changes
+
+#### Default to `default-groups = "all"` for dependency groups
+
+When migrating Poetry or Pipenv dependency groups, `migrate-to-uv` now defaults to setting `default-groups = "all"` under `[tool.uv]`.
+
+If you prefer to keep the previous behaviour, which explicitly listed all dependency groups (e.g., `default-groups = ["dev", "typing"]`), you can set `--dependency-groups-strategy set-default-groups`.
+
 ### Features
 
-* Add `set-default-groups-all` option to `--dependency-groups-strategy` ([#708](https://github.com/mkniewallner/migrate-to-uv/pull/708))
 * Add `--ignore-errors` flag to perform the migration even in case of errors ([#657](https://github.com/mkniewallner/migrate-to-uv/pull/657))
+* Add `set-default-groups-all` option to `--dependency-groups-strategy` ([#708](https://github.com/mkniewallner/migrate-to-uv/pull/708))
+* Default `--dependency-groups-strategy` to `set-default-groups-all` option ([#709](https://github.com/mkniewallner/migrate-to-uv/pull/709))
 * [poetry] Bump default `uv_build` bounds to `>=0.10.0,<0.11.0` ([#683](https://github.com/mkniewallner/migrate-to-uv/pull/683))
 
 ### Bug fixes

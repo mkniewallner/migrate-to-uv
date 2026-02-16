@@ -36,7 +36,7 @@ fn test_complete_workflow() {
     Successfully migrated project from Pipenv to uv!
     "#);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
     name = ""
     version = "0.0.1"
@@ -48,15 +48,12 @@ fn test_complete_workflow() {
 
     [tool.uv]
     package = false
-    default-groups = [
-        "dev",
-        "test",
-    ]
+    default-groups = "all"
 
     [[tool.uv.index]]
     name = "pypi"
     url = "https://pypi.org/simple"
-    "###);
+    "#);
 
     let uv_lock = toml::from_str::<UvLock>(
         fs::read_to_string(project_path.join("uv.lock"))
@@ -137,7 +134,7 @@ fn test_ignore_locked_versions() {
     Successfully migrated project from Pipenv to uv!
     "#);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
     name = ""
     version = "0.0.1"
@@ -149,15 +146,12 @@ fn test_ignore_locked_versions() {
 
     [tool.uv]
     package = false
-    default-groups = [
-        "dev",
-        "test",
-    ]
+    default-groups = "all"
 
     [[tool.uv.index]]
     name = "pypi"
     url = "https://pypi.org/simple"
-    "###);
+    "#);
 
     let uv_lock = toml::from_str::<UvLock>(
         fs::read_to_string(project_path.join("uv.lock"))
@@ -212,7 +206,7 @@ fn test_keep_current_data() {
     Successfully migrated project from Pipenv to uv!
     "#);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
     name = ""
     version = "0.0.1"
@@ -224,15 +218,12 @@ fn test_keep_current_data() {
 
     [tool.uv]
     package = false
-    default-groups = [
-        "dev",
-        "test",
-    ]
+    default-groups = "all"
 
     [[tool.uv.index]]
     name = "pypi"
     url = "https://pypi.org/simple"
-    "###);
+    "#);
 
     // Assert that previous package manager files have not been removed.
     assert!(project_path.join("Pipfile").exists());
@@ -532,7 +523,7 @@ fn test_skip_lock() {
     Successfully migrated project from Pipenv to uv!
     "###);
 
-    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r###"
+    insta::assert_snapshot!(fs::read_to_string(project_path.join("pyproject.toml")).unwrap(), @r#"
     [project]
     name = ""
     version = "0.0.1"
@@ -544,15 +535,12 @@ fn test_skip_lock() {
 
     [tool.uv]
     package = false
-    default-groups = [
-        "dev",
-        "test",
-    ]
+    default-groups = "all"
 
     [[tool.uv.index]]
     name = "pypi"
     url = "https://pypi.org/simple"
-    "###);
+    "#);
 
     // Assert that previous package manager files are correctly removed.
     assert!(!project_path.join("Pipfile").exists());
@@ -630,11 +618,7 @@ fn test_skip_lock_full() {
 
     [tool.uv]
     package = false
-    default-groups = [
-        "dev",
-        "packages-category",
-        "packages-category-2",
-    ]
+    default-groups = "all"
 
     [[tool.uv.index]]
     name = "pypi"
@@ -667,7 +651,7 @@ fn test_skip_lock_full() {
 fn test_dry_run() {
     let project_path = Path::new(FIXTURES_PATH).join("with_lock_file");
 
-    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r###"
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -685,15 +669,12 @@ fn test_dry_run() {
 
     [tool.uv]
     package = false
-    default-groups = [
-        "dev",
-        "test",
-    ]
+    default-groups = "all"
 
     [[tool.uv.index]]
     name = "pypi"
     url = "https://pypi.org/simple"
-    "###);
+    "#);
 
     // Assert that previous package manager files have not been removed.
     assert!(project_path.join("Pipfile").exists());
@@ -739,7 +720,7 @@ fn test_dry_run_minimal() {
 fn test_preserves_existing_project() {
     let project_path = Path::new(FIXTURES_PATH).join("existing_project");
 
-    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r###"
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -758,15 +739,12 @@ fn test_preserves_existing_project() {
 
     [tool.uv]
     package = false
-    default-groups = [
-        "dev",
-        "test",
-    ]
+    default-groups = "all"
 
     [[tool.uv.index]]
     name = "pypi"
     url = "https://pypi.org/simple"
-    "###);
+    "#);
 }
 
 #[test]
@@ -776,7 +754,7 @@ fn test_replaces_existing_project() {
     assert_cmd_snapshot!(cli()
         .arg(&project_path)
         .arg("--dry-run")
-        .arg("--replace-project-section"), @r###"
+        .arg("--replace-project-section"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -795,13 +773,10 @@ fn test_replaces_existing_project() {
 
     [tool.uv]
     package = false
-    default-groups = [
-        "dev",
-        "test",
-    ]
+    default-groups = "all"
 
     [[tool.uv.index]]
     name = "pypi"
     url = "https://pypi.org/simple"
-    "###);
+    "#);
 }

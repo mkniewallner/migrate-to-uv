@@ -58,7 +58,7 @@ struct Cli {
     package_manager: Option<PackageManager>,
     #[arg(
         long,
-        default_value = "set-default-groups",
+        default_value = "set-default-groups-all",
         help = "Strategy to use when migrating dependency groups"
     )]
     dependency_groups_strategy: DependencyGroupsStrategy,

@@ -100,10 +100,7 @@ fn test_complete_workflow() {
 
     [tool.uv]
     package = false
-    default-groups = [
-        "dev",
-        "typing",
-    ]
+    default-groups = "all"
     "#);
 
     let uv_lock = toml::from_str::<UvLock>(
@@ -300,10 +297,7 @@ fn test_ignore_locked_versions() {
 
     [tool.uv]
     package = false
-    default-groups = [
-        "dev",
-        "typing",
-    ]
+    default-groups = "all"
     "#);
 
     let uv_lock = toml::from_str::<UvLock>(
@@ -379,10 +373,7 @@ fn test_keep_current_data() {
 
     [tool.uv]
     package = false
-    default-groups = [
-        "dev",
-        "typing",
-    ]
+    default-groups = "all"
 
     [tool.poetry.group.dev.dependencies]
     factory-boy = "^3.2.1"
@@ -689,10 +680,7 @@ fn test_skip_lock() {
 
     [tool.uv]
     package = false
-    default-groups = [
-        "dev",
-        "typing",
-    ]
+    default-groups = "all"
     "#);
 
     // Assert that previous package manager files are correctly removed.
@@ -887,10 +875,7 @@ fn test_skip_lock_full() {
 
     [tool.uv]
     package = false
-    default-groups = [
-        "dev",
-        "typing",
-    ]
+    default-groups = "all"
 
     [[tool.uv.index]]
     name = "default"
@@ -1065,10 +1050,7 @@ fn test_dry_run() {
 
     [tool.uv]
     package = false
-    default-groups = [
-        "dev",
-        "typing",
-    ]
+    default-groups = "all"
     "#);
 
     // Assert that `pyproject.toml` was not updated.
@@ -1122,7 +1104,7 @@ fn test_dry_run_minimal() {
 fn test_preserves_existing_project() {
     let project_path = Path::new(FIXTURES_PATH).join("existing_project");
 
-    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r###"
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -1141,11 +1123,8 @@ fn test_preserves_existing_project() {
     typing = ["mypy>=1.13.0,<2"]
 
     [tool.uv]
-    default-groups = [
-        "dev",
-        "typing",
-    ]
-    "###);
+    default-groups = "all"
+    "#);
 }
 
 #[test]
@@ -1174,10 +1153,7 @@ fn test_replaces_existing_project() {
     typing = ["mypy>=1.13.0,<2"]
 
     [tool.uv]
-    default-groups = [
-        "dev",
-        "typing",
-    ]
+    default-groups = "all"
     "#);
 }
 
@@ -1220,10 +1196,7 @@ fn test_pep_621() {
     profiling = ["pyinstrument>=5.0.2,<6"]
 
     [tool.uv]
-    default-groups = [
-        "dev",
-        "typing",
-    ]
+    default-groups = "all"
 
     [[tool.uv.index]]
     name = "PyPI"
@@ -1415,10 +1388,7 @@ fn test_manage_warnings() {
 
     [tool.uv]
     package = false
-    default-groups = [
-        "dev",
-        "typing",
-    ]
+    default-groups = "all"
     "#);
 
     let uv_lock = toml::from_str::<UvLock>(
@@ -1606,10 +1576,7 @@ fn test_manage_warnings_dry_run() {
 
     [tool.uv]
     package = false
-    default-groups = [
-        "dev",
-        "typing",
-    ]
+    default-groups = "all"
 
     warning: Could not find dependency "non-existing-dependency" listed in "extra-with-non-existing-dependencies" extra.
     "#);
