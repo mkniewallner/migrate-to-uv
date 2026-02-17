@@ -38,6 +38,8 @@ pub struct Poetry {
 pub struct DependencyGroup {
     pub dependencies: IndexMap<String, DependencySpecification>,
     pub optional: Option<bool>,
+    #[serde(rename = "include-groups")]
+    pub include_groups: Option<Vec<String>>,
 }
 
 /// Represents a package source: <https://python-poetry.org/docs/repositories/#package-sources>.
