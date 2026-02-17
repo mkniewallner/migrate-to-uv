@@ -139,7 +139,7 @@ fn get_keyword_markers(keyword_markers: &KeywordMarkers) -> Vec<String> {
 pub fn get_dependency_groups_and_default_groups(
     pipfile: &schema::pipenv::Pipfile,
     uv_source_index: &mut IndexMap<String, SourceContainer>,
-    dependency_groups_strategy: DependencyGroupsStrategy,
+    dependency_groups_strategy: Option<DependencyGroupsStrategy>,
 ) -> DependencyGroupsAndDefaultGroups {
     let mut dependency_groups: IndexMap<String, Vec<DependencyGroupSpecification>> =
         IndexMap::new();
@@ -165,7 +165,7 @@ pub fn get_dependency_groups_and_default_groups(
         for (group, dependency_specification) in category_group {
             dependency_groups
                 .entry(match dependency_groups_strategy {
-                    DependencyGroupsStrategy::MergeIntoDev => "dev".to_string(),
+                    Some(DependencyGroupsStrategy::MergeIntoDev) => "dev".to_string(),
                     _ => group.clone(),
                 })
                 .or_default()
@@ -178,23 +178,23 @@ pub fn get_dependency_groups_and_default_groups(
         }
 
         match dependency_groups_strategy {
-            // When using `SetDefaultGroupsAll` strategy, set `default-groups` to "all" under
-            // `[tool.uv]`, to closely match what Pipenv does by default, since it includes all
-            // dependency groups.
-            DependencyGroupsStrategy::SetDefaultGroupsAll => {
+            // When using `SetDefaultGroupsAll` or `Auto` strategy, set `default-groups` to "all"
+            // under `[tool.uv]`, to closely match what Pipenv does by default, since it includes
+            // all dependency groups.
+            None | Some(DependencyGroupsStrategy::SetDefaultGroupsAll) => {
                 all_default_groups = true;
             }
             // When using `SetDefaultGroups` strategy, all dependency groups are referenced in
             // `default-groups` under `[tool.uv]` section. If we only have `dev` dependency group,
             // do not set `default-groups`, as this is already uv's default.
-            DependencyGroupsStrategy::SetDefaultGroups => {
+            Some(DependencyGroupsStrategy::SetDefaultGroups) => {
                 if !dependency_groups.keys().eq(["dev"]) {
                     default_groups.extend(dependency_groups.keys().map(ToString::to_string));
                 }
             }
             // When using `IncludeInDev` strategy, dependency groups (except `dev` one) are
             // referenced from `dev` dependency group with `{ include-group = "<group>" }`.
-            DependencyGroupsStrategy::IncludeInDev => {
+            Some(DependencyGroupsStrategy::IncludeInDev) => {
                 dependency_groups
                     .entry("dev".to_string())
                     .or_default()

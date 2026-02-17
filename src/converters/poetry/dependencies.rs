@@ -165,7 +165,7 @@ fn get_normalized_dependencies(
 pub fn get_dependency_groups_and_default_groups(
     poetry: &schema::poetry::Poetry,
     uv_source_index: &mut IndexMap<String, SourceContainer>,
-    dependency_groups_strategy: DependencyGroupsStrategy,
+    dependency_groups_strategy: Option<DependencyGroupsStrategy>,
 ) -> DependencyGroupsAndDefaultGroups {
     let mut dependency_groups: IndexMap<String, Vec<DependencyGroupSpecification>> =
         IndexMap::new();
@@ -198,7 +198,9 @@ pub fn get_dependency_groups_and_default_groups(
 
             dependency_groups
                 .entry(match dependency_groups_strategy {
-                    DependencyGroupsStrategy::MergeIntoDev if !optional_groups.contains(group) => {
+                    Some(DependencyGroupsStrategy::MergeIntoDev)
+                        if !optional_groups.contains(group) =>
+                    {
                         "dev".to_string()
                     }
                     _ => group.clone(),
@@ -216,13 +218,23 @@ pub fn get_dependency_groups_and_default_groups(
             // When using `SetDefaultGroupsAll` strategy, set `default-groups` to "all" under
             // `[tool.uv]`, to closely match what Poetry does by default, since it includes all
             // dependency groups.
-            DependencyGroupsStrategy::SetDefaultGroupsAll => {
+            None if optional_groups.is_empty() => {
+                all_default_groups = true;
+            }
+            Some(DependencyGroupsStrategy::SetDefaultGroupsAll) => {
+                if !optional_groups.is_empty() {
+                    add_unrecoverable_error(format!(
+                        "Could not migrate dependency groups with \"{}\" strategy because there are optional groups.",
+                        "set-default-groups-all".bold(),
+                    ));
+                }
+
                 all_default_groups = true;
             }
             // When using `SetDefaultGroups` strategy, all non-optional dependency groups are
             // referenced in `default-groups` under `[tool.uv]` section. If we only have `dev`
             // dependency group, do not set `default-groups`, as this is already uv's default.
-            DependencyGroupsStrategy::SetDefaultGroups => {
+            None | Some(DependencyGroupsStrategy::SetDefaultGroups) => {
                 if !dependency_groups.keys().eq(["dev"]) {
                     default_groups.extend(
                         dependency_groups
@@ -234,7 +246,7 @@ pub fn get_dependency_groups_and_default_groups(
             }
             // When using `IncludeInDev` strategy, non-optional dependency groups (except `dev` one)
             // are referenced from `dev` dependency group with `{ include-group = "<group>" }`.
-            DependencyGroupsStrategy::IncludeInDev => {
+            Some(DependencyGroupsStrategy::IncludeInDev) => {
                 dependency_groups
                     .entry("dev".to_string())
                     .or_default()
