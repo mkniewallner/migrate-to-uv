@@ -1,10 +1,14 @@
 [tool.poetry]
 name = "foobar"
+version = "0.0.1"
+authors = []
+description = ""
 # PEP 621 does not support multiple readme, this will abort the migration.
 readme = ["README.md", "README2.md"]
 
 [tool.poetry.dependencies]
 # PEP 621 does not support `||` operator, or `|` which are equivalent in Poetry, so this will abort the migration.
+python = ">=3.11"
 caret-or = "^1.0||^2.0||^3.0"
 caret-or-single = "^1.0|^2.0|^3.0"
 caret-or-whitespaces = " ^1.0 || ^2.0  ||  ^3.0 "
@@ -34,3 +38,14 @@ python-caret-or-single = { version = "1.2.3", python = "^3.11 | ^3.12" }
 python-whitespace = { version = "1.2.3", python = "^3.11 <=3.14"}
 # This one has no error, and serves as a way to validate that we can still migrate valid dependencies.
 arrow = "1.2.3"
+
+# Allows testing error when setting `--dependency-groups-strategy set-default-groups-all` with optional dependency
+# groups.
+[tool.poetry.group.dev.dependencies]
+pytest = "9.0.2"
+
+[tool.poetry.group.profiling]
+optional = true
+
+[tool.poetry.group.profiling.dependencies]
+pyinstrument = "5.1.2"

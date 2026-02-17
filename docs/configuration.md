@@ -129,17 +129,17 @@ migrate-to-uv --build-backend uv
 Most package managers that support dependency groups install dependencies from all groups when performing installation.
 By default, uv will [only install `dev` one](https://docs.astral.sh/uv/concepts/projects/dependencies/#default-groups).
 
-In order to match the current package manager as closely as possible, `migrate-to-uv` sets all dependency groups (except
-the ones that could be optional,
-like [Poetry allows to do](https://python-poetry.org/docs/managing-dependencies#optional-groups)) in `default-groups`
-under `[tool.uv]` section. If the only dependency group is `dev`, `default-groups` is not set, as uv already defaults to
-including only `dev` group.
+In order to match the current package manager as closely as possible, `migrate-to-uv` defaults to setting
+`default-groups = "all"` under `[tool.uv]` section, unless a dependency group is set as optional (like
+[Poetry allows to do](https://python-poetry.org/docs/managing-dependencies#optional-groups)), in which case it defaults to explicitly setting non-optional groups to `default-groups` (e.g., `default-groups = ["dev", "typing"]`).
 
 If the default behavior is not suitable, it is possible to change it.
 
 **Available options**:
 
-- `set-default-groups` (default): Move each dependency group to its corresponding uv dependency group, and add all
+- `set-default-groups-all`: Move each dependency group to its corresponding uv dependency group, and set
+  `default-groups = "all"` under `[tool.uv]` section to automatically select all dependency groups by default
+- `set-default-groups`: Move each dependency group to its corresponding uv dependency group, and add all
   non-optional dependency groups in `default-groups` under `[tool.uv]` section (unless the only dependency group is
   `dev` one, as this is already uv's default)
 - `include-in-dev`:  Move each dependency group to its corresponding uv dependency group, and reference all non-optional

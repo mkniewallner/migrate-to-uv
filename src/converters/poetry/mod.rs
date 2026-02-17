@@ -1068,6 +1068,126 @@ extra3 = ["foo-bar", "bar-foo"]
     }
 
     #[test]
+    fn test_dependency_groups_strategy_none() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[tool.poetry]
+package-mode = false
+name = "foo"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+foo = "1.2.3"
+
+[tool.poetry.group.dev.dependencies]
+bar = "1.2.3"
+
+[tool.poetry.group.typing.dependencies]
+foobar = "1.2.3"
+
+[tool.poetry.group.profiling.dependencies]
+barfoo = "1.2.3"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = "foo"
+        version = "0.0.1"
+        requires-python = ">=3.11,<4"
+        dependencies = ["foo==1.2.3"]
+
+        [dependency-groups]
+        dev = ["bar==1.2.3"]
+        typing = ["foobar==1.2.3"]
+        profiling = ["barfoo==1.2.3"]
+
+        [tool.uv]
+        package = false
+        default-groups = "all"
+        "#);
+    }
+
+    #[test]
+    fn test_dependency_groups_strategy_none_with_optional() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[tool.poetry]
+package-mode = false
+name = "foo"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+foo = "1.2.3"
+
+[tool.poetry.group.dev.dependencies]
+bar = "1.2.3"
+
+[tool.poetry.group.typing.dependencies]
+foobar = "1.2.3"
+
+[tool.poetry.group.profiling]
+optional = true
+
+[tool.poetry.group.profiling.dependencies]
+barfoo = "1.2.3"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = "foo"
+        version = "0.0.1"
+        requires-python = ">=3.11,<4"
+        dependencies = ["foo==1.2.3"]
+
+        [dependency-groups]
+        dev = ["bar==1.2.3"]
+        typing = ["foobar==1.2.3"]
+        profiling = ["barfoo==1.2.3"]
+
+        [tool.uv]
+        package = false
+        default-groups = [
+            "dev",
+            "typing",
+        ]
+        "#);
+    }
+
+    #[test]
     fn test_dependency_groups_strategy_set_default_groups_all() {
         let tmp_dir = tempdir().unwrap();
         let project_path = tmp_dir.path();
@@ -1105,7 +1225,7 @@ barfoo = "1.2.3"
                 dry_run: true,
                 skip_lock: true,
                 ignore_locked_versions: true,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroupsAll,
+                dependency_groups_strategy: Some(DependencyGroupsStrategy::SetDefaultGroupsAll),
                 ..Default::default()
             },
         };
@@ -1166,7 +1286,7 @@ barfoo = "1.2.3"
                 dry_run: true,
                 skip_lock: true,
                 ignore_locked_versions: true,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                dependency_groups_strategy: Some(DependencyGroupsStrategy::SetDefaultGroups),
                 ..Default::default()
             },
         };
@@ -1230,7 +1350,7 @@ barfoo = "1.2.3"
                 dry_run: true,
                 skip_lock: true,
                 ignore_locked_versions: true,
-                dependency_groups_strategy: DependencyGroupsStrategy::IncludeInDev,
+                dependency_groups_strategy: Some(DependencyGroupsStrategy::IncludeInDev),
                 ..Default::default()
             },
         };
@@ -1293,7 +1413,7 @@ barfoo = "1.2.3"
                 dry_run: true,
                 skip_lock: true,
                 ignore_locked_versions: true,
-                dependency_groups_strategy: DependencyGroupsStrategy::KeepExisting,
+                dependency_groups_strategy: Some(DependencyGroupsStrategy::KeepExisting),
                 ..Default::default()
             },
         };
@@ -1353,7 +1473,7 @@ barfoo = "1.2.3"
                 dry_run: true,
                 skip_lock: true,
                 ignore_locked_versions: true,
-                dependency_groups_strategy: DependencyGroupsStrategy::MergeIntoDev,
+                dependency_groups_strategy: Some(DependencyGroupsStrategy::MergeIntoDev),
                 ..Default::default()
             },
         };

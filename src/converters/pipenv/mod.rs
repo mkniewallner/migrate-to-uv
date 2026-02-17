@@ -223,7 +223,52 @@ foobar = "1.2.3"
                 dry_run: true,
                 skip_lock: true,
                 ignore_locked_versions: true,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroupsAll,
+                dependency_groups_strategy: Some(DependencyGroupsStrategy::SetDefaultGroupsAll),
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(pipenv.build_uv_pyproject(), @r#"
+        [project]
+        name = ""
+        version = "0.0.1"
+        dependencies = ["foo==1.2.3"]
+
+        [dependency-groups]
+        dev = ["bar==1.2.3"]
+        test = ["foobar==1.2.3"]
+
+        [tool.uv]
+        package = false
+        default-groups = "all"
+        "#);
+    }
+
+    #[test]
+    fn test_dependency_groups_strategy_none() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pipfile_content = r#"
+[packages]
+foo = "1.2.3"
+
+[dev-packages]
+bar = "1.2.3"
+
+[test]
+foobar = "1.2.3"
+        "#;
+
+        let mut pipfile_file = File::create(project_path.join("Pipfile")).unwrap();
+        pipfile_file.write_all(pipfile_content.as_bytes()).unwrap();
+
+        let pipenv = Pipenv {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
                 ..Default::default()
             },
         };
@@ -269,7 +314,7 @@ foobar = "1.2.3"
                 dry_run: true,
                 skip_lock: true,
                 ignore_locked_versions: true,
-                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                dependency_groups_strategy: Some(DependencyGroupsStrategy::SetDefaultGroups),
                 ..Default::default()
             },
         };
@@ -318,7 +363,7 @@ foobar = "1.2.3"
                 dry_run: true,
                 skip_lock: true,
                 ignore_locked_versions: true,
-                dependency_groups_strategy: DependencyGroupsStrategy::IncludeInDev,
+                dependency_groups_strategy: Some(DependencyGroupsStrategy::IncludeInDev),
                 ..Default::default()
             },
         };
@@ -366,7 +411,7 @@ foobar = "1.2.3"
                 dry_run: true,
                 skip_lock: true,
                 ignore_locked_versions: true,
-                dependency_groups_strategy: DependencyGroupsStrategy::KeepExisting,
+                dependency_groups_strategy: Some(DependencyGroupsStrategy::KeepExisting),
                 ..Default::default()
             },
         };
@@ -411,7 +456,7 @@ foobar = "1.2.3"
                 dry_run: true,
                 skip_lock: true,
                 ignore_locked_versions: true,
-                dependency_groups_strategy: DependencyGroupsStrategy::MergeIntoDev,
+                dependency_groups_strategy: Some(DependencyGroupsStrategy::MergeIntoDev),
                 ..Default::default()
             },
         };

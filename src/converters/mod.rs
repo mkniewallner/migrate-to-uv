@@ -39,7 +39,7 @@ pub struct ConverterOptions {
     pub keep_current_build_backend: bool,
     pub keep_old_metadata: bool,
     pub ignore_errors: bool,
-    pub dependency_groups_strategy: DependencyGroupsStrategy,
+    pub dependency_groups_strategy: Option<DependencyGroupsStrategy>,
     pub build_backend: Option<BuildBackend>,
 }
 
@@ -256,7 +256,7 @@ pub trait Converter: Any + Debug {
 
     /// Dependency groups strategy to use when writing development dependencies in dependency
     /// groups.
-    fn get_dependency_groups_strategy(&self) -> DependencyGroupsStrategy {
+    fn get_dependency_groups_strategy(&self) -> Option<DependencyGroupsStrategy> {
         self.get_converter_options().dependency_groups_strategy
     }
 
@@ -335,9 +335,8 @@ pub trait Converter: Any + Debug {
     }
 }
 
-#[derive(clap::ValueEnum, Clone, Copy, PartialEq, Eq, Debug, Default)]
+#[derive(clap::ValueEnum, Clone, Copy, PartialEq, Eq, Debug)]
 pub enum DependencyGroupsStrategy {
-    #[default]
     SetDefaultGroupsAll,
     SetDefaultGroups,
     IncludeInDev,
