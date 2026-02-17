@@ -128,6 +128,7 @@ impl Converter for Pipenv {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::converters::DependencyGroupsStrategy;
     use std::fs::File;
     use std::io::Write;
     use std::path::PathBuf;
@@ -195,5 +196,240 @@ mod tests {
         [tool.uv]
         package = false
         "###);
+    }
+
+    #[test]
+    fn test_dependency_groups_strategy_set_default_groups_all() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pipfile_content = r#"
+[packages]
+foo = "1.2.3"
+
+[dev-packages]
+bar = "1.2.3"
+
+[test]
+foobar = "1.2.3"
+        "#;
+
+        let mut pipfile_file = File::create(project_path.join("Pipfile")).unwrap();
+        pipfile_file.write_all(pipfile_content.as_bytes()).unwrap();
+
+        let pipenv = Pipenv {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroupsAll,
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(pipenv.build_uv_pyproject(), @r#"
+        [project]
+        name = ""
+        version = "0.0.1"
+        dependencies = ["foo==1.2.3"]
+
+        [dependency-groups]
+        dev = ["bar==1.2.3"]
+        test = ["foobar==1.2.3"]
+
+        [tool.uv]
+        package = false
+        default-groups = "all"
+        "#);
+    }
+
+    #[test]
+    fn test_dependency_groups_strategy_set_default_groups() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pipfile_content = r#"
+[packages]
+foo = "1.2.3"
+
+[dev-packages]
+bar = "1.2.3"
+
+[test]
+foobar = "1.2.3"
+        "#;
+
+        let mut pipfile_file = File::create(project_path.join("Pipfile")).unwrap();
+        pipfile_file.write_all(pipfile_content.as_bytes()).unwrap();
+
+        let pipenv = Pipenv {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                dependency_groups_strategy: DependencyGroupsStrategy::SetDefaultGroups,
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(pipenv.build_uv_pyproject(), @r#"
+        [project]
+        name = ""
+        version = "0.0.1"
+        dependencies = ["foo==1.2.3"]
+
+        [dependency-groups]
+        dev = ["bar==1.2.3"]
+        test = ["foobar==1.2.3"]
+
+        [tool.uv]
+        package = false
+        default-groups = [
+            "dev",
+            "test",
+        ]
+        "#);
+    }
+
+    #[test]
+    fn test_dependency_groups_strategy_include_in_dev() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pipfile_content = r#"
+[packages]
+foo = "1.2.3"
+
+[dev-packages]
+bar = "1.2.3"
+
+[test]
+foobar = "1.2.3"
+        "#;
+
+        let mut pipfile_file = File::create(project_path.join("Pipfile")).unwrap();
+        pipfile_file.write_all(pipfile_content.as_bytes()).unwrap();
+
+        let pipenv = Pipenv {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                dependency_groups_strategy: DependencyGroupsStrategy::IncludeInDev,
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(pipenv.build_uv_pyproject(), @r#"
+        [project]
+        name = ""
+        version = "0.0.1"
+        dependencies = ["foo==1.2.3"]
+
+        [dependency-groups]
+        dev = [
+            "bar==1.2.3",
+            { include-group = "test" },
+        ]
+        test = ["foobar==1.2.3"]
+
+        [tool.uv]
+        package = false
+        "#);
+    }
+
+    #[test]
+    fn test_dependency_groups_strategy_keep_existing() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pipfile_content = r#"
+[packages]
+foo = "1.2.3"
+
+[dev-packages]
+bar = "1.2.3"
+
+[test]
+foobar = "1.2.3"
+        "#;
+
+        let mut pipfile_file = File::create(project_path.join("Pipfile")).unwrap();
+        pipfile_file.write_all(pipfile_content.as_bytes()).unwrap();
+
+        let pipenv = Pipenv {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                dependency_groups_strategy: DependencyGroupsStrategy::KeepExisting,
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(pipenv.build_uv_pyproject(), @r#"
+        [project]
+        name = ""
+        version = "0.0.1"
+        dependencies = ["foo==1.2.3"]
+
+        [dependency-groups]
+        dev = ["bar==1.2.3"]
+        test = ["foobar==1.2.3"]
+
+        [tool.uv]
+        package = false
+        "#);
+    }
+
+    #[test]
+    fn test_dependency_groups_strategy_merge_into_dev() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pipfile_content = r#"
+[packages]
+foo = "1.2.3"
+
+[dev-packages]
+bar = "1.2.3"
+
+[test]
+foobar = "1.2.3"
+        "#;
+
+        let mut pipfile_file = File::create(project_path.join("Pipfile")).unwrap();
+        pipfile_file.write_all(pipfile_content.as_bytes()).unwrap();
+
+        let pipenv = Pipenv {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                dependency_groups_strategy: DependencyGroupsStrategy::MergeIntoDev,
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(pipenv.build_uv_pyproject(), @r#"
+        [project]
+        name = ""
+        version = "0.0.1"
+        dependencies = ["foo==1.2.3"]
+
+        [dependency-groups]
+        dev = [
+            "bar==1.2.3",
+            "foobar==1.2.3",
+        ]
+
+        [tool.uv]
+        package = false
+        "#);
     }
 }
