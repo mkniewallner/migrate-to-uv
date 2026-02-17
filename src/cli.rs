@@ -56,12 +56,8 @@ struct Cli {
         help = "Enforce a specific package manager instead of auto-detecting it"
     )]
     package_manager: Option<PackageManager>,
-    #[arg(
-        long,
-        default_value = "set-default-groups",
-        help = "Strategy to use when migrating dependency groups"
-    )]
-    dependency_groups_strategy: DependencyGroupsStrategy,
+    #[arg(long, help = "Strategy to use when migrating dependency groups")]
+    dependency_groups_strategy: Option<DependencyGroupsStrategy>,
     #[arg(
         long,
         conflicts_with = "keep_current_build_backend",

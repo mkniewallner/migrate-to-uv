@@ -867,7 +867,7 @@ fn test_dry_run_minimal() {
 fn test_preserves_existing_project() {
     let project_path = Path::new(FIXTURES_PATH).join("existing_project");
 
-    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r###"
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -886,11 +886,8 @@ fn test_preserves_existing_project() {
     typing = ["mypy>=1.13.0,<2"]
 
     [tool.uv]
-    default-groups = [
-        "dev",
-        "typing",
-    ]
-    "###);
+    default-groups = "all"
+    "#);
 }
 
 #[test]
@@ -919,10 +916,7 @@ fn test_replaces_existing_project() {
     typing = ["mypy>=1.13.0,<2"]
 
     [tool.uv]
-    default-groups = [
-        "dev",
-        "typing",
-    ]
+    default-groups = "all"
     "#);
 }
 
@@ -1005,13 +999,14 @@ fn test_manage_errors() {
     copy_dir(fixture_path, project_path).unwrap();
 
     apply_filters!();
-    assert_cmd_snapshot!(cli().arg(project_path), @r#"
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--dependency-groups-strategy").arg("set-default-groups-all"), @r#"
     success: false
     exit_code: 1
     ----- stdout -----
 
     ----- stderr -----
     error: Could not automatically migrate the project to uv because of the following errors:
+    error: - Could not migrate dependency groups with "set-default-groups-all" strategy because there are optional groups.
     error: - Found multiple files ("README.md", "README2.md") in "tool.poetry.readme". PEP 621 only supports setting one. Make sure to manually edit the section before migrating.
     error: - "caret-or" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
     error: - "caret-or-single" dependency with version "^1.0|^2.0|^3.0" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
@@ -1062,13 +1057,14 @@ fn test_manage_errors_ignore_errors() {
     copy_dir(fixture_path, project_path).unwrap();
 
     apply_filters!();
-    assert_cmd_snapshot!(cli().arg(project_path).arg("--ignore-errors"), @r#"
+    assert_cmd_snapshot!(cli().arg(project_path).arg("--ignore-errors").arg("--dependency-groups-strategy").arg("set-default-groups-all"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     error: The following errors occurred during the migration:
+    error: - Could not migrate dependency groups with "set-default-groups-all" strategy because there are optional groups.
     error: - Found multiple files ("README.md", "README2.md") in "tool.poetry.readme". PEP 621 only supports setting one. Make sure to manually edit the section before migrating.
     error: - "caret-or" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
     error: - "caret-or-single" dependency with version "^1.0|^2.0|^3.0" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
@@ -1095,11 +1091,9 @@ fn test_manage_errors_ignore_errors() {
     error: - "python-whitespace" dependency with python marker "3.11 <=3.14" could not be transformed to PEP 440 format. Make sure to check https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#unsupported-version-specifiers.
     Locking dependencies with constraints from existing lock file(s) using "uv lock"...
     Using [PYTHON_INTERPRETER]
-    warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
     Locking dependencies again using "uv lock" to remove constraints...
     Using [PYTHON_INTERPRETER]
-    warning: No `requires-python` value found in the workspace. Defaulting to `[PYTHON_VERSION]`.
     Resolved [PACKAGES] packages in [TIME]
     Partially migrated project from Poetry to uv, as errors occurred during the migration.
     "#);
@@ -1108,7 +1102,17 @@ fn test_manage_errors_ignore_errors() {
     [project]
     name = "foobar"
     version = "0.0.1"
+    description = ""
+    authors = []
+    requires-python = ">=3.11"
     dependencies = ["arrow==1.2.3"]
+
+    [dependency-groups]
+    dev = ["pytest==9.0.2"]
+    profiling = ["pyinstrument==5.1.2"]
+
+    [tool.uv]
+    default-groups = "all"
     "#);
 
     // Assert that previous package manager files are correctly removed.
@@ -1227,13 +1231,14 @@ fn test_manage_errors_dry_run() {
     let project_path = Path::new(FIXTURES_PATH).join("with_migration_errors");
     let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
 
-    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run"), @r#"
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run").arg("--dependency-groups-strategy").arg("set-default-groups-all"), @r#"
     success: false
     exit_code: 1
     ----- stdout -----
 
     ----- stderr -----
     error: Could not automatically migrate the project to uv because of the following errors:
+    error: - Could not migrate dependency groups with "set-default-groups-all" strategy because there are optional groups.
     error: - Found multiple files ("README.md", "README2.md") in "tool.poetry.readme". PEP 621 only supports setting one. Make sure to manually edit the section before migrating.
     error: - "caret-or" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
     error: - "caret-or-single" dependency with version "^1.0|^2.0|^3.0" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
@@ -1275,13 +1280,14 @@ fn test_manage_errors_dry_run_ignore_errors() {
     let project_path = Path::new(FIXTURES_PATH).join("with_migration_errors");
     let pyproject = fs::read_to_string(project_path.join("pyproject.toml")).unwrap();
 
-    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run").arg("--ignore-errors"), @r#"
+    assert_cmd_snapshot!(cli().arg(&project_path).arg("--dry-run").arg("--ignore-errors").arg("--dependency-groups-strategy").arg("set-default-groups-all"), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     error: The following errors occurred during the migration:
+    error: - Could not migrate dependency groups with "set-default-groups-all" strategy because there are optional groups.
     error: - Found multiple files ("README.md", "README2.md") in "tool.poetry.readme". PEP 621 only supports setting one. Make sure to manually edit the section before migrating.
     error: - "caret-or" dependency with version "^1.0||^2.0||^3.0" contains "||", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
     error: - "caret-or-single" dependency with version "^1.0|^2.0|^3.0" contains "|", which is specific to Poetry and not supported by PEP 440. See https://mkniewallner.github.io/migrate-to-uv/supported-package-managers/#operator for guidance.
@@ -1310,7 +1316,17 @@ fn test_manage_errors_dry_run_ignore_errors() {
     [project]
     name = "foobar"
     version = "0.0.1"
+    description = ""
+    authors = []
+    requires-python = ">=3.11"
     dependencies = ["arrow==1.2.3"]
+
+    [dependency-groups]
+    dev = ["pytest==9.0.2"]
+    profiling = ["pyinstrument==5.1.2"]
+
+    [tool.uv]
+    default-groups = "all"
     "#);
 
     // Assert that `pyproject.toml` was not updated.
