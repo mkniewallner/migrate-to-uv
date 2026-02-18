@@ -196,15 +196,17 @@ pub fn get_dependency_groups_and_default_groups(
                 optional_groups.insert(group.clone());
             }
 
+            let group_key = if dependency_groups_strategy
+                == Some(DependencyGroupsStrategy::MergeIntoDev)
+                && !optional_groups.contains(group)
+            {
+                "dev".to_string()
+            } else {
+                group.clone()
+            };
+
             dependency_groups
-                .entry(match dependency_groups_strategy {
-                    Some(DependencyGroupsStrategy::MergeIntoDev)
-                        if !optional_groups.contains(group) =>
-                    {
-                        "dev".to_string()
-                    }
-                    _ => group.clone(),
-                })
+                .entry(group_key.clone())
                 .or_default()
                 .extend(
                     get(Some(&dependency_group.dependencies), uv_source_index)
@@ -212,6 +214,19 @@ pub fn get_dependency_groups_and_default_groups(
                         .into_iter()
                         .map(DependencyGroupSpecification::String),
                 );
+
+            if dependency_groups_strategy != Some(DependencyGroupsStrategy::MergeIntoDev) {
+                dependency_groups.entry(group_key).or_default().extend(
+                    dependency_group
+                        .include_groups
+                        .clone()
+                        .unwrap_or_default()
+                        .iter()
+                        .map(|group| DependencyGroupSpecification::Map {
+                            include_group: Some(group.clone()),
+                        }),
+                );
+            }
         }
 
         match dependency_groups_strategy {
@@ -247,13 +262,31 @@ pub fn get_dependency_groups_and_default_groups(
             // When using `IncludeInDev` strategy, non-optional dependency groups (except `dev` one)
             // are referenced from `dev` dependency group with `{ include-group = "<group>" }`.
             Some(DependencyGroupsStrategy::IncludeInDev) => {
+                // Some groups might already have been included with Poetry's `include-groups`, so
+                // we first retrieve the already defined included groups.
+                let already_included_groups = dependency_groups
+                    .get("dev")
+                    .unwrap_or(&Vec::new())
+                    .iter()
+                    .filter_map(|spec| match spec {
+                        DependencyGroupSpecification::Map {
+                            include_group: Some(group),
+                        } => Some(group).cloned(),
+                        _ => None,
+                    })
+                    .collect::<HashSet<_>>();
+
                 dependency_groups
                     .entry("dev".to_string())
                     .or_default()
                     .extend(
                         poetry_group
                             .keys()
-                            .filter(|&k| k != "dev" && !optional_groups.contains(k))
+                            .filter(|&k| {
+                                k != "dev"
+                                    && !optional_groups.contains(k)
+                                    && !already_included_groups.contains(k)
+                            })
                             .map(|g| DependencyGroupSpecification::Map {
                                 include_group: Some(g.clone()),
                             }),

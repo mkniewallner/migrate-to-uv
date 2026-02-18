@@ -18,6 +18,7 @@ If you wish to keep the previous behavior, to always explicitly set all dependen
 * Add `set-default-groups-all` option to `--dependency-groups-strategy` ([#708](https://github.com/mkniewallner/migrate-to-uv/pull/708))
 * Automatically choose best dependency groups strategy by default ([#711](https://github.com/mkniewallner/migrate-to-uv/pull/711))
 * [poetry] Bump default `uv_build` bounds to `>=0.10.0,<0.11.0` ([#683](https://github.com/mkniewallner/migrate-to-uv/pull/683))
+* [poetry] Respect `include-groups` from `[tool.poetry.group.<group>]` ([#722](https://github.com/mkniewallner/migrate-to-uv/pull/722))
 
 ### Bug fixes
 

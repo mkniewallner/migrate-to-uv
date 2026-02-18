@@ -1125,6 +1125,70 @@ barfoo = "1.2.3"
     }
 
     #[test]
+    fn test_dependency_groups_strategy_none_with_include_groups() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[tool.poetry]
+package-mode = false
+name = "foo"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+foo = "1.2.3"
+
+[tool.poetry.group.dev.dependencies]
+bar = "1.2.3"
+
+[tool.poetry.group.dev]
+include-groups = ["typing", "profiling"]
+
+[tool.poetry.group.typing.dependencies]
+foobar = "1.2.3"
+
+[tool.poetry.group.profiling.dependencies]
+barfoo = "1.2.3"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = "foo"
+        version = "0.0.1"
+        requires-python = ">=3.11,<4"
+        dependencies = ["foo==1.2.3"]
+
+        [dependency-groups]
+        dev = [
+            "bar==1.2.3",
+            { include-group = "typing" },
+            { include-group = "profiling" },
+        ]
+        typing = ["foobar==1.2.3"]
+        profiling = ["barfoo==1.2.3"]
+
+        [tool.uv]
+        package = false
+        default-groups = "all"
+        "#);
+    }
+
+    #[test]
     fn test_dependency_groups_strategy_none_with_optional() {
         let tmp_dir = tempdir().unwrap();
         let project_path = tmp_dir.path();
@@ -1249,6 +1313,71 @@ barfoo = "1.2.3"
     }
 
     #[test]
+    fn test_dependency_groups_strategy_set_default_groups_all_with_include_groups() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[tool.poetry]
+package-mode = false
+name = "foo"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+foo = "1.2.3"
+
+[tool.poetry.group.dev.dependencies]
+bar = "1.2.3"
+
+[tool.poetry.group.dev]
+include-groups = ["typing", "profiling"]
+
+[tool.poetry.group.typing.dependencies]
+foobar = "1.2.3"
+
+[tool.poetry.group.profiling.dependencies]
+barfoo = "1.2.3"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                dependency_groups_strategy: Some(DependencyGroupsStrategy::SetDefaultGroupsAll),
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = "foo"
+        version = "0.0.1"
+        requires-python = ">=3.11,<4"
+        dependencies = ["foo==1.2.3"]
+
+        [dependency-groups]
+        dev = [
+            "bar==1.2.3",
+            { include-group = "typing" },
+            { include-group = "profiling" },
+        ]
+        typing = ["foobar==1.2.3"]
+        profiling = ["barfoo==1.2.3"]
+
+        [tool.uv]
+        package = false
+        default-groups = "all"
+        "#);
+    }
+
+    #[test]
     fn test_dependency_groups_strategy_set_default_groups() {
         let tmp_dir = tempdir().unwrap();
         let project_path = tmp_dir.path();
@@ -1313,6 +1442,75 @@ barfoo = "1.2.3"
     }
 
     #[test]
+    fn test_dependency_groups_strategy_set_default_groups_with_include_groups() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[tool.poetry]
+package-mode = false
+name = "foo"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+foo = "1.2.3"
+
+[tool.poetry.group.dev.dependencies]
+bar = "1.2.3"
+
+[tool.poetry.group.dev]
+include-groups = ["typing", "profiling"]
+
+[tool.poetry.group.typing.dependencies]
+foobar = "1.2.3"
+
+[tool.poetry.group.profiling.dependencies]
+barfoo = "1.2.3"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                dependency_groups_strategy: Some(DependencyGroupsStrategy::SetDefaultGroups),
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = "foo"
+        version = "0.0.1"
+        requires-python = ">=3.11,<4"
+        dependencies = ["foo==1.2.3"]
+
+        [dependency-groups]
+        dev = [
+            "bar==1.2.3",
+            { include-group = "typing" },
+            { include-group = "profiling" },
+        ]
+        typing = ["foobar==1.2.3"]
+        profiling = ["barfoo==1.2.3"]
+
+        [tool.uv]
+        package = false
+        default-groups = [
+            "dev",
+            "typing",
+            "profiling",
+        ]
+        "#);
+    }
+
+    #[test]
     fn test_dependency_groups_strategy_include_in_dev() {
         let tmp_dir = tempdir().unwrap();
         let project_path = tmp_dir.path();
@@ -1366,6 +1564,70 @@ barfoo = "1.2.3"
         dev = [
             "bar==1.2.3",
             { include-group = "typing" },
+        ]
+        typing = ["foobar==1.2.3"]
+        profiling = ["barfoo==1.2.3"]
+
+        [tool.uv]
+        package = false
+        "#);
+    }
+
+    #[test]
+    fn test_dependency_groups_strategy_include_in_dev_with_include_groups() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[tool.poetry]
+package-mode = false
+name = "foo"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+foo = "1.2.3"
+
+[tool.poetry.group.dev.dependencies]
+bar = "1.2.3"
+
+[tool.poetry.group.dev]
+include-groups = ["typing"]
+
+[tool.poetry.group.typing.dependencies]
+foobar = "1.2.3"
+
+[tool.poetry.group.profiling.dependencies]
+barfoo = "1.2.3"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                dependency_groups_strategy: Some(DependencyGroupsStrategy::IncludeInDev),
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = "foo"
+        version = "0.0.1"
+        requires-python = ">=3.11,<4"
+        dependencies = ["foo==1.2.3"]
+
+        [dependency-groups]
+        dev = [
+            "bar==1.2.3",
+            { include-group = "typing" },
+            { include-group = "profiling" },
         ]
         typing = ["foobar==1.2.3"]
         profiling = ["barfoo==1.2.3"]
@@ -1436,6 +1698,72 @@ barfoo = "1.2.3"
     }
 
     #[test]
+    fn test_dependency_groups_strategy_keep_existing_with_include_groups() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[tool.poetry]
+package-mode = false
+name = "foo"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+foo = "1.2.3"
+
+[tool.poetry.group.dev.dependencies]
+bar = "1.2.3"
+
+[tool.poetry.group.dev]
+include-groups = ["typing"]
+
+[tool.poetry.group.typing.dependencies]
+foobar = "1.2.3"
+
+[tool.poetry.group.profiling.dependencies]
+barfoo = "1.2.3"
+
+[tool.poetry.group.profiling]
+optional = true
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                dependency_groups_strategy: Some(DependencyGroupsStrategy::KeepExisting),
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = "foo"
+        version = "0.0.1"
+        requires-python = ">=3.11,<4"
+        dependencies = ["foo==1.2.3"]
+
+        [dependency-groups]
+        dev = [
+            "bar==1.2.3",
+            { include-group = "typing" },
+        ]
+        typing = ["foobar==1.2.3"]
+        profiling = ["barfoo==1.2.3"]
+
+        [tool.uv]
+        package = false
+        "#);
+    }
+
+    #[test]
     fn test_dependency_groups_strategy_merge_into_dev() {
         let tmp_dir = tempdir().unwrap();
         let project_path = tmp_dir.path();
@@ -1460,6 +1788,71 @@ optional = true
 
 [tool.poetry.group.profiling.dependencies]
 barfoo = "1.2.3"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                dependency_groups_strategy: Some(DependencyGroupsStrategy::MergeIntoDev),
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = "foo"
+        version = "0.0.1"
+        requires-python = ">=3.11,<4"
+        dependencies = ["foo==1.2.3"]
+
+        [dependency-groups]
+        dev = [
+            "bar==1.2.3",
+            "foobar==1.2.3",
+        ]
+        profiling = ["barfoo==1.2.3"]
+
+        [tool.uv]
+        package = false
+        "#);
+    }
+
+    #[test]
+    fn test_dependency_groups_strategy_merge_into_dev_with_include_groups() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+[tool.poetry]
+package-mode = false
+name = "foo"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+foo = "1.2.3"
+
+[tool.poetry.group.dev.dependencies]
+bar = "1.2.3"
+
+[tool.poetry.group.dev]
+include-groups = ["typing"]
+
+[tool.poetry.group.typing.dependencies]
+foobar = "1.2.3"
+
+[tool.poetry.group.profiling.dependencies]
+barfoo = "1.2.3"
+
+[tool.poetry.group.profiling]
+optional = true
         "#;
 
         let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
