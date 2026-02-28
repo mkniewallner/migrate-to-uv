@@ -1,11 +1,10 @@
-use crate::common::{LockedPackage, UvLock, apply_filters, cli};
+use crate::common::{LockedPackage, PackageBuilder, UvLock, apply_filters, build_packages, cli};
 use dircpy::copy_dir;
 use flate2::read::GzDecoder;
 use insta_cmd::assert_cmd_snapshot;
 use std::fs;
 use std::fs::{File, remove_dir_all};
 use std::path::Path;
-use std::process::{Command, Stdio};
 use tar::Archive;
 use tempfile::tempdir;
 use walkdir::WalkDir;
@@ -1394,14 +1393,7 @@ fn test_build_backend_auto_hatch() {
 
     copy_dir(&fixture_path, project_path).unwrap();
 
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_before =
@@ -1503,14 +1495,7 @@ fn test_build_backend_auto_hatch() {
     "from/packages_from_to_sdist_wheel" = "to/packages_from_to_sdist_wheel"
     "#);
 
-    Command::new("uvx")
-        .arg("hatch")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Hatch, project_path);
 
     let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_after =
@@ -1529,14 +1514,7 @@ fn test_build_backend_auto_uv() {
 
     copy_dir(&fixture_path, project_path).unwrap();
 
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_before =
@@ -1608,13 +1586,7 @@ fn test_build_backend_auto_uv() {
     ]
     "#);
 
-    Command::new("uv")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Uv, project_path);
 
     let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_after =
@@ -1633,14 +1605,7 @@ fn test_build_backend_auto_keep_current_build_backend() {
 
     copy_dir(&fixture_path, project_path).unwrap();
 
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_before =
@@ -1712,14 +1677,7 @@ fn test_build_backend_auto_keep_current_build_backend() {
     ]
     "#);
 
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_after =
@@ -1739,14 +1697,7 @@ fn test_build_backend_auto_errors() {
     copy_dir(&fixture_path, project_path).unwrap();
 
     // Ensure that the project is valid for Poetry, even if we cannot convert it to uv.
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     assert_cmd_snapshot!(cli().arg(project_path), @r#"
     success: false
@@ -1780,14 +1731,7 @@ fn test_build_backend_auto_errors_ignore_errors() {
     copy_dir(&fixture_path, project_path).unwrap();
 
     // Ensure that the project is valid for Poetry, even if we cannot convert it to uv.
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     apply_filters!();
     assert_cmd_snapshot!(cli().arg(project_path).arg("--ignore-errors"), @r#"
@@ -1948,14 +1892,7 @@ fn test_build_backend_hatch() {
 
     copy_dir(&fixture_path, project_path).unwrap();
 
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_before =
@@ -2056,14 +1993,7 @@ fn test_build_backend_hatch() {
     "from/packages_from_to_sdist_wheel" = "to/packages_from_to_sdist_wheel"
     "#);
 
-    Command::new("uvx")
-        .arg("hatch")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Hatch, project_path);
 
     let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_after =
@@ -2083,14 +2013,7 @@ fn test_build_backend_hatch_errors() {
     copy_dir(&fixture_path, project_path).unwrap();
 
     // Ensure that the project is valid for Poetry, even if we cannot convert it to uv.
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     assert_cmd_snapshot!(cli().arg(project_path).arg("--build-backend").arg("hatch"), @r#"
     success: false
@@ -2124,14 +2047,7 @@ fn test_build_backend_hatch_errors_ignore_errors() {
     copy_dir(&fixture_path, project_path).unwrap();
 
     // Ensure that the project is valid for Poetry, even if we cannot convert it to uv.
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     apply_filters!();
     assert_cmd_snapshot!(cli().arg(project_path).arg("--build-backend").arg("hatch").arg("--ignore-errors"), @r#"
@@ -2289,14 +2205,7 @@ fn test_build_backend_uv() {
 
     copy_dir(&fixture_path, project_path).unwrap();
 
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_before =
@@ -2368,13 +2277,7 @@ fn test_build_backend_uv() {
     ]
     "#);
 
-    Command::new("uv")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Uv, project_path);
 
     let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_after =
@@ -2394,14 +2297,7 @@ fn test_build_backend_uv_errors() {
     copy_dir(&fixture_path, project_path).unwrap();
 
     // Ensure that the project is valid for Poetry, even if we cannot convert it to uv.
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     assert_cmd_snapshot!(cli().arg(project_path).arg("--build-backend").arg("uv"), @r#"
     success: false
@@ -2444,14 +2340,7 @@ fn test_build_backend_uv_errors_ignore_errors() {
     copy_dir(&fixture_path, project_path).unwrap();
 
     // Ensure that the project is valid for Poetry, even if we cannot convert it to uv.
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     apply_filters!();
     assert_cmd_snapshot!(cli().arg(project_path).arg("--build-backend").arg("uv").arg("--ignore-errors"), @r#"
@@ -2636,14 +2525,7 @@ fn test_build_backend_implicit_package() {
 
     copy_dir(&fixture_path, project_path).unwrap();
 
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_before =
@@ -2688,13 +2570,7 @@ fn test_build_backend_implicit_package() {
     source-include = ["text_file_sdist.txt"]
     "#);
 
-    Command::new("uv")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Uv, project_path);
 
     let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_after =
@@ -2713,14 +2589,7 @@ fn test_build_backend_implicit_package_src() {
 
     copy_dir(&fixture_path, project_path).unwrap();
 
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_before =
@@ -2764,13 +2633,7 @@ fn test_build_backend_implicit_package_src() {
     source-include = ["text_file_sdist.txt"]
     "#);
 
-    Command::new("uv")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Uv, project_path);
 
     let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_after =
@@ -2790,14 +2653,7 @@ fn test_build_backend_implicit_package_src_and_no_src() {
 
     copy_dir(&fixture_path, project_path).unwrap();
 
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_before =
@@ -2842,13 +2698,7 @@ fn test_build_backend_implicit_package_src_and_no_src() {
     source-include = ["text_file_sdist.txt"]
     "#);
 
-    Command::new("uv")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Uv, project_path);
 
     let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_after =
@@ -2867,14 +2717,7 @@ fn test_build_backend_uses_namespace() {
 
     copy_dir(&fixture_path, project_path).unwrap();
 
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_before =
@@ -2921,13 +2764,7 @@ fn test_build_backend_uses_namespace() {
     source-include = ["text_file_sdist.txt"]
     "#);
 
-    Command::new("uv")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Uv, project_path);
 
     let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_after =
@@ -2947,14 +2784,7 @@ fn test_build_backend_implicit_package_no_package_metadata() {
 
     copy_dir(&fixture_path, project_path).unwrap();
 
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_before =
@@ -2998,13 +2828,7 @@ fn test_build_backend_implicit_package_no_package_metadata() {
     module-root = ""
     "#);
 
-    Command::new("uv")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Uv, project_path);
 
     let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_after =
@@ -3024,14 +2848,7 @@ fn test_build_backend_implicit_package_no_package_metadata_uv() {
 
     copy_dir(&fixture_path, project_path).unwrap();
 
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_before =
@@ -3075,13 +2892,7 @@ fn test_build_backend_implicit_package_no_package_metadata_uv() {
     module-root = ""
     "#);
 
-    Command::new("uv")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Uv, project_path);
 
     let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_after =
@@ -3101,14 +2912,7 @@ fn test_build_backend_implicit_package_no_package_metadata_hatch() {
 
     copy_dir(&fixture_path, project_path).unwrap();
 
-    Command::new("uvx")
-        .arg("poetry")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Poetry, project_path);
 
     let sdist_files_before = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_before =
@@ -3147,14 +2951,7 @@ fn test_build_backend_implicit_package_no_package_metadata_hatch() {
     ]
     "#);
 
-    Command::new("uvx")
-        .arg("hatch")
-        .arg("build")
-        .current_dir(project_path)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
+    build_packages(&PackageBuilder::Hatch, project_path);
 
     let sdist_files_after = get_tar_gz_entries(&project_path.join("dist"), "foobar-0.1.0.tar.gz");
     let wheel_files_after =

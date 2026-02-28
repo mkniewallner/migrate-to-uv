@@ -1,6 +1,7 @@
 use insta_cmd::get_cargo_bin;
 use serde::Deserialize;
-use std::process::Command;
+use std::path::Path;
+use std::process::{Command, ExitStatus, Stdio};
 
 macro_rules! apply_filters {
     {} => {
@@ -28,6 +29,47 @@ pub struct UvLock {
 pub struct LockedPackage {
     pub name: String,
     pub version: String,
+}
+
+#[allow(dead_code)]
+pub enum PackageBuilder {
+    Hatch,
+    Poetry,
+    Uv,
+}
+
+impl PackageBuilder {
+    #[allow(dead_code)]
+    pub fn get_command(&self) -> Command {
+        match self {
+            PackageBuilder::Hatch => {
+                let mut command = Command::new("uvx");
+                command.arg("hatch").arg("build");
+                command
+            }
+            PackageBuilder::Poetry => {
+                let mut command = Command::new("uvx");
+                command.arg("poetry").arg("build");
+                command
+            }
+            PackageBuilder::Uv => {
+                let mut command = Command::new("uv");
+                command.arg("build");
+                command
+            }
+        }
+    }
+}
+
+#[allow(dead_code)]
+pub fn build_packages(builder: &PackageBuilder, project_path: &Path) -> ExitStatus {
+    builder
+        .get_command()
+        .current_dir(project_path)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .unwrap()
 }
 
 pub fn cli() -> Command {
