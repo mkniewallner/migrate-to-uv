@@ -58,6 +58,8 @@ fn test_complete_workflow() {
         "httpx[cli]==0.28.1",
         "uvicorn @ git+https://github.com/encode/uvicorn",
         "requests==2.32.3",
+        "django==4.1.7",
+        "sqlparse==0.4.3",
     ]
 
     [dependency-groups]
@@ -128,6 +130,8 @@ fn test_keep_current_data() {
         "httpx[cli]==0.28.1",
         "uvicorn @ git+https://github.com/encode/uvicorn",
         "requests==2.32.3",
+        "django==4.1.7",
+        "sqlparse==0.4.3",
     ]
 
     [dependency-groups]
@@ -191,6 +195,8 @@ fn test_skip_lock() {
         "httpx[cli]==0.28.1",
         "uvicorn @ git+https://github.com/encode/uvicorn",
         "requests==2.32.3",
+        "django==4.1.7",
+        "sqlparse==0.4.3",
     ]
 
     [dependency-groups]
@@ -244,6 +250,8 @@ fn test_dry_run() {
         "httpx[cli]==0.28.1",
         "uvicorn @ git+https://github.com/encode/uvicorn",
         "requests==2.32.3",
+        "django==4.1.7",
+        "sqlparse==0.4.3",
     ]
 
     [dependency-groups]

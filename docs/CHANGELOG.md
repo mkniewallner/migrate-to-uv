@@ -3,6 +3,12 @@ icon: lucide/scroll-text
 ---
 # Changelog
 
+## Unreleased
+
+### Bug fixes
+
+* [pip] Handle multi-line dependencies ([#751](https://github.com/mkniewallner/migrate-to-uv/pull/751))
+
 ## 0.11.0 - 2026-02-20
 
 ### Breaking changes
