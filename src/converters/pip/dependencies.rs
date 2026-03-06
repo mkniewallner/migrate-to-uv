@@ -24,8 +24,12 @@ pub fn get(project_path: &Path, requirements_files: Vec<String>) -> Option<Vec<S
             }
 
             let dependency = match line.split_once(" #") {
-                Some((dependency, _)) => dependency,
+                Some((dependency, _)) => dependency.trim(),
                 None => line,
+            };
+            let dependency = match dependency.split_once('\\') {
+                Some((dependency, _)) => dependency.trim(),
+                None => dependency,
             };
 
             let dependency_specification = Requirement::<Url>::from_str(dependency);
