@@ -6,7 +6,6 @@ on:
   workflow_dispatch:
 
 env:
-  PYTHON_VERSION: '3.14'
   # renovate: datasource=crate depName=maturin
   MATURIN_VERSION: '1.12.2'
   # renovate: datasource=pypi depName=pypi-attestations
@@ -151,7 +150,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: '3.14'
 
       - name: Build documentation
         run: uv run --only-group docs zensical build --clean
