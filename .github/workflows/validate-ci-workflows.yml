@@ -11,8 +11,6 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  # renovate: datasource=pypi depName=uv
-  UV_VERSION: '0.10.7'
   # renovate: datasource=pypi depName=zizmor
   ZIZMOR_VERSION: '1.22.0'
 
@@ -30,7 +28,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@5a095e7a2014a4212f075830d4f7277575a9d098 # v7.3.1
         with:
-          version: ${{ env.UV_VERSION }}
+          version: '0.10.7'
 
       - name: Run zizmor
         run: uvx zizmor@${{ env.ZIZMOR_VERSION }} .
