@@ -9,6 +9,7 @@ description = ""
 authors = [{ name = "Mathieu Kniewallner", email = "mathieu.kniewallner@gmail.com" }]
 requires-python = ">=3.8"
 license = "MIT"
+license-files = ["LICENSE"]
 readme = "README.md"
 keywords = [
     "uv",
@@ -20,7 +21,6 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.8",
