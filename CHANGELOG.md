@@ -4,6 +4,7 @@
 
 ### Bug fixes
 
+* Do not set version when setting version dynamically with `project.dynamic` ([#814](https://github.com/mkniewallner/migrate-to-uv/pull/814))
 * [pip] Handle multi-line dependencies ([#751](https://github.com/mkniewallner/migrate-to-uv/pull/751))
 
 ## 0.11.0 - 2026-02-20

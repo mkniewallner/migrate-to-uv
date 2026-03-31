@@ -28,6 +28,7 @@ pub struct Project {
     pub gui_scripts: Option<IndexMap<String, String>>,
     #[serde(rename = "entry-points")]
     pub entry_points: Option<IndexMap<String, IndexMap<String, String>>>,
+    pub dynamic: Option<Vec<String>>,
     #[serde(flatten)]
     pub remaining_fields: HashMap<String, Value>,
 }

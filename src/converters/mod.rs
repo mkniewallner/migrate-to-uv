@@ -172,18 +172,38 @@ pub trait Converter: Any + Debug {
 
     /// Build PEP 621 `[project]` section, keeping existing fields if the section is already
     /// defined, unless user has chosen to replace existing section.
-    fn build_project(&self, current_project: Option<Project>, project: Project) -> Project {
+    fn build_project(
+        &self,
+        current_project: Option<Project>,
+        project: Project,
+        version: String,
+    ) -> Project {
+        // "version" is required by uv, unless the attribute is set dynamically. If the user wants
+        // to replace `project` section, we ignore `dynamic`, since it gets removed.
+        let version = if !self.replace_project_section()
+            && let Some(current_project) = current_project.as_ref()
+            && current_project
+                .dynamic
+                .clone()
+                .unwrap_or_default()
+                .contains(&"version".to_string())
+        {
+            None
+        } else {
+            Some(version)
+        };
+
         if self.replace_project_section() {
-            return project;
+            return Project { version, ..project };
         }
 
         let Some(current_project) = current_project else {
-            return project;
+            return Project { version, ..project };
         };
 
         Project {
             name: current_project.name.or(project.name),
-            version: current_project.version.or(project.version),
+            version: current_project.version.or(version),
             description: current_project.description.or(project.description),
             authors: current_project.authors.or(project.authors),
             requires_python: current_project.requires_python.or(project.requires_python),
@@ -200,6 +220,7 @@ pub trait Converter: Any + Debug {
             scripts: current_project.scripts.or(project.scripts),
             gui_scripts: current_project.gui_scripts.or(project.gui_scripts),
             entry_points: current_project.entry_points.or(project.entry_points),
+            dynamic: current_project.dynamic.or(project.dynamic),
             remaining_fields: current_project.remaining_fields,
         }
     }
