@@ -87,8 +87,6 @@ impl Converter for Poetry {
         let project = Project {
             // "name" is required by uv.
             name: Some(poetry.name.unwrap_or_default()),
-            // "version" is required by uv.
-            version: Some(poetry.version.unwrap_or_else(|| "0.0.1".to_string())),
             description: poetry.description,
             authors: project::get_authors(poetry.authors),
             requires_python: requires_python.clone(),
@@ -139,7 +137,11 @@ impl Converter for Poetry {
         };
 
         pyproject_updater.insert_build_system(build_system.as_ref());
-        pyproject_updater.insert_pep_621(&self.build_project(pyproject.project, project));
+        pyproject_updater.insert_pep_621(&self.build_project(
+            pyproject.project,
+            project,
+            poetry.version.unwrap_or_else(|| "0.0.1".to_string()),
+        ));
         pyproject_updater.insert_dependency_groups(dependency_groups.as_ref());
         pyproject_updater.insert_uv(&uv);
 
@@ -369,6 +371,150 @@ mod tests {
         version = "0.0.1"
         requires-python = ">=3.12,<4"
         license = { file = "LICENSE" }
+        "#);
+    }
+
+    #[test]
+    fn test_dynamic_version() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+        [project]
+        dynamic = ["version"]
+
+        [tool.poetry]
+        name = "foo"
+        version = "1.2.3"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = "foo"
+        dynamic = ["version"]
+        "#);
+    }
+
+    #[test]
+    fn test_dynamic_version_no_poetry_version() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+        [project]
+        dynamic = ["version"]
+
+        [tool.poetry]
+        name = "foo"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = "foo"
+        dynamic = ["version"]
+        "#);
+    }
+
+    #[test]
+    fn test_dynamic_version_replace_project_section() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+        [project]
+        dynamic = ["version"]
+
+        [tool.poetry]
+        name = "foo"
+        version = "1.2.3"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                replace_project_section: true,
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = "foo"
+        version = "1.2.3"
+        "#);
+    }
+
+    #[test]
+    fn test_dynamic_version_no_poetry_version_replace_project_section() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pyproject_content = r#"
+        [project]
+        dynamic = ["version"]
+
+        [tool.poetry]
+        name = "foo"
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let poetry = Poetry {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                replace_project_section: true,
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(poetry.build_uv_pyproject(), @r#"
+        [project]
+        name = "foo"
+        version = "0.0.1"
         "#);
     }
 

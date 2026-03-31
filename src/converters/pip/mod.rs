@@ -45,8 +45,6 @@ impl Converter for Pip {
         let project = Project {
             // "name" is required by uv.
             name: Some(String::new()),
-            // "version" is required by uv.
-            version: Some("0.0.1".to_string()),
             dependencies: dependencies::get(
                 &self.get_project_path(),
                 self.requirements_files.clone(),
@@ -67,7 +65,11 @@ impl Converter for Pip {
             pyproject: &mut updated_pyproject,
         };
 
-        pyproject_updater.insert_pep_621(&self.build_project(pyproject.project, project));
+        pyproject_updater.insert_pep_621(&self.build_project(
+            pyproject.project,
+            project,
+            "0.0.1".to_string(),
+        ));
         pyproject_updater.insert_dependency_groups(dependency_groups.as_ref());
         pyproject_updater.insert_uv(&uv);
 
@@ -133,5 +135,109 @@ impl Converter for Pip {
             return Some(dependencies);
         }
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::converters::pip::Pip;
+    use std::fs::File;
+    use std::io::Write;
+    use std::path::PathBuf;
+    use tempfile::tempdir;
+
+    #[test]
+    fn test_dynamic_version() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let requirements_content = "foo==1.2.3";
+
+        let mut requirements_file = File::create(project_path.join("requirements.txt")).unwrap();
+        requirements_file
+            .write_all(requirements_content.as_bytes())
+            .unwrap();
+
+        let pyproject_content = r#"
+        [project]
+        dependencies = ["foo==1.2.3"]
+        dynamic = ["version"]
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let pipenv = Pip {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                ..Default::default()
+            },
+            requirements_files: vec!["requirements.txt".to_string()],
+            dev_requirements_files: Vec::new(),
+            is_pip_tools: false,
+        };
+
+        insta::assert_snapshot!(pipenv.build_uv_pyproject(), @r###"
+        [project]
+        name = ""
+        dependencies = ["foo==1.2.3"]
+        dynamic = ["version"]
+
+        [tool.uv]
+        package = false
+        "###);
+    }
+
+    #[test]
+    fn test_dynamic_version_replace_project_section() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let requirements_content = "foo==1.2.3";
+
+        let mut requirements_file = File::create(project_path.join("requirements.txt")).unwrap();
+        requirements_file
+            .write_all(requirements_content.as_bytes())
+            .unwrap();
+
+        let pyproject_content = r#"
+        [project]
+        dynamic = ["version"]
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let pipenv = Pip {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                replace_project_section: true,
+                ..Default::default()
+            },
+            requirements_files: vec!["requirements.txt".to_string()],
+            dev_requirements_files: Vec::new(),
+            is_pip_tools: false,
+        };
+
+        insta::assert_snapshot!(pipenv.build_uv_pyproject(), @r###"
+        [project]
+        name = ""
+        version = "0.0.1"
+        dependencies = ["foo==1.2.3"]
+
+        [tool.uv]
+        package = false
+        "###);
     }
 }

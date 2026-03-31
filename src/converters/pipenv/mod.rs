@@ -43,8 +43,6 @@ impl Converter for Pipenv {
         let project = Project {
             // "name" is required by uv.
             name: Some(String::new()),
-            // "version" is required by uv.
-            version: Some("0.0.1".to_string()),
             requires_python: project::get_requires_python(pipfile.requires),
             dependencies: dependencies::get(pipfile.packages.as_ref(), &mut uv_source_index),
             ..Default::default()
@@ -70,7 +68,11 @@ impl Converter for Pipenv {
             pyproject: &mut updated_pyproject,
         };
 
-        pyproject_updater.insert_pep_621(&self.build_project(pyproject.project, project));
+        pyproject_updater.insert_pep_621(&self.build_project(
+            pyproject.project,
+            project,
+            "0.0.1".to_string(),
+        ));
         pyproject_updater.insert_dependency_groups(dependency_groups.as_ref());
         pyproject_updater.insert_uv(&uv);
 
@@ -192,6 +194,96 @@ mod tests {
         [project]
         name = ""
         version = "0.0.1"
+
+        [tool.uv]
+        package = false
+        "###);
+    }
+
+    #[test]
+    fn test_dynamic_version() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pipfile_content = r#"
+        [packages]
+        foo = "1.2.3"
+        "#;
+
+        let mut pipfile_file = File::create(project_path.join("Pipfile")).unwrap();
+        pipfile_file.write_all(pipfile_content.as_bytes()).unwrap();
+
+        let pyproject_content = r#"
+        [project]
+        dependencies = ["foo==1.2.3"]
+        dynamic = ["version"]
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let pipenv = Pipenv {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(pipenv.build_uv_pyproject(), @r###"
+        [project]
+        name = ""
+        dependencies = ["foo==1.2.3"]
+        dynamic = ["version"]
+
+        [tool.uv]
+        package = false
+        "###);
+    }
+
+    #[test]
+    fn test_dynamic_version_replace_project_section() {
+        let tmp_dir = tempdir().unwrap();
+        let project_path = tmp_dir.path();
+
+        let pipfile_content = r#"
+        [packages]
+        foo = "1.2.3"
+        "#;
+
+        let mut pipfile_file = File::create(project_path.join("Pipfile")).unwrap();
+        pipfile_file.write_all(pipfile_content.as_bytes()).unwrap();
+
+        let pyproject_content = r#"
+        [project]
+        dynamic = ["version"]
+        "#;
+
+        let mut pyproject_file = File::create(project_path.join("pyproject.toml")).unwrap();
+        pyproject_file
+            .write_all(pyproject_content.as_bytes())
+            .unwrap();
+
+        let pipenv = Pipenv {
+            converter_options: ConverterOptions {
+                project_path: PathBuf::from(project_path),
+                dry_run: true,
+                skip_lock: true,
+                ignore_locked_versions: true,
+                replace_project_section: true,
+                ..Default::default()
+            },
+        };
+
+        insta::assert_snapshot!(pipenv.build_uv_pyproject(), @r###"
+        [project]
+        name = ""
+        version = "0.0.1"
+        dependencies = ["foo==1.2.3"]
 
         [tool.uv]
         package = false
