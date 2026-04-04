@@ -1,8 +1,8 @@
 site_name: migrate-to-uv
 edit_uri: edit/main/docs/
-repo_name: mkniewallner/migrate-to-uv
-repo_url: https://github.com/mkniewallner/migrate-to-uv
-site_url: https://mkniewallner.github.io/migrate-to-uv
+repo_name: osprey-oss/migrate-to-uv
+repo_url: https://github.com/osprey-oss/migrate-to-uv
+site_url: https://osprey-oss.github.io/migrate-to-uv
 site_description: Migrate to uv from another package manager.
 site_author: Mathieu Kniewallner
 
@@ -49,7 +49,7 @@ theme:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/mkniewallner/migrate-to-uv
+      link: https://github.com/osprey-oss/migrate-to-uv
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/migrate-to-uv/
 
