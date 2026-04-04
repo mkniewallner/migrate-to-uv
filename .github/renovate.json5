@@ -10,5 +10,10 @@
       matchPackageNames: ["astral-sh/uv", "astral-sh/uv-pre-commit"],
       groupName: "uv-version",
     },
+    {
+      matchDatasources: ["npm"],
+      matchPackageNames: ["pnpm"],
+      extends: [":automergeMinor"],
+    },
   ],
 }
