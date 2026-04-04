@@ -25,7 +25,7 @@ url = "=2.5.8"
 which = "=8.0.2"
 
 [dev-dependencies]
-dircpy = "=0.3.19"
+dircpy = "=0.3.20"
 flate2 = "=1.1.9"
 insta = { version = "=1.47.0", features = ["filters"] }
 insta-cmd = "=0.6.0"
