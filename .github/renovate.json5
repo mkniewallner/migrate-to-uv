@@ -4,6 +4,10 @@
     "github>mkniewallner/renovate-config:default.json5",
     ":automergePatch",
   ],
+  schedule: ["before 5am on saturday"],
+  lockFileMaintenance: {
+    schedule: ["before 5am on saturday"],
+  },
   packageRules: [
     {
       matchDatasources: ["github-releases", "github-tags"],
