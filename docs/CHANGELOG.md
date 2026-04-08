@@ -3,6 +3,10 @@ icon: lucide/scroll-text
 ---
 # Changelog
 
+## 0.12.0 - 2026-04-08
+
+The project source code was moved under [a new GitHub organization](https://github.com/osprey-oss/migrate-to-uv). This release does not come with functional changes, but since the documentation has been moved to a [new URL](https://osprey-oss.github.io/migrate-to-uv/), it ensures that links are updated in the CLI and in PyPI metadata. See https://github.com/osprey-oss/migrate-to-uv/issues/823 for details about the move to an organization.
+
 ## 0.11.1 - 2026-03-31
 
 ### Bug fixes
