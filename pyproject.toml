@@ -36,9 +36,9 @@ classifiers = [
 ]
 
 [project.urls]
-Documentation = "https://mkniewallner.github.io/migrate-to-uv/"
-Repository = "https://github.com/mkniewallner/migrate-to-uv"
-Changelog = "https://github.com/mkniewallner/migrate-to-uv/blob/main/CHANGELOG.md"
+Documentation = "https://osprey-oss.github.io/migrate-to-uv/"
+Repository = "https://github.com/osprey-oss/migrate-to-uv"
+Changelog = "https://github.com/osprey-oss/migrate-to-uv/blob/main/CHANGELOG.md"
 Funding = "https://github.com/sponsors/mkniewallner"
 
 [dependency-groups]
