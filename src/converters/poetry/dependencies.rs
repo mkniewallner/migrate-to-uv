@@ -249,15 +249,15 @@ pub fn get_dependency_groups_and_default_groups(
             // When using `SetDefaultGroups` strategy, all non-optional dependency groups are
             // referenced in `default-groups` under `[tool.uv]` section. If we only have `dev`
             // dependency group, do not set `default-groups`, as this is already uv's default.
-            None | Some(DependencyGroupsStrategy::SetDefaultGroups) => {
-                if !dependency_groups.keys().eq(["dev"]) {
-                    default_groups.extend(
-                        dependency_groups
-                            .keys()
-                            .filter(|&group| !optional_groups.contains(group))
-                            .map(ToString::to_string),
-                    );
-                }
+            None | Some(DependencyGroupsStrategy::SetDefaultGroups)
+                if !dependency_groups.keys().eq(["dev"]) =>
+            {
+                default_groups.extend(
+                    dependency_groups
+                        .keys()
+                        .filter(|&group| !optional_groups.contains(group))
+                        .map(ToString::to_string),
+                );
             }
             // When using `IncludeInDev` strategy, non-optional dependency groups (except `dev` one)
             // are referenced from `dev` dependency group with `{ include-group = "<group>" }`.
