@@ -24,7 +24,7 @@ jobs:
 
       - uses: pnpm/action-setup@903f9c1a6ebcba6cf41d87230be49611ac97822e # v6.0.3
         with:
-          version: '10.33.0'
+          version: '10.33.2'
 
       - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
